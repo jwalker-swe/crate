@@ -7,7 +7,7 @@ export default function Home() {
     <div className={`
       content-container
       w-[1200px] h-screen
-      mx-auto
+      mx-auto py-4
     `}>
       <NavBar />
     </div>

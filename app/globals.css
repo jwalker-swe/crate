@@ -40,9 +40,12 @@
 @theme {
   --color-primaryText: #FCFFFF;
   --color-secondaryText: #A0A6B4;
+  --color-primaryTextHover: #D4E3E6;
   --color-primaryBackground: #121318;
   --color-secondaryBackground: #181A1E;
   --color-primaryBorder: #1A1A28;
+  --color-primaryButton: #2787F7;
+  --color-primaryButtonHover: #1E6BCD;
   --font-sans: 'montreal';
 }
 
