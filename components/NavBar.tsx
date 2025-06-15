@@ -7,7 +7,7 @@ export default function NavBar() {
             //General Styling
             w-[100%]
             flex justify-between items-center
-            py-4 px-2 mx-auto
+            py-4 px-2 mx-auto mb-4
             border-b-[1px]
             border-primaryBorder
             //Mobile Styling
@@ -43,17 +43,17 @@ export default function NavBar() {
                         //Desktop Styling
                     `}>
                         <Link href='#'>
-                            <li className={`text-secondaryText text-sm`}>
+                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
                                 Albums
                             </li>
                         </Link>
                         <Link href='#'>
-                            <li className={`text-secondaryText text-sm`}>
+                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
                                 Lists
                             </li>
                         </Link>
                         <Link href='#'>
-                            <li className={`text-secondaryText text-sm`}>
+                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
                                 News
                             </li>
                         </Link>
@@ -66,30 +66,34 @@ export default function NavBar() {
                     //Mobile Styling
                     //Desktop Styling
                 `}>
-                    <button className={`
-                        //General Styling
-                        text-secondaryText text-sm
-                        //Mobile Styling
-                        //Desktop Styling
-                    `}>
-                        Log in
-                    </button>
-                    <button className={`
-                        //General Styling
-                        text-primaryText text-sm
-                        bg-primaryButton
-                        px-4 py-2
-                        rounded-lg
-                        transition-colors
-                        ease-in-out
-                        duration-200
-                        text-primaryTextHover
-                        hover:bg-primaryButtonHover
-                        //Mobile Styling
-                        //Desktop Styling
-                    `}>
-                        Sign up
-                    </button>
+                    <Link href='#'>                    
+                        <div className={`
+                            //General Styling
+                            text-secondaryText text-sm hover:text-primaryText
+                            //Mobile Styling
+                            //Desktop Styling
+                        `}>
+                            Log in
+                        </div>
+                    </Link>
+                    <Link href='#'>
+                        <div className={`
+                            //General Styling
+                            text-primaryText text-sm
+                            bg-primaryButton
+                            px-4 py-2
+                            rounded-lg
+                            transition-colors
+                            ease-in-out
+                            duration-200
+                            text-primaryTextHover
+                            hover:bg-primaryButtonHover
+                            //Mobile Styling
+                            //Desktop Styling
+                        `}>
+                            Sign up
+                        </div>
+                    </Link>
                 </div>
              </div>
         </div>
