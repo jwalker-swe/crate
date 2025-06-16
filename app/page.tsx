@@ -2,6 +2,7 @@ import Image from "next/image";
 import './globals.css';
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -45,10 +46,13 @@ export default function Home() {
         <Link href='#'>
           <div className={`
             //General Styling
-            text-lg
-            my-6 px-4 py-2
-            rounded-lg
-            bg-primaryButton
+            text-lg text-primaryText font-medium hover:text-primaryTextHover
+            my-6 px-5 py-3
+            rounded-xl
+            bg-primaryButton hover:bg-primaryButtonHover
+            transition-colors
+            ease-in-out
+            duration-200
             //Mobile Styling
             //Desktop Styling
           `}>
@@ -57,9 +61,10 @@ export default function Home() {
         </Link>
       </section>
       <section className={`
-      
+
       `}>
       </section>
+      <Footer />
     </div>
   )
 }
