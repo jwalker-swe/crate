@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className={`
+        <div className={`
             //General Styling
             w-full h-60
             py-12
@@ -256,6 +256,6 @@ export default function Footer() {
                     </ul>
                 </div>
             </div>
-        </footer>
+        </div>
     )
 }

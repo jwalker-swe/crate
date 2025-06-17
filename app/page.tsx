@@ -3,12 +3,13 @@ import './globals.css';
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
+import AlbumPreview from "@/components/AlbumPreview";
 
 export default function Home() {
   return (
     <div className={`
       content-container
-      w-[1200px] h-screen
+      w-[1200px] h-fit
       mx-auto py-4
     `}>
       <NavBar />
@@ -61,8 +62,53 @@ export default function Home() {
         </Link>
       </section>
       <section className={`
-
+        //General Styling
+        flex flex-col items-center justify-center gap-8
+        mt-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
       `}>
+        <h3 className={`
+          //General Styling
+          text-2xl text-secondaryText font-sans
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Albums from all your favorite artist
+        </h3>
+        <ul className={`
+          //General Styling
+          w-[1200px]
+          grid grid-cols-5 gap-4 grid-rows-1
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <Link href='#'>
+            <li>
+              <AlbumPreview height="h-56"/>
+            </li>
+          </Link>
+          <Link href='#'>
+            <li>
+              <AlbumPreview height="h-56"/>
+            </li>
+          </Link>
+          <Link href='#'>
+            <li>
+              <AlbumPreview height="h-56"/>
+            </li>
+          </Link>
+          <Link href='#'>
+            <li>
+              <AlbumPreview height="h-56"/>
+            </li>
+          </Link>
+          <Link href='#'>
+            <li>
+              <AlbumPreview height="h-56"/>
+            </li>
+          </Link>
+        </ul>
       </section>
       <Footer />
     </div>
