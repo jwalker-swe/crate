@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import AlbumPreview from "@/components/AlbumPreview";
+import FeatureDescription from "@/components/FeatureDescription";
 
 export default function Home() {
   return (
@@ -79,36 +80,38 @@ export default function Home() {
         <ul className={`
           //General Styling
           w-[1200px]
-          grid grid-cols-5 gap-4 grid-rows-1
+          grid grid-cols-[224px_224px_224px_224px_224px] gap-4 grid-rows-1
           //Mobile Styling
           //Desktop Styling
         `}>
-          <Link href='#'>
-            <li>
-              <AlbumPreview height="h-56"/>
-            </li>
-          </Link>
-          <Link href='#'>
-            <li>
-              <AlbumPreview height="h-56"/>
-            </li>
-          </Link>
-          <Link href='#'>
-            <li>
-              <AlbumPreview height="h-56"/>
-            </li>
-          </Link>
-          <Link href='#'>
-            <li>
-              <AlbumPreview height="h-56"/>
-            </li>
-          </Link>
-          <Link href='#'>
-            <li>
-              <AlbumPreview height="h-56"/>
-            </li>
-          </Link>
+          <AlbumPreview imgURL={'/images/album-covers/album-001.jpg'} coverHeight={224} />
+          <AlbumPreview imgURL={'/images/album-covers/album-002.jpg'} coverHeight={224} />
+          <AlbumPreview imgURL={'/images/album-covers/album-003.jpg'} coverHeight={224} />
+          <AlbumPreview imgURL={'/images/album-covers/album-004.jpg'} coverHeight={224} />
+          <AlbumPreview imgURL={'/images/album-covers/album-005.png'} coverHeight={224} />
         </ul>
+      </section>
+      <section className={`
+        features-section
+        //General Styling
+        w-[1200px]
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <div className={`
+          feature-container
+          //General Styling
+          grid grid-cols-3 grid-rows-2 gap-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <FeatureDescription featureName="track" />
+          <FeatureDescription featureName="connect" />
+          <FeatureDescription featureName="lists" />
+          <FeatureDescription featureName="insights" />
+          <FeatureDescription featureName="reviews" />
+          <FeatureDescription featureName="favorites" />
+        </div>
       </section>
       <Footer />
     </div>
