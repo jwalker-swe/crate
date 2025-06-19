@@ -5,6 +5,11 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import AlbumPreview from "@/components/AlbumPreview";
 import FeatureDescription from "@/components/FeatureDescription";
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import ViewAll from "@/components/ViewAll";
+import SectionTitle from "@/components/SectionTitle";
+import ArticlePreview from "@/components/ArticlePreview";
+import ReviewPreview from "@/components/ReviewPreview";
 
 export default function Home() {
   return (
@@ -13,12 +18,14 @@ export default function Home() {
       w-[1200px] h-fit
       mx-auto py-4
     `}>
+      {/*NavBar*/}
       <NavBar />
+      {/* Hero Section */}
       <section className={`
         hero-section
         //General Styling
         w-full h-96
-        mt-16
+        mt-16 mb-8
         font-sans
         flex flex-col items-center justify-center
         //Mobile Styling
@@ -62,25 +69,29 @@ export default function Home() {
           </div>
         </Link>
       </section>
+      {/* Top Albums Preview Section */}
       <section className={`
         //General Styling
         flex flex-col items-center justify-center gap-8
-        mt-16 pb-8
+        mt-16 mb-16 pb-8
         //Mobile Styling
         //Desktop Styling
       `}>
-        <h3 className={`
+        <div className={`
           //General Styling
-          text-2xl text-secondaryText font-sans
+          w-[1200px]
+          flex items-center justify-between
           //Mobile Styling
           //Desktop Styling
         `}>
-          Albums from all your favorite artist
-        </h3>
+          {/* <SectionTitle title={'Albums from all your favorite artist'} />
+          <ViewAll /> */}
+        </div>
         <ul className={`
           //General Styling
           w-[1200px]
-          grid grid-cols-[224px_224px_224px_224px_224px] gap-4 grid-rows-1
+          grid grid-cols-[224px_224px_224px_224px_224px] gap-5 grid-rows-1
+          mx-auto items-center justify-center
           //Mobile Styling
           //Desktop Styling
         `}>
@@ -91,10 +102,38 @@ export default function Home() {
           <AlbumPreview imgURL={'/images/album-covers/album-005.png'} coverHeight={224} />
         </ul>
       </section>
+      {/* Tag Line */}
+      <div className={`
+        //General Styling
+        w-full
+        flex flex-col justify-center items-center
+        mb-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <h2 className={`
+          //General Styling
+          text-4xl text-primaryText
+          font-sans font-bold mb-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Discover Your Music Journey
+        </h2>
+        <p className={`
+          //General Styling
+          text-xl text-secondaryText
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Track your habits, connect with fellow music lovers, and explore new sounds like never before
+        </p>
+      </div>
+      {/* Features Section */}
       <section className={`
         features-section
         //General Styling
-        w-[1200px]
+        w-[1200px] mb-16 pb-8
         //Mobile Styling
         //Desktop Styling
       `}>
@@ -111,6 +150,121 @@ export default function Home() {
           <FeatureDescription featureName="insights" />
           <FeatureDescription featureName="reviews" />
           <FeatureDescription featureName="favorites" />
+        </div>
+      </section>
+      {/* Tag Line */}
+      <div className={`
+        //General Styling
+        w-full
+        flex flex-col justify-center items-center
+        mb-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <h2 className={`
+          //General Styling
+          text-4xl text-primaryText
+          font-sans font-bold mb-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Hear Every Opinion
+        </h2>
+        <p className={`
+          //General Styling
+          text-xl text-secondaryText
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          See what the crowd hears-browse fellow listeners' reviews and join the conversation
+        </p>
+      </div>
+      {/* Recent Reviews Section */}
+      <section className={`
+        //General Styling
+        w-[1200px] h-[488px] mb-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <div className={`
+          //General Styling
+          flex justify-between items-center
+          mb-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <SectionTitle title="Recent Reviews" />
+          <ViewAll />
+        </div>
+        <div className={`
+          //General Styling
+          grid grid-cols-2 grid-rows-2 justify-center gap-6
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <ReviewPreview />
+          <ReviewPreview />
+          <ReviewPreview />
+          <ReviewPreview />
+        </div>
+      </section>
+      {/* Tag Line */}
+      <div className={`
+        //General Styling
+        w-full
+        flex flex-col justify-center items-center
+        mb-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <h2 className={`
+          //General Styling
+          text-4xl text-primaryText
+          font-sans font-bold mb-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          From the Crate
+        </h2>
+        <p className={`
+          //General Styling
+          text-xl text-secondaryText
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Catch the latest drops, headlines, and stories shaping the world of music.
+        </p>
+      </div>
+      {/* News Section */}
+      <section className={`
+        //General Styling
+        flex flex-col items-center justify-center
+        mt-16 mb-16 pb-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <div className={`
+          //General Styling
+          w-[1200px]
+          flex items-center justify-between
+          mb-4
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <SectionTitle title={'Latest News'} />
+          <ViewAll />
+        </div>
+        <div className={`
+          //General Styling
+          w-[1200px]
+          grid grid-cols-3 grid-rows-1 gap-4 justify-center
+          mb-14 mx-auto 
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <ArticlePreview />
+          <ArticlePreview />
+          <ArticlePreview />
         </div>
       </section>
       <Footer />
