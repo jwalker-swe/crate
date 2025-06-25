@@ -71,7 +71,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
     try {
 
-        const albumsRes = await fetch(`https://api.spotify.com/v1/browse/new-releases?limit=5`, {
+        const albumsRes = await fetch(`https://api.spotify.com/v1/browse/new-releases?limit=30`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

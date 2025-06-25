@@ -20,8 +20,11 @@ export default async function Home() {
   const res = await fetch('https://localhost:3000/api/spotify/getTopAlbums', {
     cache: 'no-store'
   })
-  const albumsData: SpotifyAlbumsResponse = await res.json();
-  const albumItems = albumsData.albums.items;
+  const musicData: SpotifyAlbumsResponse = await res.json();
+  const musicItems = musicData.albums.items;
+
+  const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
+  console.log(albumsOnly);
 
   // console.log(albumItems);
 
@@ -37,7 +40,7 @@ export default async function Home() {
   let albumID: string[] = [];
   let albumImage: string[] = [];
 
-  albumItems.forEach(item => {
+  albumsOnly.forEach(item => {
     albumTitle.push(item.name);
     albumArtist.push(item.artists[0].name)
     albumID.push(item.id);
@@ -142,7 +145,7 @@ export default async function Home() {
           <AlbumPreview coverHeight={224} id={albums.id[2]} name={albums.title[2]} artist={albums.artist[2]} imageUrl={albums.images[2]} />
           <AlbumPreview coverHeight={224} id={albums.id[3]} name={albums.title[3]} artist={albums.artist[3]} imageUrl={albums.images[3]} />
           <AlbumPreview coverHeight={224} id={albums.id[4]} name={albums.title[4]} artist={albums.artist[4]} imageUrl={albums.images[4]} />
-          
+
         </ul>
       </section>
       {/* Tag Line */}
