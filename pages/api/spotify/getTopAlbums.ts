@@ -1,5 +1,5 @@
 // Get list of top albums
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 let accessToken: string | null = null;
 let tokenExpiresAt: number = 0;
@@ -7,41 +7,91 @@ let tokenExpiresAt: number = 0;
 // Get access token to access Spotify Web API
 async function getAccessToken() {
 
-    if ( !accessToken && Date.now() < tokenExpiresAt ) {
+    if ( accessToken && Date.now() < tokenExpiresAt ) {
         return accessToken;
     }
 
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            Authorization: 
-                'Basic ' +
-                Buffer.from(`${process.env.SPOTIFY_API_CLIENT_ID}:${process.env.SPOTIFY_API_CLIENT_SECRET}`).toString('base64'),
-                'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            grant_type: 'client_credentials',
-        }),
-    });
+    const clientID = process.env.SPOTIFY_API_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_API_CLIENT_SECRET;
 
-    const data = await response.json();
-    accessToken = data.accessToken;
 
-    return accessToken;
+    if ( !clientID || !clientSecret ) {
+        console.error('Missing SPOTIFY_API_CLIENT_ID or SPOTIFY_API_CLIENT_SECRET');
+        return null;
+    }
+
+    const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64');
+
+    try {
+
+        const res = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                Authorization: 
+                    `Basic ${credentials}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'client_credentials',
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            console.error('Failed to get access token:', data);
+            return null
+        }
+        
+        accessToken = data.access_token;
+        console.log(`Access Token: ${accessToken}`);
+        tokenExpiresAt = Date.now() + data.expires_in * 1000;
+
+        return accessToken;
+
+    } catch (err) {
+
+        console.error('Error fetching access token:', err);
+        return null;
+
+    }
 
 }
 
-export default async function handler( req:NextApiRequest, res:NextApiResponse ) {
+export default async function handler( req: NextApiRequest, res: NextApiResponse ) {
 
     const token = await getAccessToken();
+    console.log(token);
+    
+    if (!token) {
 
-    const albumsRes = await fetch(`https://api.spotify.com/v1/browse/new-releases?limit=5`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+        return res.status(500).json({error: 'Unable to retrieve Spotify access token'});
 
-    const albumsData = await albumsRes.json();
-    const albums = albumsData.albums.items;
+    }
+
+    try {
+
+        const albumsRes = await fetch(`https://api.spotify.com/v1/browse/new-releases?limit=5`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const data = await albumsRes.json();
+        console.log(data);
+
+        if (!albumsRes.ok) {
+            return res.status(albumsRes.status).json({error: data});
+        }
+
+        return res.status(200).json(data);
+
+    } catch (err) {
+
+        console.error('Error fetching top albums:', err);
+        return res.status(500).json({error: 'Failedd to fetch top albums'});
+
+    }
+
 
 }

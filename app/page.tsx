@@ -10,8 +10,50 @@ import ViewAll from "@/components/ViewAll";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import ReviewPreview from "@/components/ReviewPreview";
+import { SpotifyAlbumsResponse } from "@/types/spotify";
 
-export default function Home() {
+//Create function to get Album data
+
+export default async function Home() {
+
+  //Get Album Data
+  const res = await fetch('https://localhost:3000/api/spotify/getTopAlbums', {
+    cache: 'no-store'
+  })
+  const albumsData: SpotifyAlbumsResponse = await res.json();
+  const albumItems = albumsData.albums.items;
+
+  // console.log(albumItems);
+
+  interface AlbumProps {
+    title: string[],
+    artist: string[],
+    id: string[],
+    images: string[]
+  }
+
+  let albumTitle: string[] = [];
+  let albumArtist: string[] = [];
+  let albumID: string[] = [];
+  let albumImage: string[] = [];
+
+  albumItems.forEach(item => {
+    albumTitle.push(item.name);
+    albumArtist.push(item.artists[0].name)
+    albumID.push(item.id);
+    albumImage.push(item.images[0].url)
+
+  })
+
+  let albums: AlbumProps = {
+    title: albumTitle,
+    artist: albumArtist,
+    id: albumID,
+    images: albumImage
+  }
+
+  console.log('Albums:', albums);
+
   return (
     <div className={`
       content-container
@@ -95,11 +137,12 @@ export default function Home() {
           //Mobile Styling
           //Desktop Styling
         `}>
-          <AlbumPreview imgURL={'/images/album-covers/album-001.jpg'} coverHeight={224} />
-          <AlbumPreview imgURL={'/images/album-covers/album-002.jpg'} coverHeight={224} />
-          <AlbumPreview imgURL={'/images/album-covers/album-003.jpg'} coverHeight={224} />
-          <AlbumPreview imgURL={'/images/album-covers/album-004.jpg'} coverHeight={224} />
-          <AlbumPreview imgURL={'/images/album-covers/album-005.png'} coverHeight={224} />
+          <AlbumPreview coverHeight={224} id={albums.id[0]} name={albums.title[0]} artist={albums.artist[0]} imageUrl={albums.images[0]} />
+          <AlbumPreview coverHeight={224} id={albums.id[1]} name={albums.title[1]} artist={albums.artist[1]} imageUrl={albums.images[1]} />
+          <AlbumPreview coverHeight={224} id={albums.id[2]} name={albums.title[2]} artist={albums.artist[2]} imageUrl={albums.images[2]} />
+          <AlbumPreview coverHeight={224} id={albums.id[3]} name={albums.title[3]} artist={albums.artist[3]} imageUrl={albums.images[3]} />
+          <AlbumPreview coverHeight={224} id={albums.id[4]} name={albums.title[4]} artist={albums.artist[4]} imageUrl={albums.images[4]} />
+          
         </ul>
       </section>
       {/* Tag Line */}
@@ -251,7 +294,7 @@ export default function Home() {
           //Mobile Styling
           //Desktop Styling
         `}>
-          <SectionTitle title={'Latest News'} />
+          <SectionTitle title={'Latest Newsd'} />
           <ViewAll />
         </div>
         <div className={`
@@ -265,6 +308,63 @@ export default function Home() {
           <ArticlePreview />
           <ArticlePreview />
           <ArticlePreview />
+        </div>
+      </section>
+      {/* Call to Action Section */}
+      <section className={`
+        //General Styling
+        w-[1200px]
+        flex flex-col justify-center items-center
+        mt-16 mb-16 p-16
+        text-center
+        bg-secondaryBackground
+        rounded-lg
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <h3 className={`
+          //General Styling
+          text-3xl text-primaryText font-bold
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Join the Crate community
+        </h3>
+        <p className={`
+          //General Styling
+          w-lg
+          text-secondaryText font-sans
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Track your music journey, discover new albums, and connect with music lovers from around the world.
+        </p>
+        <div className={`
+          //General Styling
+          flex justify-center items-center gap-4
+          mt-6
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          <Link href='#'>
+            <div className={`
+              //General Styling
+               px-4 py-2
+              bg-primaryButton hover:bg-primaryButtonHover
+              text-primaryText hover:text-primaryTextHover
+              rounded-lg
+              //Mobile Styling
+              //Desktop Styling
+            `}>
+              <h4 className={`
+                //General Styling
+                //Mobile Styling
+                //Dekstop Styling
+              `}>
+                Sign Up Now
+              </h4>
+            </div>
+          </Link>
         </div>
       </section>
       <Footer />
