@@ -13,9 +13,11 @@ export default function NavBar() {
             //Mobile Styling
             //Desktop Styling
         `}>
-            <Image src={'/images/crate-logo-cropped.png'} alt='crate logo'
-                width={148} height={25}
-             />
+            <Link href='/'>
+                <Image src={'/images/crate-logo-cropped.png'} alt='crate logo'
+                    width={148} height={25}
+                />
+            </Link>
              <div className={`
                 //General Styling
                 flex items-center gap-16

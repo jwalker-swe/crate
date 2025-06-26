@@ -11,16 +11,16 @@ import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import ReviewPreview from "@/components/ReviewPreview";
 import { SpotifyAlbumsResponse } from "@/types/spotify";
+import getTopAlbums from '@/lib/spotify/getTopAlbums';
 
 //Create function to get Album data
 
 export default async function Home() {
 
   //Get Album Data
-  const res = await fetch('https://localhost:3000/api/spotify/getTopAlbums', {
-    cache: 'no-store'
-  })
-  const musicData: SpotifyAlbumsResponse = await res.json();
+  const res = await getTopAlbums();
+  const musicData: SpotifyAlbumsResponse = res
+  console.log(musicData);
   const musicItems = musicData.albums.items;
 
   const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
@@ -95,7 +95,7 @@ export default async function Home() {
           //Mobile Styling
           //Desktop Styling
         `}>
-          Join the community of music enthusiasts. Log our listening, rate albums, and discover new music based on your taste.
+          Join the community of music enthusiasts. Log your listening, rate albums, and discover new music based on your taste.
         </p>
         <Link href='#'>
           <div className={`
@@ -118,7 +118,7 @@ export default async function Home() {
       <section className={`
         //General Styling
         flex flex-col items-center justify-center gap-8
-        mt-16 mb-16 pb-8
+        mt-8 mb-16 pb-8
         //Mobile Styling
         //Desktop Styling
       `}>

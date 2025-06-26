@@ -19,8 +19,9 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
     let coverWidthString = coverWidth?.toString();
     let coverHeightSting = coverHeight?.toString();
 
+
     return (
-        <Link href={'#'} className={`
+        <Link href={`/album/${id}`} className={`
             //General Styling
             transition-transform duration-200 ease-in-out
             //Mobile Styling
