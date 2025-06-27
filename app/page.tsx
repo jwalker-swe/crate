@@ -297,7 +297,7 @@ export default async function Home() {
           //Mobile Styling
           //Desktop Styling
         `}>
-          <SectionTitle title={'Latest Newsd'} />
+          <SectionTitle title={'Latest News'} />
           <ViewAll />
         </div>
         <div className={`

@@ -1,8 +1,15 @@
+import { SpotifyAlbumsResponse } from "@/types/spotify";
 import getAccessToken from "./getAccessToken";
 
 export default async function getAlbumById(id: string) {
 
     const token = await getAccessToken();
+
+    if (!token) {
+        console.error('Failed to fetch access token');
+    } 
+
+    // console.log('Token: ', token);
 
     const res = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
         headers: {
@@ -14,5 +21,8 @@ export default async function getAlbumById(id: string) {
         throw new Error('Failed to fetch album');
     }
 
-    return res.json();
+    const data: SpotifyAlbumsResponse = await res.json();
+    // console.log(data);
+
+    return data;
 }

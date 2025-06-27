@@ -32,3 +32,9 @@ export type AlbumType = {
     id: string,
     images: string
 }
+
+export interface AlbumPageParams {
+    params: {
+        id: string;
+    }
+}
