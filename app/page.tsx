@@ -24,9 +24,6 @@ export default async function Home() {
   const musicItems = musicData.albums.items;
 
   const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
-  console.log(albumsOnly);
-
-  // console.log(albumItems);
 
   interface AlbumProps {
     title: string[],

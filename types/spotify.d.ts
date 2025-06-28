@@ -26,6 +26,28 @@ export type SpotifyAlbumsResponse = {
     };
 };
 
+export type SpotifyAlbum = {
+    artists: {
+        name: string,
+    }[],
+    id: string,
+    images: {
+        url: string,
+    }[],
+    name: string,
+    release_date: string,
+    total_tracks: number,
+    tracks: {
+        items: {
+            artists: {
+                name: string,
+            }[],
+            name: string,
+            track_number: number
+        }[],
+    }
+}
+
 export type AlbumType = {
     title: string,
     artist: string,
@@ -37,4 +59,22 @@ export interface AlbumPageParams {
     params: {
         id: string;
     }
+}
+
+export interface AlbumInfo {
+    id: string;
+    title: string;
+    artists: {
+        name: string;
+        artistId: string;
+    }[];
+    images: {
+        url: string;
+    }[]
+    releaseDate: string;
+    totalTracks: number;
+    trackList: {
+        items: {
+        }[]
+    }[];
 }

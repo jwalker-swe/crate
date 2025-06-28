@@ -13,7 +13,7 @@ export default async function getTopAlbums() {
     
         try {
         
-            const res = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=30', {
+            const res = await fetch('https://api.spotify.com/v1/search?q=year:2025&type=album&limit=50', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

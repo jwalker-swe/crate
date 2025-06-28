@@ -1,4 +1,4 @@
-import { SpotifyAlbumsResponse } from "@/types/spotify";
+import { AlbumInfo, SpotifyAlbumsResponse } from "@/types/spotify";
 import getAccessToken from "./getAccessToken";
 
 export default async function getAlbumById(id: string) {
@@ -21,7 +21,7 @@ export default async function getAlbumById(id: string) {
         throw new Error('Failed to fetch album');
     }
 
-    const data: SpotifyAlbumsResponse = await res.json();
+    const data = await res.json();
     // console.log(data);
 
     return data;
