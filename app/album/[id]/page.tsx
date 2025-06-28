@@ -9,10 +9,13 @@ import { use } from 'react';
 import getAlbumById from "@/lib/spotify/getAlbumById";
 import { AlbumInfo, AlbumPageParams, AlbumType, SpotifyAlbum, SpotifyAlbumsResponse } from "@/types/spotify";
 import getReleaseYear from "@/lib/spotify/getReleaseYear";
+import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import ReviewPreview from "@/components/ReviewPreview";
 import AlbumPageReview from "@/components/AlbumPageReview";
+import DisplayAlbumStats from "@/components/DisplayAlbumStats";
+import AlbumPageList from "@/components/AlbumPageList";
 
 
 export default async function Home({ params }: AlbumPageParams) {
@@ -37,8 +40,8 @@ export default async function Home({ params }: AlbumPageParams) {
     console.log(albumInfo)
 
     //Seperate out release year from release date
-    const releaseYear = getReleaseYear(albumInfo.release_date);
-    console.log(releaseYear);
+    const releaseDate = getReleaseDate(albumInfo.release_date);
+    console.log('Release Date: ', releaseDate);
 
     //To Do:
         //Take albumInfo and build out html elements
@@ -76,52 +79,61 @@ export default async function Home({ params }: AlbumPageParams) {
                             //Desktop Styling
                     `} />
                     <div className={`
-                        album-info-container
                         //General Styling
-                        w-136
-                        flex flex-col justify-center items-left
+                        h-[320px]
+                        flex flex-col justify-center
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <h1 className={`
-                            album-title
-                            //General Styling
-                            text-primaryText text-3xl font-bold font-sans 
-                            //Mobile Styling
-                            //Desktop Styling
-                        `}>
-                            {albumInfo.name}
-                        </h1>
-                        <h2 className={`
-                            artist-name
-                            //General Styling
-                            text-accentText text-3xl font-sans
-                            //Mobile Styling
-                            //Desktop Styling
-                        `}>
-                            {albumInfo.artists[0].name}
-                        </h2>
                         <div className={`
                             album-info-container
                             //General Styling
-                            flex justify-start items-center gap-2
-                            text-secondaryText font-sans
+                            w-136
+                            flex flex-col justify-center items-left
                             //Mobile Styling
                             //Desktop Styling
                         `}>
-                            <span className={`year-of-release`}>
-                                {releaseYear}
-                            </span>
-                            <div className={`
-                                bg-secondaryText
-                                w-1 h-1
-                                rounded-full
+                            <h1 className={`
+                                album-title
+                                //General Styling
+                                text-primaryText text-3xl font-bold font-sans 
+                                //Mobile Styling
+                                //Desktop Styling
                             `}>
+                                {albumInfo.name}
+                            </h1>
+                            <h2 className={`
+                                artist-name
+                                //General Styling
+                                text-accentText text-3xl font-sans
+                                //Mobile Styling
+                                //Desktop Styling
+                            `}>
+                                {albumInfo.artists[0].name}
+                            </h2>
+                            <div className={`
+                                album-info-container
+                                //General Styling
+                                flex justify-start items-center gap-2
+                                text-secondaryText font-sans
+                                //Mobile Styling
+                                //Desktop Styling
+                            `}>
+                                <span className={`year-of-release`}>
+                                    {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
+                                </span>
+                                <div className={`
+                                    bg-secondaryText
+                                    w-1 h-1
+                                    rounded-full
+                                `}>
+                                </div>
+                                <span className={`total-tracks`}>
+                                    {`${albumInfo.total_tracks} Songs`}
+                                </span>
                             </div>
-                            <span className={`total-tracks`}>
-                                {`${albumInfo.total_tracks} Songs`}
-                            </span>
                         </div>
+                        <DisplayAlbumStats />
                     </div>
                 </div>
                 <div className={`
@@ -144,7 +156,7 @@ export default async function Home({ params }: AlbumPageParams) {
                     <AlbumPageReview />
                     <AlbumPageReview />
                 </div>
-                <div className={`
+                {/* <div className={`
                     //General Styling
                     flex justify-between items-center
                     mb-4
@@ -163,6 +175,27 @@ export default async function Home({ params }: AlbumPageParams) {
                     <AlbumPageReview />
                     <AlbumPageReview />
                     <AlbumPageReview />
+                </div> */}
+                 <div className={`
+                    //General Styling
+                    flex justify-between items-center
+                    mb-4
+                    //Mobile Styling
+                    //Desktop Styling
+                `}>
+                    <SectionTitle title="Popular Lists" />
+                    <ViewAll />
+                </div>
+                <div className={`
+                    //General Styling
+                    grid grid-cols-2 grid-rows-2 gap-4
+                    //Mobile Styling
+                    //Desktop Styling
+                `}>
+                    <AlbumPageList />
+                    <AlbumPageList />
+                    <AlbumPageList />
+                    <AlbumPageList />
                 </div>
             </div>
             <Footer />

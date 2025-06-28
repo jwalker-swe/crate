@@ -20,10 +20,23 @@ export default async function Home() {
   //Get Album Data
   const res = await getTopAlbums();
   const musicData: SpotifyAlbumsResponse = res
-  console.log(musicData);
   const musicItems = musicData.albums.items;
 
   const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
+
+  // const latestAlbums = albumsOnly.filter(albums => {
+  //   const releaseDate = albums.release_date;
+  //   const releaseYear = parseInt(releaseDate.split('-')[0]);
+  //   const releaseMonth = parseInt(releaseDate.split('-')[1]);
+  //   const releaseDay = parseInt(releaseDate.split('-')[2]);
+  //   const currentYear = new Date().getFullYear();
+  //   const currentMonth = new Date().getMonth() + 1;
+  //   const currentDay = new Date().getDay();
+    
+  //   return releaseYear === currentYear && releaseMonth === currentMonth && releaseDay >= currentDay - 6;
+  // })
+
+  console.log(albumsOnly[5].name);
 
   interface AlbumProps {
     title: string[],
@@ -52,7 +65,6 @@ export default async function Home() {
     images: albumImage
   }
 
-  console.log('Albums:', albums);
 
   return (
     <div className={`

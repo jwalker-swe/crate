@@ -9,7 +9,7 @@ export default function ReviewPreview() {
             flex justify-start items-start gap-4
             p-6
             bg-secondaryBackground
-            rounded-xl
+            rounded-lg
             //Mobile Styling
             //Desktop Styling
         `}>

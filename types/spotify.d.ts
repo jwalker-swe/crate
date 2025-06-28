@@ -12,6 +12,7 @@ export type SpotifyAlbums = {
         height: number;
         width: number;
     }[];
+    popularity: number;
 };
 
 export type SpotifyAlbumsResponse = {

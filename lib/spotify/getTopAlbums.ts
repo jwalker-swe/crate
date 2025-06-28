@@ -12,8 +12,14 @@ export default async function getTopAlbums() {
     } else {
     
         try {
-        
-            const res = await fetch('https://api.spotify.com/v1/search?q=year:2025&type=album&limit=50', {
+
+            const searchURL = 'https://api.spotify.com/v1/search?q=';
+            const searchQuery: any = ['tag:new'];
+            const encodedQuery = encodeURIComponent(searchQuery);
+
+            const browseURL = 'https://api.spotify.com/v1/browse/new-releases?';
+
+            const res = await fetch(`${searchURL}${encodedQuery}&type=album&limit=50`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
