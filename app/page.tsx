@@ -35,8 +35,7 @@ export default async function Home() {
     
   //   return releaseYear === currentYear && releaseMonth === currentMonth && releaseDay >= currentDay - 6;
   // })
-
-  console.log(albumsOnly[5].name);
+  console.log(albumsOnly);
 
   interface AlbumProps {
     title: string[],

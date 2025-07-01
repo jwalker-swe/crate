@@ -44,7 +44,7 @@ export default function AlbumPageList() {
                     //General Styling
                     w-full
                     flex justify-start items-center gap-2
-                    mb-3
+                    mb-4
                     text-xs text-secondaryText font-sans 
                     //Mobile Styling
                     //Desktop Styling
@@ -105,8 +105,8 @@ export default function AlbumPageList() {
                     list-description
                     //General Styling
                     max-w-64
-                    line-clamp-3
-                    text-xs
+                    line-clamp-2
+                    text-xs text-secondaryText
                     //Mobile Styling
                     //Desktop Styling
                 `}>

@@ -75,7 +75,7 @@ export default function ReviewPreview() {
                 </Link> */}
                 <p className={`
                     //General Styling
-                    text text-primaryText line-clamp-3
+                    text text-secondaryText line-clamp-3
                     //Mobile Styling
                     //Desktop Styling
                 `}>
