@@ -25,7 +25,7 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Retrieve album id from url params
     const { id } = await params;
-    console.log(id);
+    // console.log(id);
 
     //Fetch album data based on album id
     const data = await getAlbumById(id);
@@ -148,7 +148,7 @@ export default async function Home({ params }: AlbumPageParams) {
                             //Mobile Styling
                             //Desktop Styling
                         `}>
-                            <AlbumPageInfoNavigation />
+                            <AlbumPageInfoNavigation currentState='Track List' />
                             <AlbumPageInfo currentState="Track List" tracks={albumInfo.tracks.items} totalTracks={albumInfo.total_tracks} />
                         </div>
                     </div>

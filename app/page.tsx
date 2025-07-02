@@ -24,6 +24,8 @@ export default async function Home() {
 
   const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
 
+  // const latestAlbums = albumsOnly.filter((album) => album.release_date == '2025');
+
   // const latestAlbums = albumsOnly.filter(albums => {
   //   const releaseDate = albums.release_date;
   //   const releaseYear = parseInt(releaseDate.split('-')[0]);
@@ -35,7 +37,10 @@ export default async function Home() {
     
   //   return releaseYear === currentYear && releaseMonth === currentMonth && releaseDay >= currentDay - 6;
   // })
-  console.log(albumsOnly);
+
+  // console.log(albumsOnly);
+  console.log(`Total Items Fetched: `, musicItems.length);
+  console.log(`Total Albums Fetched: `, albumsOnly.length);
 
   interface AlbumProps {
     title: string[],

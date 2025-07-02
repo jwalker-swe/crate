@@ -25,6 +25,12 @@ export default async function getTopAlbums() {
                 },
             })
 
+            // const res = await fetch(`${browseURL}&type=album&limit=50`, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // })
+
             const data = await res.json();
             // console.log(data);
 
