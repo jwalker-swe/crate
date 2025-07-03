@@ -7,6 +7,8 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
 
     const [infoState, setInfoState] = useState('Track List');
 
+    //Test
+
     // Set total number of grid columns to determine how many tracks will be listed in each column
     const gridColumnTotal = 2;
     
