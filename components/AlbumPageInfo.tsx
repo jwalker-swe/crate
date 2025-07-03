@@ -1,174 +1,85 @@
-// 'use client'
+'use client'
 
-// import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { AlbumPageInfoProps } from '@/types/spotify';
 
-// const [ infoType, setInfoType ] = useState('Track List');
+export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProps) {
 
-type AlbumPageInfoProps = {
-    currentState: string,
-    tracks: {
-        name: string,
-        track_number: number,
-        artists: {
-            name: String
-        }[]
-    }[],
-    totalTracks: number
-}
+    const [infoState, setInfoState] = useState('Track List');
 
-const gridTotal = 2;
-
-export default function AlbumPageInfo({ currentState, tracks, totalTracks }: AlbumPageInfoProps) {
-
-    // console.log(`Tracks to get info from: `, tracks[1].artists[2].name);
-
-    switch (currentState) {
-        case 'Track List':
-
-            // const gridTotal = 2;
-
-            function getTotalTracksPerCol(num_of_tracks: number) {
-                let perGrid = Math.ceil(num_of_tracks / gridTotal);
-
-                return perGrid;
-            }
-
-            let tracksPerGrid = getTotalTracksPerCol(totalTracks)
-            // console.log(`Tracks Per Grid Column: `, tracksPerGrid);
-            
-            const trackChunks: any = [];
-
-            for (let i = 0; i < gridTotal; i++) {
-                const start = i * tracksPerGrid;
-                const end = start + tracksPerGrid;
-
-                trackChunks.push(tracks.slice(start, end));
-            }
-
-            // console.log(`Tracks For Each Grid Column: `, trackChunks);
-
-            return (
-                <div className={`
-                    container
-                    //General Styling
-                    grid grid-cols-${gridTotal} gap-4
-                    mt-4
-                    p-4
-                    rounded-lg
-                    bg-secondaryBackground 
-                    //Mobile Styling
-                    //Desktop Styling
-                `}>
-                    {trackChunks.map((chunk: any, columnIndex: any) => (
-                        <div key={columnIndex} className={`
-                            column-${columnIndex + 1}
-                            flex flex-col gap-2
-                            text-secondaryText
-                        `}>
-                            {chunk.map((songTitle: any, itemIndex: any) => {
-                                const originalIndex = columnIndex * tracksPerGrid + itemIndex;
-                                const trackNumber = originalIndex + 1;
-
-                                return (
-                                    <span key={itemIndex} className={`
-                                        transition-colors duration-200 ease-in-out
-                                        hover:text-accentText
-                                    `}>
-                                        {`${trackNumber}. ${songTitle.name}`}
-                                    </span>
-                                )
-                            })}
-                        </div>
-                    ))}
-                </div>
-            )
-        case 'Performed By':
-
-            function getRowsPerCol(num_of_tracks: number) {
-                let perGrid = Math.ceil(num_of_tracks / gridTotal);
-
-                return perGrid;
-            }
-
-            let rowsPerCol: number = getRowsPerCol(totalTracks);
-            let artistsData: any[] = [];
-            let artistsNames: any[] = [];
-
-            tracks.forEach(track => {
-                return artistsData.push(track.artists);
-            });
-
-            artistsData.forEach(artists => {
-                let currentArtist: any[] = [];
-
-                artists.map((artist: any, artistIndex: any) => {
-                    let name: string;
-                    if ( artistIndex > 0 ) {
-                        name = ' ' + artist.name;
-                    } else {
-                        name = artist.name;
-                    }
-                    currentArtist.push(name);
-                })
-
-                artistsNames.push(currentArtist)
-            })
-            
-            console.log(`Artists Names: `, artistsNames)
-
-            let artistsChunks: any[] = [];
-
-            for (let i = 0; i < gridTotal; i++) {
-                const start = i * rowsPerCol;
-                const end = start + rowsPerCol;
-
-                artistsChunks.push(artistsNames.slice(start, end));
-            }
-
-            console.log(`Artists Chunks: `, artistsChunks);
-
-            return (
-                <div className={`
-                    container
-                    //General Styling
-                    grid grid-cols-${gridTotal} gap-4
-                    mt-4
-                    p-4
-                    rounded-lg
-                    bg-secondaryBackground 
-                    //Mobile Styling
-                    //Desktop Styling
-                `}>
-                    {artistsChunks.map((chunk: any, columnIndex: any) => (
-                        <div key={columnIndex} className={`
-                            column-${columnIndex + 1}
-                            flex flex-col gap-2
-                            text-secondaryText
-                        `}>
-                            {chunk.map((artistName: any, itemIndex: any) => {
-                                const originalIndex = columnIndex * rowsPerCol + itemIndex;
-                                const trackNumber = originalIndex + 1;
-
-                                return (
-                                    <span key={itemIndex} className={`
-                                        transition-colors duration-200 ease-in-out
-                                        hover:text-accentText
-                                    `}>
-                                        {`${trackNumber}. ${artistName}`}
-                                    </span>
-                                )
-                            })}
-                        </div>
-                    ))}
-                </div>
-            )
-        case 'Producers':
-
-
-
-            return (
-                <div>
-                </div>
-            )
+    // Set total number of grid columns to determine how many tracks will be listed in each column
+    const gridColumnTotal = 2;
+    
+    function getRowsPerGridColumn() {
+        return Math.ceil(totalTracks / gridColumnTotal);
     }
+
+    const rowsPerGridColumn = getRowsPerGridColumn();
+
+    console.log(`Rows Per Grid Column: `, rowsPerGridColumn);
+    console.log(`Total Tracks Fetched: `, totalTracks);
+    console.log(`Tracks Fetched: `, tracks);
+
+    return (
+        <div className={`
+            //General Styling
+            w-full
+            flex flex-col justify-start items-start
+            //Mobile Stylings
+            //Desktop Styling
+        `}>
+            <ul className={`
+                //General Styling
+                flex justify-start items-center
+                text-xl text-secondaryText
+                //Mobile Styling
+                //Desktop Styling
+            `}>
+                <li className={`
+                    //General Styling
+                    mr-4
+                    ${infoState === 'Track List' ? 'text-accentText border-accentText': 'border-secondaryText'}
+                    ${infoState !== 'Track List' ? 'hover:text-accentText hover:border-accentText hover:cursor-pointer': ''}
+                    border-b-2
+                    //Mobile Styling
+                    //Desktop Styling
+                `}>
+                    Track List
+                </li>
+                <li className={`
+                    //General Styling
+                    mr-4
+                    ${infoState === 'Performed By' ? 'text-accentText border-accentText': 'border-secondaryText'}
+                    ${infoState !== 'Performed By' ? 'hover:text-accentText hover:border-accentText hover:cursor-pointer': ''}
+                    border-b-2
+                    //Mobile Styling
+                    //Desktop Styling
+                `}>
+                    Performed By
+                </li>
+                <li className={`
+                    //General Styling
+                    mr-4
+                    ${infoState === 'Producers' ? 'text-accentText border-accentText': 'border-secondaryText'}
+                    ${infoState !== 'Producers' ? 'hover:text-accentText hover:border-accentText hover:cursor-pointer': ''}
+                    border-b-2
+                    //Mobile Styling
+                    //Desktop Styling
+                `}>
+                    Producers
+                </li>
+            </ul>
+            <div className={`
+                //General Styling
+                w-full
+                grid grid-cols-[${gridColumnTotal}]
+                mt-4 p-4
+                bg-secondaryBackground
+                rounded-lg
+                //Mobile Styling
+                //Desktop Styling
+            `}>
+            </div>
+        </div>
+    )
 }

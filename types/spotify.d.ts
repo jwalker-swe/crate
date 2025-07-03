@@ -79,3 +79,10 @@ export interface AlbumInfo {
         }[]
     }[];
 }
+
+export type AlbumPageInfoProps = {
+    tracks: {
+
+    }[],
+    totalTracks: number
+}

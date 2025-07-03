@@ -1,3 +1,4 @@
+
 //import page dependencies
 import Image from "next/image";
 import Link from "next/link";
@@ -5,7 +6,6 @@ import { notFound } from 'next/navigation';
 import { StarIcon } from "@heroicons/react/24/solid";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-import { use } from 'react';
 import getAlbumById from "@/lib/spotify/getAlbumById";
 import { AlbumInfo, AlbumPageParams, AlbumType, SpotifyAlbum, SpotifyAlbumsResponse } from "@/types/spotify";
 import getReleaseYear from "@/lib/spotify/getReleaseYear";
@@ -19,9 +19,14 @@ import AlbumPageList from "@/components/AlbumPageList";
 import UserActivityIcon from "@/components/UserActivityIcon";
 import AlbumPageInfoNavigation from "@/components/AlbumPageInfoNavigation";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
+import AlbumPageInfoState from '@/components/AlbumPageInfoState';
 
+
+type StateType = string;
 
 export default async function Home({ params }: AlbumPageParams) {
+
+    // Setup state
 
     // Retrieve album id from url params
     const { id } = await params;
@@ -148,8 +153,8 @@ export default async function Home({ params }: AlbumPageParams) {
                             //Mobile Styling
                             //Desktop Styling
                         `}>
-                            <AlbumPageInfoNavigation currentState='Track List' />
-                            <AlbumPageInfo currentState="Track List" tracks={albumInfo.tracks.items} totalTracks={albumInfo.total_tracks} />
+                            {/* Display Album Info Component containing info on album track list tab, performed by tab, and producers tab  */}
+                            <AlbumPageInfo tracks={albumInfo.tracks.items} totalTracks={albumInfo.total_tracks} />
                         </div>
                     </div>
                 </section>
