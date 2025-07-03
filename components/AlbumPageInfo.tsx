@@ -5,9 +5,11 @@ import { AlbumPageInfoProps } from '@/types/spotify';
 
 export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProps) {
 
+    // Set all state variable for Album Info Section. This let us dynamically load
+    // different information to display
     const [infoState, setInfoState] = useState('Track List');
 
-    //Test
+
 
     // Set total number of grid columns to determine how many tracks will be listed in each column
     const gridColumnTotal = 2;
@@ -18,9 +20,21 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
 
     const rowsPerGridColumn = getRowsPerGridColumn();
 
-    console.log(`Rows Per Grid Column: `, rowsPerGridColumn);
-    console.log(`Total Tracks Fetched: `, totalTracks);
-    console.log(`Tracks Fetched: `, tracks);
+    // console.log(`Rows Per Grid Column: `, rowsPerGridColumn);
+    // console.log(`Total Tracks Fetched: `, totalTracks);
+    // console.log(`Tracks Fetched: `, tracks);
+
+    let trackChunks: any[] = [];
+
+    for(let i = 0; i < gridColumnTotal; i++) {
+        const start = i * rowsPerGridColumn;
+        const end = start + rowsPerGridColumn;
+
+        trackChunks.push(tracks.slice(start, end));
+    }
+
+    console.log(`Track Chunks: `, trackChunks);
+
 
     return (
         <div className={`
@@ -45,7 +59,11 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     border-b-2
                     //Mobile Styling
                     //Desktop Styling
-                `}>
+                `} onClick={() => {
+                    if ( infoState !== 'Track List' ) {
+                        setInfoState('Track List');
+                    }
+                }}>
                     Track List
                 </li>
                 <li className={`
@@ -56,7 +74,11 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     border-b-2
                     //Mobile Styling
                     //Desktop Styling
-                `}>
+                `} onClick={() => {
+                    if ( infoState !== 'Performed By' ) {
+                        setInfoState('Performed By');
+                    }
+                }}>
                     Performed By
                 </li>
                 <li className={`
@@ -67,20 +89,46 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     border-b-2
                     //Mobile Styling
                     //Desktop Styling
-                `}>
+                `} onClick={() => {
+                    if ( infoState !== 'Producers' ) {
+                        setInfoState('Producers');
+                    }
+                }}>
                     Producers
                 </li>
             </ul>
             <div className={`
                 //General Styling
                 w-full
-                grid grid-cols-[${gridColumnTotal}]
+                ${infoState !== 'Track List' ? 'hidden' : ''}
+                grid grid-cols-${gridColumnTotal}
                 mt-4 p-4
                 bg-secondaryBackground
                 rounded-lg
                 //Mobile Styling
                 //Desktop Styling
             `}>
+                {trackChunks.map((chunk: any, columnIndex: number) => (
+                    <div key={columnIndex} className={`
+                        column-${columnIndex + 1}
+                        flex flex-col gap-2
+                        text-secondaryText
+                    `}> 
+                        {chunk.map((songTitle: any, itemIndex: number) => {
+                            const originalIndex = columnIndex * rowsPerGridColumn + itemIndex;
+                            const trackNumber = originalIndex + 1;
+
+                            return (
+                                <span key={itemIndex} className={`
+                                    transition-colors duration-200 ease-in-out
+                                    hover:text-accentText
+                                `}>
+                                    {`${trackNumber}. ${songTitle.name}`}
+                                </span>
+                            )
+                        })}
+                    </div>
+                ))}
             </div>
         </div>
     )
