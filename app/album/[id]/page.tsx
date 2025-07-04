@@ -17,9 +17,7 @@ import AlbumPageReview from "@/components/AlbumPageReview";
 import DisplayAlbumStats from "@/components/DisplayAlbumStats";
 import AlbumPageList from "@/components/AlbumPageList";
 import UserActivityIcon from "@/components/UserActivityIcon";
-import AlbumPageInfoNavigation from "@/components/AlbumPageInfoNavigation";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
-import AlbumPageInfoState from '@/components/AlbumPageInfoState';
 
 
 type StateType = string;
@@ -34,7 +32,6 @@ export default async function Home({ params }: AlbumPageParams) {
 
     //Fetch album data based on album id
     const data = await getAlbumById(id);
-    // console.log(data);
 
     const albumInfo: SpotifyAlbum = {
         artists: data.artists,
@@ -46,6 +43,8 @@ export default async function Home({ params }: AlbumPageParams) {
         tracks: data.tracks
     }
 
+    console.log(data);
+    
     //Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
 

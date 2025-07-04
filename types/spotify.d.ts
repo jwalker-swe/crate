@@ -5,7 +5,7 @@ export type SpotifyAlbums = {
     album_type: string;
     artists: {
         name: string;
-        id: string
+        id: string;
     }[];
     images: {
         url: string;
@@ -16,16 +16,25 @@ export type SpotifyAlbums = {
 };
 
 export type SpotifyAlbumsResponse = {
-    albums: {
-        href: string;
-        items: SpotifyAlbums[];
-        limit: number;
-        next: string | null;
-        offset: number;
-        previous: string | null;
-        total: number;
-    };
-};
+    album_type: string,
+    total_tracks: number,
+    is_playable: boolean,
+    external_urls: {
+        spotify: string,
+    }[],
+    href: string,
+    id: string,
+    images: {
+
+    }[],
+    name: string,
+    release_date: string,
+    release_date_precision: string,
+    uri: string,
+    artists: {
+
+    }[]
+}[];
 
 export type SpotifyAlbum = {
     artists: {

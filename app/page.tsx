@@ -10,7 +10,7 @@ import ViewAll from "@/components/ViewAll";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import ReviewPreview from "@/components/ReviewPreview";
-import { SpotifyAlbumsResponse } from "@/types/spotify";
+import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
 import getTopAlbums from '@/lib/spotify/getTopAlbums';
 
 //Create function to get Album data
@@ -18,29 +18,8 @@ import getTopAlbums from '@/lib/spotify/getTopAlbums';
 export default async function Home() {
 
   //Get Album Data
-  const res = await getTopAlbums();
-  const musicData: SpotifyAlbumsResponse = res
-  const musicItems = musicData.albums.items;
-
-  const albumsOnly = musicItems.filter((item) => item.album_type === 'album');
-
-  // const latestAlbums = albumsOnly.filter((album) => album.release_date == '2025');
-
-  // const latestAlbums = albumsOnly.filter(albums => {
-  //   const releaseDate = albums.release_date;
-  //   const releaseYear = parseInt(releaseDate.split('-')[0]);
-  //   const releaseMonth = parseInt(releaseDate.split('-')[1]);
-  //   const releaseDay = parseInt(releaseDate.split('-')[2]);
-  //   const currentYear = new Date().getFullYear();
-  //   const currentMonth = new Date().getMonth() + 1;
-  //   const currentDay = new Date().getDay();
-    
-  //   return releaseYear === currentYear && releaseMonth === currentMonth && releaseDay >= currentDay - 6;
-  // })
-
-  // console.log(albumsOnly);
-  console.log(`Total Items Fetched: `, musicItems.length);
-  console.log(`Total Albums Fetched: `, albumsOnly.length);
+  const recentTopAlbums: any = await getTopAlbums();
+  // console.log(res);
 
   interface AlbumProps {
     title: string[],
@@ -54,13 +33,15 @@ export default async function Home() {
   let albumID: string[] = [];
   let albumImage: string[] = [];
 
-  albumsOnly.forEach(item => {
+  recentTopAlbums.forEach((item: any) => {
     albumTitle.push(item.name);
     albumArtist.push(item.artists[0].name)
     albumID.push(item.id);
     albumImage.push(item.images[0].url)
 
   })
+
+ 
 
   let albums: AlbumProps = {
     title: albumTitle,

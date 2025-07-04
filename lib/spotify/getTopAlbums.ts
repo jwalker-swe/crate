@@ -1,9 +1,10 @@
 import getAccessToken from "@/lib/spotify/getAccessToken";
+import getAlbumPopularity from "@/lib/spotify/getAlbumPopularity";
 
 export default async function getTopAlbums() {
 
     const token = await getAccessToken();
-    console.log(token);
+    // console.log(token);
 
     if (!token) {
 
@@ -13,28 +14,60 @@ export default async function getTopAlbums() {
     
         try {
 
-            const searchURL = 'https://api.spotify.com/v1/search?q=';
-            const searchQuery: any = ['tag:new'];
+            const currentYear = new Date().getFullYear();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+
+            let albums: any = [];
+
+            const searchQuery = `year:${currentYear}`;
             const encodedQuery = encodeURIComponent(searchQuery);
+            const searchURL = `https://api.spotify.com/v1/search?q=${encodedQuery}&type=album&limit=50&market=US`;
 
-            const browseURL = 'https://api.spotify.com/v1/browse/new-releases?';
-
-            const res = await fetch(`${searchURL}${encodedQuery}&type=album&limit=50`, {
+            //Fetch Albums
+            const res = await fetch(`${searchURL}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                },
+                }
+            });
+            const data = await res.json();
+
+            const fetchedAlbums: any[] = [];
+            data.albums.items.map((item: any) => {
+                if ( item.album_type === 'album' ) {
+                    fetchedAlbums.push(item);
+                }
             })
 
-            // const res = await fetch(`${browseURL}&type=album&limit=50`, {
-            //     headers: {
-            //         Authorization: `Bearer ${token}`,
-            //     },
-            // })
+            const recentAlbums: any[] = [];
+            fetchedAlbums.map((album: any) => {
+                const releaseDate = new Date(album.release_date);
+                if ( releaseDate >= oneMonthAgo ) {
+                    recentAlbums.push(album);
+                }
+                // console.log(releaseDate)
+            })
 
-            const data = await res.json();
-            // console.log(data);
+            const popularAlbums: any[] = [];
+            for (const album of recentAlbums ) {
+                const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-            return data;
+                const data = await res.json();
+                const popularity = data.popularity;
+                if ( popularity >= 80 ) {
+                    popularAlbums.push(album);
+                }
+                // console.log(popularity);
+            };
+
+            // console.log(popularAlbums);
+            
+
+            return popularAlbums;
 
         } catch(err) {
 
