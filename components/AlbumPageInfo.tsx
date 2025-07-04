@@ -33,8 +33,41 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
         trackChunks.push(tracks.slice(start, end));
     }
 
-    console.log(`Track Chunks: `, trackChunks);
+    let artistChunks: any[] = [];
+    let artistData: any[] = [];
+    let artistNames: any[] = [];
 
+    tracks.forEach(track => {
+        return artistData.push(track.artists)
+    });
+
+    // console.log(`Track Chunks: `, trackChunks);
+    console.log(`Artists Data: `, artistData);
+
+    artistData.forEach(artists => {
+        let currentArtist: any[] = [];
+        artists.map((artist: any, artistIndex: any) => {
+            let name: string;
+            if ( artistIndex > 0 ) {
+                name = ' ' + artist.name;
+            } else {
+                name = artist.name;
+            }
+            currentArtist.push(name);
+        })
+        artistNames.push(currentArtist)
+    })
+
+    // console.log(`Artists Names: `, artistNames)
+
+    for (let i = 0; i < gridColumnTotal; i++) {
+        const start = i * rowsPerGridColumn;
+        const end = start + rowsPerGridColumn;
+
+        artistChunks.push(artistNames.slice(start, end));
+    }
+
+    console.log(`Arist Chunks: `, artistChunks);
 
     return (
         <div className={`
@@ -124,6 +157,39 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                                     hover:text-accentText
                                 `}>
                                     {`${trackNumber}. ${songTitle.name}`}
+                                </span>
+                            )
+                        })}
+                    </div>
+                ))}
+            </div>
+            <div className={`
+                //General Styling
+                w-full
+                ${infoState !== 'Performed By' ? 'hidden' : ''}
+                grid grid-cols-${gridColumnTotal}
+                mt-4 p-4
+                bg-secondaryBackground
+                rounded-lg
+                //Mobile Styling
+                //Desktop Styling
+            `}>
+                {artistChunks.map((chunk: any, columnIndex: any) => (
+                    <div key={columnIndex} className={`
+                        column-${columnIndex + 1}
+                        flex flex-col gap-2
+                        text-secondaryText
+                    `}>
+                        {chunk.map((artistName: any, artistIndex: any) => {
+                            const originalIndex: number = columnIndex * rowsPerGridColumn + artistIndex;
+                            const trackNumber: number = originalIndex + 1;
+
+                            return (
+                                <span key={artistIndex} className={`
+                                    transition-colors duration-200 ease-in-out
+                                    hover:text-accentText
+                                `}>
+                                    {`${trackNumber}. ${artistName}`}
                                 </span>
                             )
                         })}

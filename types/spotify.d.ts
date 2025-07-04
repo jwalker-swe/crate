@@ -32,9 +32,9 @@ export type SpotifyAlbumsResponse = {
     release_date_precision: string,
     uri: string,
     artists: {
-
+        
     }[]
-}[];
+};
 
 export type SpotifyAlbum = {
     artists: {
@@ -91,7 +91,7 @@ export interface AlbumInfo {
 
 export type AlbumPageInfoProps = {
     tracks: {
-
+        artists: any
     }[],
-    totalTracks: number
+    totalTracks: number,
 }

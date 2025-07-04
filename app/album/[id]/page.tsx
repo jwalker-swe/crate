@@ -43,7 +43,7 @@ export default async function Home({ params }: AlbumPageParams) {
         tracks: data.tracks
     }
 
-    console.log(data);
+    console.log(albumInfo.artists);
     
     //Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
