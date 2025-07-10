@@ -1,63 +1,83 @@
 'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn, signUp, SignInData, SignUpData} from '@/lib/supabase/auth';
+import Link from 'next/link'
+import Image from 'next/image'
+import { supabase } from '@/lib/supabase/supabase'
+import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
-interface AuthFormProps {
-   defaultMode: 'signIn' | 'signUp';
-}
+export default function Auth() {
+    const params = useParams()
+    const param = params?.param
 
-export default function AuthForm({ defaultMode = 'signIn' }: AuthFormProps) {
-
-    const [mode, setMode] = useState<'signIn' | 'signUp'>(defaultMode);
+    const [mode, setMode] = useState(`${param}`)
+    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         username: '',
         displayName: ''
     })
-    const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState('')
+
     const router = useRouter()
 
     const handleSubmit = async function(e: React.FormEvent) {
-        e.preventDefault()
-        setLoading(true)
-        setMessage('')
+        // Prevent page reload
+        e.preventDefault();
 
-        try {
-            let result
-
-            if ( mode === 'signIn' ) {
-                const signinData: SignInData = {
-                    email: formData.email,
-                    password: formData.password
-                }
-                result =  await signIn(signinData)
-            } else {
-                const signupData: SignUpData = {
+        // Handle form submission if signing up
+        if (mode === 'sign-up') {
+            try {
+                const { data, error } = await supabase.auth.signUp({
                     email: formData.email,
                     password: formData.password,
-                    username: formData.username,
-                    displayName: formData.displayName
-                }
-                result = await signUp(signupData)
-            }
+                    options: {
+                        data: {
+                            username: formData.username,
+                            display_name: formData.displayName
+                        }
+                    }
+                })
 
-            if (result.success) {
-                if (mode === 'signIn') {
-                    router.push('/dashboard') /* Change dashboard to profile page */
-                } else {
-                    setMessage('Account created! Check your email to verify your account.')
+                if (data) {
+                    router.push(`/auth/sign-in`)
                 }
-            } else {
-                setMessage(result.error || 'An error occurred')
+            } catch (error) {
+                console.error('An error occurred while trying to sign up.', error)
             }
-        } catch (error) {
-            setMessage('An unexpected error occured')
-        } finally {
-            setLoading(false)
+        }
+
+        //Handle form submission if signing in
+        if (mode === 'sign-in') {
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: formData.email,
+                    password: formData.password
+                })
+
+                if (data) {
+                    // Get signed-in user's info from Supabase
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        // Fetch the user's profile from your users table
+                        const { data: profile, error } = await supabase
+                            .from('users')
+                            .select('username')
+                            .eq('id', user.id)
+                            .single();
+
+                        if (profile && profile.username) {
+                            router.push(`/profile/${profile.username}`);
+                        } else {
+                            console.error('Could not find user profile.');
+                        }
+                    } else {
+                        console.error('Could not get user info.');
+                    }
+                }
+            } catch (error) {
+                console.error('An unexpected error occurred while trying to sign in.', error)
+            }
         }
     }
 
@@ -69,335 +89,187 @@ export default function AuthForm({ defaultMode = 'signIn' }: AuthFormProps) {
         }))
     }
 
-    switch (mode) {
-        case 'signIn':
-            return (
+    return (
+        <div className={`
+            w-[1200px] h-screen
+            mx-auto py-4
+            bg-primaryBackground
+        `}>
+            <section className={`
+                w-full h-full
+                flex justify-center items-center
+                px-16 py-8
+            `}>
                 <div className={`
-                    //General Styling
-                    content-container
-                    w-[1200px] h-screen
-                    mx-auto py-4
-                    //Mobile Styling
-                    //Desktop Styling
+                    w-2xl
+                    px-32 pt-8 pb-14
+                    bg-secondaryBackground
+                    rounded-lg
                 `}>
-                    <section className={`
-                        //General Styling
-                        w-full h-full
-                        flex justify-center items-center 
-                        //Mobile Styling
-                        //Desktop Styling
+                    <Link href='/' className={`hover:cursor-pointer`}>
+                        <Image src={'/images/crate-logo-cropped.png'} alt='crate logo'
+                            width={220} height={25} className={`
+                                mx-auto p-4
+                            `}
+                        />
+                    </Link>
+                    <h1 className={`
+                        text-3xl text-center
                     `}>
-                        <div className={`
-                            //General Styling
-                            py-8 px-32
-                            bg-secondaryBackground
-                            rounded-lg
-                            //Mobile Styling
-                            //Desktop Styling
-                        `}>
-                            <h1 className={`
-                                //General Styling
-                                text-4xl text-center
-                                font-bold
-                                //Mobile Styling
-                                //Desktop Styling
-                            `}>
-                                Sign In
-                            </h1>
-
-                            <form onSubmit={handleSubmit} className={`
-                                //General Styling
-                                flex flex-col justify-center items-start
-                                mt-8 space-y-2
-                                //Mobile Styling
-                                //Desktop Styling
-                            `}>
-                                <div className={`
-                                    //General Styling
-                                    w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    <label htmlFor='email' className={`
-                                        //General Styling
-                                        text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
-                                    `}>
-                                        Email
-                                    </label>
-                                    <input 
-                                        type='email'
-                                        id='email'
-                                        name='email'
-                                        placeholder='Enter your email address...'
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
-                                        className={`
-                                            //General Styling
-                                            w-full
-                                            p-2
-                                            text-sm
-                                            rounded-sm
-                                            bg-primaryBackground
-                                            focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                    />
-                                </div>
-                                <div className={`
-                                    //General Styling
-                                    w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    <label htmlFor='password' className={`
-                                        //General Styling
-                                        text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
-                                    `}>
-                                        Password
-                                    </label>
-                                    <input 
-                                        type='password'
-                                        id='password'
-                                        name='password'
-                                        placeholder='Enter your password...'
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        className={`
-                                            //General Styling
-                                            w-full
-                                            p-2
-                                            text-sm
-                                            rounded-sm
-                                            bg-primaryBackground
-                                            focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                    />
-                                    <button type='submit' disabled={loading} className={`
-                                    //General Styling
-                                    w-full
-                                    mt-8 p-2
-                                    rounded-sm
-                                    bg-accentText
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    Sign Up
-                                </button>
-                                </div>
-                            </form>
-                        </div>
-                    </section>
-                </div>
-            )
-        
-        case 'signUp':
-            return (
-                <div className={`
-                    //General Styling
-                    content-container
-                    w-[1200px] h-screen
-                    mx-auto py-4
-                    //Mobile Styling
-                    //Desktop Styling
-                `}>
-                    <section className={`
-                        //General Styling
-                        w-full h-full
-                        flex justify-center items-center 
-                        //Mobile Styling
-                        //Desktop Styling
+                        {mode === 'sign-in' ? 'Log in to your account' : 'Sign up for an account'}
+                    </h1>
+                    <form onSubmit={handleSubmit} className={`
+                        flex flex-col justify-center items-start
+                        mt-8 space-y-2
                     `}>
-                        <div className={`
-                            //General Styling
-                            py-8 px-32
-                            bg-secondaryBackground
-                            rounded-lg
-                            //Mobile Styling
-                            //Desktop Styling
-                        `}>
-                            <h1 className={`
-                                //General Styling
-                                text-4xl text-center
-                                font-bold
-                                //Mobile Styling
-                                //Desktop Styling
-                            `}>
-                                Join Crate
-                            </h1>
-
-                            <form onSubmit={handleSubmit} className={`
-                                //General Styling
-                                flex flex-col justify-center items-start
-                                mt-8 space-y-2
-                                //Mobile Styling
-                                //Desktop Styling
-                            `}>
+                        {mode === 'sign-up' && (
+                            <>
                                 <div className={`
-                                    //General Styling
                                     w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
                                 `}>
                                     <label htmlFor='username' className={`
-                                        //General Styling
+                                        block
                                         text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
                                     `}>
                                         Username
                                     </label>
-                                    <input 
+                                    <input
                                         type='text'
                                         id='username'
                                         name='username'
                                         placeholder='Enter a username...'
+                                        pattern='[a-zA-Z0-9_]+'
                                         value={formData.username}
                                         onChange={handleChange}
                                         required
-                                        pattern='[a-zA-Z0-9_]+'
-                                        title='Username can only contain letters, number, and underscores'
                                         className={`
-                                            //General Styling
                                             w-full
                                             p-2
                                             text-sm
                                             rounded-sm
                                             bg-primaryBackground
                                             focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
                                         `}
                                     />
                                 </div>
                                 <div className={`
-                                    //General Styling
-                                    w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                w-full
+                            `}>
+                                <label htmlFor='displayName' className={`
+                                    block
+                                    text-sm text-secondaryText
                                 `}>
-                                    <label htmlFor='email' className={`
-                                        //General Styling
-                                        text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
-                                    `}>
-                                        Email
-                                    </label>
-                                    <input 
-                                        type='email'
-                                        id='email'
-                                        name='email'
-                                        placeholder='Enter your email address...'
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
-                                        className={`
-                                            //General Styling
-                                            w-full
-                                            p-2
-                                            text-sm
-                                            rounded-sm
-                                            bg-primaryBackground
-                                            focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                    />
-                                </div>
-                                <div className={`
-                                    //General Styling
-                                    w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    Display Name (Optional)
+                                </label>
+                                <input
+                                    type='text'
+                                    id='displayName'
+                                    name='displayName'
+                                    placeholder='Enter a display name...'
+                                    value={formData.displayName}
+                                    onChange={handleChange}
+                                    className={`
+                                        w-full
+                                        p-2
+                                        text-sm
+                                        rounded-sm
+                                        bg-primaryBackground
+                                        focus:outline-none
+                                    `}
+                                />
+                            </div>
+                            </>
+                        )}
+                        <div className={`
+                                w-full
+                            `}>
+                                <label htmlFor='email' className={`
+                                    block
+                                    text-sm text-secondaryText
                                 `}>
-                                    <label htmlFor='password' className={`
-                                        //General Styling
-                                        text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
-                                    `}>
-                                        Password
-                                    </label>
-                                    <input 
-                                        type='password'
-                                        id='password'
-                                        name='password'
-                                        placeholder='Enter your password...'
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        className={`
-                                            //General Styling
-                                            w-full
-                                            p-2
-                                            text-sm
-                                            rounded-sm
-                                            bg-primaryBackground
-                                            focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                    />
-                                </div>
-                                <button type='submit' disabled={loading} className={`
-                                    //General Styling
-                                    w-full
-                                    mt-8 p-2
-                                    rounded-sm
-                                    bg-accentText
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    Email address
+                                </label>
+                                <input
+                                    type='email'
+                                    id='email'
+                                    name='email'
+                                    placeholder='Enter your email...'
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    className={`
+                                        w-full
+                                        p-2
+                                        text-sm
+                                        rounded-sm
+                                        bg-primaryBackground
+                                        focus:outline-none
+                                    `}
+                                />
+                            </div>
+                            <div className={`
+                                w-full
+                            `}>
+                                <label htmlFor='password' className={`
+                                    block
+                                    text-sm text-secondaryText
                                 `}>
-                                    Sign Up
-                                </button>
-                                {/* <div className={`
-                                    //General Styling
-                                    w-full
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    <label htmlFor='displayName' className={`
-                                        //General Styling
-                                        text-sm text-secondaryText
-                                        //Mobile Styling
-                                        //Desktop Styling
-                                    `}>
-                                        Display Name (Optional)
-                                    </label>
-                                    <input 
-                                        type='text'
-                                        id='displayName'
-                                        name='displayName'
-                                        placeholder='Enter a dispay name...'
-                                        value={formData.displayName}
-                                        onChange={handleChange}
-                                        required
-                                        className={`
-                                            //General Styling
-                                            w-full
-                                            p-2
-                                            text-sm
-                                            rounded-sm
-                                            bg-primaryBackground
-                                            focus:outline-none
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                    />
-                                </div> */}
-                            </form>
-                        </div>
-                    </section>
+                                    Password
+                                </label>
+                                <input
+                                    type='password'
+                                    id='password'
+                                    name='password'
+                                    placeholder='Enter a password...'
+                                    minLength={6}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    className={`
+                                        w-full
+                                        p-2
+                                        text-sm
+                                        rounded-sm
+                                        bg-primaryBackground
+                                        focus:outline-none
+                                    `}
+                                />
+                            </div>
+                            <button type='submit' className={`
+                                w-full
+                                mt-4 p-3
+                                text-center
+                                bg-accentText
+                                rounded-sm
+                                hover:cursor-pointer
+                                hover:bg-primaryButtonHover
+                                hover:text-primaryTextHover
+                            `}>
+                                {mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
+                            </button>
+                    </form>
+                    <div className={`
+                        w-full
+                        mt-4
+                        flex justify-center items-center gap-2
+                    `}>
+                        <p className={`
+                            text-secondaryText
+                        `}>
+                            {mode === 'sign-in' ? `Don't have an account?` : `Already have an account?`}
+                        </p>
+                        <button onClick={() => {
+                            setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')
+                        }} className={`
+                            text-accentText
+                            hover:cursor-pointer
+                            hover:text-primaryButtonHover
+                        `}>
+                            {mode === 'sign-in' ? `Sign up` : `Log in`}
+                        </button>
+                    </div>
                 </div>
-            )
-    }
+            </section>
+        </div>
+    )
 }
