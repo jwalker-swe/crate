@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/supabase'
 import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 export default function NavBar() {
 
     const [user, setUser]: any = useState(null)
+    const router = useRouter();
 
     useEffect(() => {
         // Check for an existing session on mount
@@ -92,6 +94,7 @@ export default function NavBar() {
                     login-container
                     //General Styling
                     flex items-center gap-4
+                    h-12
                     //Mobile Styling
                     //Desktop Styling
                 `}>
@@ -132,12 +135,11 @@ export default function NavBar() {
                             <div>
                                 <div className={`
                                     profile-nav-container
-                                    w-36
-                                    p-2
-                                    flex justify-start items-center
                                     group
+                                    flex justify-start items-center
+                                    p-2
                                     hover:bg-secondaryBackground
-                                    hover:rounded-ss-sm hover:rounded-se-sm
+                                    hover:rounded-ss-lg hover:rounded-se-lg
                                 `}>
                                     <UserCircleIcon className={`
                                         w-8 h-8 
@@ -147,21 +149,23 @@ export default function NavBar() {
                                         absolute
                                         flex flex-col justify-end items-end
                                         invisible
-                                        translate-y-37 -translate-x-[8px]
+                                        translate-y-37 -translate-x-26
                                         bg-secondaryBackground
-                                        rounded-es-sm rounded-ee-sm
+                                        rounded-ss-lg rounded-es-lg rounded-ee-lg
                                         group-hover:visible 
                                     `}>
                                         <div className={`
                                             w-36
-                                            p-2
+                                            p-2 
                                             flex items-center justify-end
                                             bg-secondaryBackground
                                             border-t-1 border-b-1 border-primaryBackground
+                                            rounded-ss-lg
                                         `}>
                                             <Link href={`#`} className={`
                                                 text-secondaryText
                                                 hover:text-accentText
+                                                mr-1
                                             `}>
                                                 Profile
                                             </Link>
@@ -176,6 +180,7 @@ export default function NavBar() {
                                             <Link href='#' className={`
                                                 text-secondaryText
                                                 hover:text-accentText
+                                                mr-1
                                             `}>
                                                 Albums
                                             </Link>
@@ -190,6 +195,7 @@ export default function NavBar() {
                                             <Link href='#' className={`
                                                 text-secondaryText
                                                 hover:text-accentText
+                                                mr-1
                                             `}>
                                                 Reviews
                                             </Link>
@@ -204,6 +210,7 @@ export default function NavBar() {
                                             <Link href='#' className={`
                                                 text-secondaryText
                                                 hover:text-accentText
+                                                mr-1
                                             `}>
                                                 Lists
                                             </Link>
@@ -218,6 +225,7 @@ export default function NavBar() {
                                             <Link href='#' className={`
                                                 text-secondaryText
                                                 hover:text-accentText
+                                                mr-1
                                             `}>
                                                 Likes
                                             </Link>
@@ -228,14 +236,16 @@ export default function NavBar() {
                                             flex items-center justify-end
                                             bg-secondaryBackground
                                             border-b-1 border-primaryBackground
-                                            rounded-es-sm rounded-ee-sm
+                                            rounded-es-lg rounded-ee-lg
                                         `}>
                                             <button onClick={() => {
                                                 supabase.auth.signOut();
+                                                router.push('/')
                                             }} className={`
                                                 text-secondaryText
                                                 hover:text-accentText
                                                 hover:cursor-pointer
+                                                mr-1
                                             `}>
                                                 Sign Out
                                             </button>

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crate
 
-## Getting Started
+Crate is a work-in-progress web application that allows users to track, rate, review, and share their favorite albums — similar to how Letterboxd works for movies. Built with a modern full-stack tech stack, Crate aims to become a go-to social platform for music lovers to connect over the albums they love (or love to hate).
 
-First, run the development server:
+## Project Status
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+In Development — This project is actively being built. Features, UI, and functionality are still evolving. Not open to contributions at this time.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features (Planned / In Progress)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- User authentication (Supabase)
+- Spotify integration to fetch album metadata
+- Responsive UI with Tailwind CSS
+- User profile pages showing:
+  - Top 5 albums
+  - Recently listened albums
+  - Recent and most popular reviews
+  - Followers/following count
+- Review and rating system
+- Album detail pages
+- Like and comment on reviews
+- Custom lists and album tracking (planned)
+- Search and discover albums (planned)
+- Follow other users and view their activity (planned)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Frontend: React, Next.js, TypeScript, Tailwind CSS
+- Backend: Node.js, Supabase (PostgreSQL + Auth)
+- API Integration: Spotify Web API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Screenshots
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Coming soon...
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## License
+
+This project is not yet licensed and is not open for contributions or reuse at this time.
+
+---
+
+## Contact
+
+Have questions or feedback? Feel free to reach out privately.
