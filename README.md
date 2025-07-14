@@ -1,6 +1,6 @@
 # Crate
 
-Crate is a work-in-progress web application that allows users to track, rate, review, and share their favorite albums — similar to how Letterboxd works for movies. Built with a modern full-stack tech stack, Crate aims to become a go-to social platform for music lovers to connect over the albums they love (or love to hate).
+Crate is a work-in-progress web application that allows users to track, rate, review, and share their favorite albums — similar to how Letterboxd works. I want Crate to become the place for music lovers, like me, to build community and help users find new music they other wise wouldn't have come across.
 
 ## Project Status
 
@@ -36,8 +36,8 @@ In Development — This project is actively being built. Features, UI, and funct
 ---
 
 ## Screenshots
-
-Coming soon...
+![Crate Home Page](/assets/images/readme-images/crate-readme-001.png)
+More coming soon...
 
 ---
 
