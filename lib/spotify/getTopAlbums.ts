@@ -16,7 +16,7 @@ export default async function getTopAlbums() {
 
             const currentYear = new Date().getFullYear();
             const oneMonthAgo = new Date();
-            oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+            oneMonthAgo.setDate(oneMonthAgo.getDate() - 35);
 
             let albums: any = [];
 
@@ -61,10 +61,10 @@ export default async function getTopAlbums() {
                 if ( popularity >= 80 ) {
                     popularAlbums.push(album);
                 }
-                // console.log(popularity);
+                console.log(popularity);
             };
 
-            // console.log(popularAlbums);
+            console.log(recentAlbums);
             
 
             return popularAlbums;
