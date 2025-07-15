@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 type ProfileStatProps = {
     statName: string,
@@ -6,6 +6,8 @@ type ProfileStatProps = {
 }
 
 export default async function ProfileStat({ statName, username }: ProfileStatProps) {
+
+    const supabase = await createClient()
 
     let id: string | null = null
     let following: number | null = null

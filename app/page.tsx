@@ -19,7 +19,6 @@ export default async function Home() {
 
   //Get Album Data
   const recentTopAlbums: any = await getTopAlbums();
-  // console.log(res);
 
   interface AlbumProps {
     title: string[],
@@ -34,14 +33,12 @@ export default async function Home() {
   let albumImage: string[] = [];
 
   recentTopAlbums.forEach((item: any) => {
-    albumTitle.push(item.name);
-    albumArtist.push(item.artists[0].name)
-    albumID.push(item.id);
-    albumImage.push(item.images[0].url)
+    albumTitle.push(item.album.name);
+    albumArtist.push(item.album.artists[0].name)
+    albumID.push(item.album.id);
+    albumImage.push(item.album.images[0].url)
 
   })
-
- 
 
   let albums: AlbumProps = {
     title: albumTitle,
@@ -49,7 +46,6 @@ export default async function Home() {
     id: albumID,
     images: albumImage
   }
-
 
   return (
     <div className={`

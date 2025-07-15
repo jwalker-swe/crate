@@ -3,11 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase/supabase'
+import { createClient } from '@/lib/supabase/client';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 export default function NavBar() {
+
+    const supabase = createClient()
 
     const [user, setUser]: any = useState(null)
     const router = useRouter();

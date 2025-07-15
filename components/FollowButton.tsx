@@ -1,5 +1,6 @@
 'use client'
 
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/supabase'
 import { useState, useEffect } from 'react'
 
@@ -13,6 +14,8 @@ type ViewingOwnProfileProps = {
 }
 
 export default function FollowButton({profile}: FollowButtonProps) {
+
+    const supabase = createServerSupabaseClient()
 
     const [userId, setUserId] = useState<string | null>(null)
     const [sameUser, setSameUser] = useState<boolean>(false)

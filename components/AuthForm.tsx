@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { supabase } from '@/lib/supabase/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 export default function Auth() {
+    const supabase = createClient()
+
     const params = useParams()
     const param = params?.param
 
