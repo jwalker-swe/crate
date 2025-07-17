@@ -1,4 +1,3 @@
-
 //import page dependencies
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +17,7 @@ import DisplayAlbumStats from "@/components/DisplayAlbumStats";
 import AlbumPageList from "@/components/AlbumPageList";
 import UserActivityIcon from "@/components/UserActivityIcon";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
+import LogOptions from "@/components/LogOptions";
 
 
 type StateType = string;
@@ -43,7 +43,7 @@ export default async function Home({ params }: AlbumPageParams) {
         tracks: data.tracks
     }
 
-    console.log(albumInfo.artists);
+    // console.log(albumInfo.artists);
     
     //Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
@@ -145,6 +145,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                     </div>
                                 </div>
                                 <DisplayAlbumStats id={id} />
+                                <LogOptions album={albumInfo} />
                             </div>
                         </div>
                         <div className={`
