@@ -53,7 +53,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                 modal-container-bg
                 w-screen h-full
                 absolute
-               bg-secondarBackground/50
+                bg-secondarBackground/50
                 inset-0
                 backdrop-blur-3xl
                 z-50
@@ -68,7 +68,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                     shadow-primaryButtonHover/10
                     p-8
                     rounded-lg
-                    w-2xl h-96
+                    w-3xl h-96
                     z-100
                 `}>
                     <div className={`
@@ -84,11 +84,27 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                         </button>
                     </div>
                     <div className={`
-                        
+                        mt-4
+                        flex justify-between items-start gap-4
                     `}>
                         <img src={album.images[0].url} width={248} height={248} className={`
                             rounded-lg
                         `}/>
+                        <div className={`
+                            flex flex-col justify-start items-center
+                        `}>
+                            <h2 className={`
+                                text-3xl
+                                font-bold
+                                line-clamp-1
+                            `}>
+                                {album.name}
+                            </h2>
+                            <div className={`
+                                flex 
+                            `}>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
