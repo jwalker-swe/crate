@@ -1,7 +1,9 @@
 'use client'
 
+import getReleaseDate from '@/lib/spotify/getReleaseDate'
+import getReleaseYear from '@/lib/spotify/getReleaseYear'
 import { SpotifyAlbum } from '@/types/spotify'
-import { XMarkIcon } from '@heroicons/react/24/solid'
+import { HeartIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import {useState, useEffect } from 'react'
 
@@ -19,7 +21,10 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
         setLogging(false);
     }
 
-    console.log('Album Info: ', album)
+    const releaseDate = getReleaseDate(album.release_date)
+
+    // console.log('Album Info: ', album)
+    // console.log('Release Date: ', releaseDate)
 
     useEffect(() => {
         if (logging) {
@@ -91,19 +96,50 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                             rounded-lg
                         `}/>
                         <div className={`
-                            flex flex-col justify-start items-center
+                            flex flex-col justify-start items-start
                         `}>
-                            <h2 className={`
-                                text-3xl
-                                font-bold
-                                line-clamp-1
-                            `}>
-                                {album.name}
-                            </h2>
-                            <div className={`
-                                flex 
-                            `}>
-                            </div>
+                            <form onSubmit={() => {}}>
+                                <h2 className={`
+                                    text-3xl
+                                    font-bold
+                                    line-clamp-1
+                                `}>
+                                    {album.name}
+                                </h2>
+                                <div className={`
+                                    text-left text-secondaryText
+                                `}>
+                                    {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
+                                </div>
+                                <div className={`
+                                    flex justify-start items-center gap-8
+                                    mt-4
+                                `}>
+                                    <div className={`
+                                        like-container
+                                    `}>
+                                        <label htmlFor='Like' className={`
+                                            text-xl text-secondaryText
+                                        `}>
+                                            Like
+                                        </label>
+                                        <HeartIcon className={`
+                                            w-9 h-9
+                                            text-secondaryText
+                                            hover:text-accentText
+                                        `} />
+                                    </div>
+                                    <div>
+                                        <label htmlFor='Rating' className={`
+                                            block
+                                            text-xl text-secondaryText
+                                        `}>
+                                            Rate
+                                        </label>
+                                        <div></div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

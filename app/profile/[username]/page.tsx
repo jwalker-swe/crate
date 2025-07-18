@@ -6,7 +6,7 @@ import ProfileStat from "@/components/ProfileStat";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+// import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 type ProfileProps = {
     params: {
