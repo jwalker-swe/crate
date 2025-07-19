@@ -37,6 +37,8 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
 
     const handleSubmit = async function(e: React.FormEvent) {
         e.preventDefault()
+
+        
     }
 
     const handleMouseMove = function(e: MouseEvent<HTMLDivElement>, starIndex: number) {
@@ -109,7 +111,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
             `}>
                 <div className={`
                     modal-container
-                    w-[920px] h-fit
+                    w-[942px] h-fit
                     p-8
                     bg-secondaryBackground
                     rounded-lg
@@ -140,7 +142,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                         <div className={`
                             cover-container
                         `}>
-                            <img src={album.images[0].url} width={310} height={310} className={`
+                            <img src={album.images[0].url} width={334} height={334} className={`
                                 rounded-sm
                             `}/>
                         </div>
@@ -171,12 +173,12 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                 `}>
                                     <div className={`
                                         rating-container
-                                        w-fit h-fit
+                                        w-fit h-fit flex justify-start items-center gap-2
                                     `}>
                                         <h3 className={`
                                             font-medium
                                         `}>
-                                            Rating
+                                            Rating:
                                         </h3>
                                         <div className={`
                                             flex justify-start items-center
@@ -229,12 +231,12 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                     <div className={`
                                         like-container
                                         w-fit h-fit
-                                        flex flex-col justify-start items-center
+                                        flex justify-start items-center gap-2
                                     `}>
                                         <h3 className={`
                                             font-medium
                                         `}>
-                                            Like
+                                            Like: 
                                         </h3>
                                         <button type='button' onClick={async () => {
                                             await setFormData(prev => ({
@@ -273,6 +275,26 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                     id='review'
                                     name='review'
                                 />
+                                <div className={`
+                                    flex justify-end items-center
+                                    w-[462px]
+                                `}>
+                                    <button 
+                                        onClick={() => {
+                                            handleSubmit
+                                        }}    
+                                        className={`
+                                            w-full
+                                            mt-2 px-4 py-2
+                                            rounded-sm
+                                            cursor-pointer
+                                            bg-accentText
+                                            hover:bg-primaryButtonHover hover:text-primaryTextHover
+                                        `}
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </section>
