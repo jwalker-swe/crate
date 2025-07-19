@@ -48,6 +48,7 @@
   --color-primaryButton: #2787F7;
   --color-primaryButtonHover: #1E6BCD;
   --font-sans: 'montreal';
+  --font-text: 'Helvetica';
 }
 
 body {

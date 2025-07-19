@@ -3,28 +3,68 @@
 import getReleaseDate from '@/lib/spotify/getReleaseDate'
 import getReleaseYear from '@/lib/spotify/getReleaseYear'
 import { SpotifyAlbum } from '@/types/spotify'
-import { HeartIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { HeartIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import {useState, useEffect } from 'react'
+import React, {useState, useEffect, MouseEvent } from 'react'
+import StarRating from './StarRating'
+
+interface FormData {
+    rating: number | null,
+    liked: boolean,
+    review: string | null,
+}
 
 
 export default function LogOptions({ album }: {album: SpotifyAlbum}) {
 
-    const [logging, setLogging] = useState<boolean>(false)
-    const [size, setSize] = useState<string>('0')
+    const [logging, setLogging] = useState<boolean>(false);
+    const [hoverRating, setHoverRating] = useState<number>(0);
+    const [rating, setRating] = useState<number>(0);
+    const [formData, setFormData] = useState<FormData>({
+        rating: null,
+        liked: false,
+        review: null
+    });
+    const releaseDate = getReleaseDate(album.release_date)
 
     const handleOpen = function() {
         setLogging(true);
-    }
+    };
 
     const handleClose = function() {
         setLogging(false);
+    };
+
+    const handleSubmit = async function(e: React.FormEvent) {
+        e.preventDefault()
     }
 
-    const releaseDate = getReleaseDate(album.release_date)
+    const handleMouseMove = function(e: MouseEvent<HTMLDivElement>, starIndex: number) {
+        const {left, width} = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - left;
+        const isHalf = x < width / 2;
+        const value = starIndex - (isHalf ? 0.5 : 0);
+        setHoverRating(value)
+    }
 
-    // console.log('Album Info: ', album)
-    // console.log('Release Date: ', releaseDate)
+    const handleClick = function(e: MouseEvent<HTMLDivElement>, starIndex: number) {
+        const {left, width} = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - left;
+        const isHalf = x < width / 2;
+        const value = starIndex - (isHalf ? 0.5 : 0); 
+        setRating(value);
+    }
+
+    const getFillPercent = function(index: number): number {
+        const active = hoverRating || rating;
+        if (active >= index) {
+            return 100
+        } else if (active + 0.5 === index) {
+            return 50
+        } else {
+            return 0
+        }
+    }
 
     useEffect(() => {
         if (logging) {
@@ -33,6 +73,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
             document.body.style.overflow = ''
         }
     }, [logging])
+
 
     return (
         <>
@@ -66,82 +107,173 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                 ${logging ? `visible scale-100` : `hidden scale-0`}
                 transition-all duration-200 ease-in-out
             `}>
-                <div className={` 
-                    flex flex-col justify-start items-start
-                    bg-secondaryBackground
-                    shadow-[0_0_60px_10px]
-                    shadow-primaryButtonHover/10
+                <div className={`
+                    modal-container
+                    w-4xl h-fit
                     p-8
+                    bg-secondaryBackground
                     rounded-lg
-                    w-3xl h-96
-                    z-100
+                    drop-shadow-
                 `}>
                     <div className={`
-                        w-full
+                        header-container
+                        w-full h-fit
                         flex justify-end items-center
                     `}>
-                        <button onClick={handleClose}>
+                        <button onClick={handleClose}
+                            className={`
+                                cursor-pointer
+                            `}
+                        >
                             <XMarkIcon className={`
-                                w-8 h-8
-                                text-secondaryText
-                                hover:cursor-pointer hover:text-primaryTextHover
-                            `}/>
+                                w-9 h-9
+                                hover:text-accentText
+                                transition-colors duration-200 ease-in-out
+                            `} />
                         </button>
                     </div>
-                    <div className={`
-                        mt-4
-                        flex justify-between items-start gap-4
+                    <section className={`
+                        body-container
+                        w-full h-fit mt-4
+                        flex justify-between items-start gap-8
                     `}>
-                        <img src={album.images[0].url} width={248} height={248} className={`
-                            rounded-lg
-                        `}/>
                         <div className={`
-                            flex flex-col justify-start items-start
+                            cover-container
                         `}>
-                            <form onSubmit={() => {}}>
-                                <h2 className={`
-                                    text-3xl
-                                    font-bold
-                                    line-clamp-1
+                            <img src={album.images[0].url} className={`
+                                w-60 h-60
+                            `}/>
+                        </div>
+                        <div className={`
+                            form-container
+                            flex flex-col justify-start items-start flex-grow
+                        `}>
+                            <h2 className={`
+                                text-3xl font-bold
+                            `}>
+                                {album.name}
+                            </h2>
+                            <p className={`
+                                text-accentText
+                            `}>
+                                {album.artists[0].name}
+                            </p>
+                            <form onClick={() => {}}
+                                className={`
+                                    w-full
+                                `}
+                            >
+                                <p className={`
+                                    text-sm
+                                    mt-8
                                 `}>
-                                    {album.name}
-                                </h2>
+                                    Placeholder for check listed on and listened before check boxes
+                                </p>
+                                <textarea 
+                                    className={`
+                                        w-[90%] h-32 mt-2 p-2
+                                        rounded-sm
+                                        bg-[#2A2C30]
+                                        font-text
+                                        resize-none
+                                        focus:h-96 focus:outline-none
+                                    `}
+                                    placeholder='Add a review...'
+                                    id='review'
+                                    name='review'
+                                />
                                 <div className={`
-                                    text-left text-secondaryText
-                                `}>
-                                    {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
-                                </div>
-                                <div className={`
-                                    flex justify-start items-center gap-8
-                                    mt-4
+                                    mt-2
+                                    flex justify-start items-center gap-4
                                 `}>
                                     <div className={`
-                                        like-container
+                                        rating-container
+                                        w-fit h-fit
                                     `}>
-                                        <label htmlFor='Like' className={`
-                                            text-xl text-secondaryText
+                                        <h3 className={`
+                                            font-medium
+                                        `}>
+                                            Rating
+                                        </h3>
+                                        <div className={`
+                                            flex justify-start items-center
+                                        `}>
+                                            {[1,2,3,4,5].map((i) => {
+                                                const fillPercent = getFillPercent(i)
+
+                                                return (
+                                                    <div 
+                                                        key={i}
+                                                        onMouseMove={(e) => {handleMouseMove(e, i)}}
+                                                        onMouseLeave={() => {setHoverRating(0)}}
+                                                        onClick={(e) => {handleClick(e, i)}}
+                                                        className={`
+                                                            relative 
+                                                            w-6 h-6
+                                                            cursor-pointer
+                                                        `}
+                                                    >
+                                                        {/* Background Star (empty) */}
+                                                        <StarIcon 
+                                                            className={`
+                                                                w-6 h-6
+                                                                text-secondaryText
+                                                            `}
+                                                        />
+
+                                                        {/* Foreground Star (filled) with width clipped */}
+                                                        <div 
+                                                            className={`
+                                                                absolute
+                                                                h-full top-0 left-0
+                                                                overflow-hidden
+                                                                pointer-events-none
+                                                            `}
+                                                            style={{width: `${fillPercent}%`}}
+                                                        >
+                                                            <StarIcon 
+                                                                className={`
+                                                                    w-6 h-6
+                                                                    text-accentText
+                                                                `}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div className={`
+                                        like-container
+                                        w-fit h-fit
+                                        flex flex-col justify-start items-center
+                                    `}>
+                                        <h3 className={`
+                                            font-medium
                                         `}>
                                             Like
-                                        </label>
-                                        <HeartIcon className={`
-                                            w-9 h-9
-                                            text-secondaryText
-                                            hover:text-accentText
-                                        `} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor='Rating' className={`
-                                            block
-                                            text-xl text-secondaryText
-                                        `}>
-                                            Rate
-                                        </label>
-                                        <div></div>
+                                        </h3>
+                                        <button type='button' onClick={async () => {
+                                            await setFormData(prev => ({
+                                                ...prev,
+                                                liked: !prev.liked
+                                            }))
+                                            console.log(formData.liked)
+                                        }}>
+                                            <HeartIcon 
+                                                className={`
+                                                    w-6 h-6
+                                                    ${formData.liked ? 'text-accentText' : 'text-secondaryText'}
+                                                    hover:text-accentText
+                                                    cursor-pointer
+                                                `}
+                                            />
+                                        </button>
                                     </div>
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </>
