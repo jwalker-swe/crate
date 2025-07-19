@@ -37,6 +37,7 @@ In Development — This project is actively being built. Features, UI, and funct
 
 ## Screenshots
 ![Crate Home Page](/assets/images/readme-images/crate-readme-001.png)
+![Crate Dynamic Album Page](/assets/images/readme-images/crate-readme-002.png)
 More coming soon...
 
 ---
