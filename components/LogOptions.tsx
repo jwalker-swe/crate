@@ -109,7 +109,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
             `}>
                 <div className={`
                     modal-container
-                    w-4xl h-fit
+                    w-[920px] h-fit
                     p-8
                     bg-secondaryBackground
                     rounded-lg
@@ -140,14 +140,14 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                         <div className={`
                             cover-container
                         `}>
-                            <img src={album.images[0].url} width={256} height={256} className={`
+                            <img src={album.images[0].url} width={310} height={310} className={`
                                 rounded-sm
                             `}/>
                         </div>
                         <div className={`
                             form-container
                             flex flex-col justify-start items-start flex-grow
-                            max-w-lg
+                            w-[512px]
                         `}>
                             <h2 className={`
                                 text-3xl font-bold
@@ -165,28 +165,9 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                     w-full
                                 `}
                             >
-                                <p className={`
-                                    text-sm
-                                    mt-8
-                                `}>
-                                    Placeholder for check listed on and listened before check boxes
-                                </p>
-                                <textarea 
-                                    className={`
-                                        w-[90%] h-32 mt-2 p-2
-                                        rounded-sm
-                                        bg-[#2A2C30]
-                                        font-text
-                                        resize-none
-                                        focus:h-96 focus:outline-none
-                                    `}
-                                    placeholder='Add a review...'
-                                    id='review'
-                                    name='review'
-                                />
                                 <div className={`
-                                    mt-2
-                                    flex justify-start items-center gap-4
+                                    mt-6
+                                    flex justify-start items-center gap-8
                                 `}>
                                     <div className={`
                                         rating-container
@@ -273,6 +254,25 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                         </button>
                                     </div>
                                 </div>
+                                {/* <p className={`
+                                    text-sm
+                                    mt-2
+                                `}>
+                                    Placeholder for check listed on and listened before check boxes
+                                </p> */}
+                                <textarea 
+                                    className={`
+                                        w-[90%] h-32 mt-3 p-2
+                                        rounded-sm
+                                        bg-[#2A2C30]
+                                        font-text
+                                        resize-none
+                                        focus:h-96 focus:outline-none
+                                    `}
+                                    placeholder='Add a review...'
+                                    id='review'
+                                    name='review'
+                                />
                             </form>
                         </div>
                     </section>
