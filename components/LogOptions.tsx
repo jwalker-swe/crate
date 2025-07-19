@@ -140,16 +140,18 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                         <div className={`
                             cover-container
                         `}>
-                            <img src={album.images[0].url} className={`
-                                w-60 h-60
+                            <img src={album.images[0].url} width={256} height={256} className={`
+                                rounded-sm
                             `}/>
                         </div>
                         <div className={`
                             form-container
                             flex flex-col justify-start items-start flex-grow
+                            max-w-lg
                         `}>
                             <h2 className={`
                                 text-3xl font-bold
+                                line-clamp-2
                             `}>
                                 {album.name}
                             </h2>
