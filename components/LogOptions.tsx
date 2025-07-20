@@ -29,29 +29,29 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
         liked: false,
         review: null
     });
-    const releaseDate = getReleaseDate(album.release_date)
+    const releaseDate = getReleaseDate(album.release_date);
 
     const getActiveSession = async function () {
         try {
             const {data: sessionData, error: sessionError} = await supabase.auth.getSession();
 
             if (sessionError) {
-                console.error('Error fetching session data: ', sessionError)
-                setActiveSession
+                console.error('Error fetching session data: ', sessionError);
+                setActiveSession;
                 return
             }
             if (!sessionData.session) {
-                console.log('No user session active: ', sessionData)
-                setActiveSession(false)
+                console.log('No user session active: ', sessionData);
+                setActiveSession(false);
                 return
             }
             if (sessionData.session) {
-                console.log('User session active: ', sessionData)
+                console.log('User session active: ', sessionData);
                 setActiveSession(true);
                 return 
             }
         } catch (err) {
-        
+            console.error('An unexpected error occurred while fetching session data: ', err);
         }
     }
 
@@ -63,10 +63,85 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
         setLogging(false);
     };
 
+    const getAlbum = async function() {
+            try {
+                const { data: albumData, error: albumError } = await supabase
+                    .from('albums')
+                    .select('id')
+                    .eq('spotify_id', album.id)
+                    .single()
+                
+                if (albumError && albumError.code !== 'PGRST116') {
+                    console.error('Error fetching album data: ', albumError)
+                    return
+                }
+
+                if (albumData) {
+                    return albumData.id
+                } else {
+                    const { data: newAlbumData, error: newAlbumError } = await supabase
+                        .from('albums')
+                        .insert([
+                            {
+                                spotify_id: album.id,
+                                title: album.name,
+                                artists: album.artists,
+                                release_date: album.release_date,
+                                cover_image_url: album.images[0].url,
+                                total_tracks: album.total_tracks,
+                                tracks: album.tracks
+                            }
+                        ])
+                        .select('id')
+                        .single()
+                    
+                    if (newAlbumError) {
+                        console.error('Error inserting album data: ', newAlbumError)
+                        return
+                    }
+
+                    return newAlbumData.id
+                }
+            } catch (err) {
+                console.error('An unexpected error occurred while fetching album data: ', err)
+            }
+    }
+
     const handleSubmit = async function(e: React.FormEvent) {
         e.preventDefault()
 
-        
+        //Send form data to database
+        try {
+            const {data: { user }, error: userError} = await supabase.auth.getUser();
+            if (userError) {
+                console.error('An error occurred while fetching user data: ', userError)
+            }
+
+            const albumId = await getAlbum();
+            console.log('AlbumId: ', albumId);
+
+            if (user) {
+                const { error } = await supabase
+                    .from('user_albums')
+                    .insert([
+                        {
+                            user_id: user.id,
+                            album_id: albumId,
+                            rating: formData.rating,
+                            review_text: formData.review,
+                            liked: formData.liked,
+                        }
+                    ])
+                    if (error) {
+                        console.error('Error inserting data: ', error)
+                    } else {
+                        console.log('Review submitted successfully')
+                        handleClose()
+                    }
+            }
+        } catch (err) {
+            console.error('An unexpected error occurred while fetching user data: ', err)
+        }
     }
 
     const handleMouseMove = function(e: MouseEvent<HTMLDivElement>, starIndex: number) {
@@ -83,6 +158,10 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
         const isHalf = x < width / 2;
         const value = starIndex - (isHalf ? 0.5 : 0); 
         setRating(value);
+        setFormData(prev => ({
+            ...prev,
+            rating: value
+        }));
     }
 
     const getFillPercent = function(index: number): number {
@@ -195,7 +274,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                 `}>
                                     {album.artists[0].name}
                                 </p>
-                                <form onClick={() => {}}
+                                <form onSubmit={handleSubmit}
                                     className={`
                                         w-full
                                     `}
@@ -271,12 +350,11 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                             `}>
                                                 Like: 
                                             </h3>
-                                            <button type='button' onClick={async () => {
-                                                await setFormData(prev => ({
+                                            <button type='button' onClick={() => {
+                                                setFormData(prev => ({
                                                     ...prev,
                                                     liked: !prev.liked
                                                 }))
-                                                console.log(formData.liked)
                                             }}>
                                                 <HeartIcon 
                                                     className={`
@@ -307,15 +385,20 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                         placeholder='Add a review...'
                                         id='review'
                                         name='review'
+                                        value={formData.review || ''}
+                                        onChange={(e) => setFormData(prev => (
+                                            {
+                                                ...prev,
+                                                review: e.target.value 
+                                            }
+                                        ))}
                                     />
                                     <div className={`
                                         flex justify-end items-center
                                         w-[462px]
                                     `}>
                                         <button 
-                                            onClick={() => {
-                                                handleSubmit
-                                            }}    
+                                            type='submit' 
                                             className={`
                                                 w-full
                                                 mt-2 px-4 py-2
