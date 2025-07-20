@@ -28,7 +28,6 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Retrieve album id from url params
     const { id } = await params;
-    // console.log(id);
 
     //Fetch album data based on album id
     const data = await getAlbumById(id);
@@ -42,16 +41,9 @@ export default async function Home({ params }: AlbumPageParams) {
         total_tracks: data.total_tracks,
         tracks: data.tracks
     }
-
-    // console.log(albumInfo.artists);
     
     //Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
-
-    //To Do:
-        //Take albumInfo and build out html elements
-
-    
 
     return (
         <div className={`
@@ -145,7 +137,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                     </div>
                                 </div>
                                 <DisplayAlbumStats id={id} />
-                                <LogOptions album={albumInfo} />
+                                <LogOptions album={albumInfo}/>
                             </div>
                         </div>
                         <div className={`
