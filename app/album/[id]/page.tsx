@@ -18,6 +18,7 @@ import AlbumPageList from "@/components/AlbumPageList";
 import UserActivityIcon from "@/components/UserActivityIcon";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
 import LogOptions from "@/components/LogOptions";
+import { supabase } from "@/lib/supabase/supabase";
 
 
 type StateType = string;
@@ -137,7 +138,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                     </div>
                                 </div>
                                 <DisplayAlbumStats id={id} />
-                                <LogOptions album={albumInfo}/>
+                                <LogOptions album={albumInfo} />
                             </div>
                         </div>
                         <div className={`
