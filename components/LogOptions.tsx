@@ -380,7 +380,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                             bg-[#2A2C30]
                                             font-text
                                             resize-none
-                                            focus:h-96 focus:outline-none
+                                            focus:h-[55vh] focus:outline-none
                                         `}
                                         placeholder='Add a review...'
                                         id='review'
