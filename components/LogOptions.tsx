@@ -37,9 +37,9 @@ type AlbumProps = {
 const supabase = createClient();
 
 
-export default function LogOptions({ album }: {album: AlbumProps}) {
+export default function LogOptions({ album, session }: {album: AlbumProps, session: any}) {
 
-    const [activeSession, setActiveSession] = useState<boolean>(false);
+    const [activeSession, setActiveSession] = useState<boolean>(session);
     const [logging, setLogging] = useState<boolean>(false);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [rating, setRating] = useState<number>(0);

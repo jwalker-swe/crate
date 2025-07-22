@@ -7,11 +7,11 @@ import { createClient } from '@/lib/supabase/client';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
-export default function NavBar() {
+export default function NavBar({ session }: {session: boolean}) {
 
     const supabase = createClient()
 
-    const [user, setUser]: any = useState(null)
+    const [user, setUser]: any = useState(session)
     const router = useRouter();
 
     useEffect(() => {

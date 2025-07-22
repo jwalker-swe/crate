@@ -12,10 +12,16 @@ import ArticlePreview from "@/components/ArticlePreview";
 import ReviewPreview from "@/components/ReviewPreview";
 import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
 import getTopAlbums from '@/lib/spotify/getTopAlbums';
+import { createClient } from "@/lib/supabase/server";
+import SignUpButton from "@/components/SignUpButton";
 
 //Create function to get Album data
 
 export default async function Home() {
+
+  const supabase = await createClient();
+      const { data: { user } }: any = await supabase.auth.getUser();
+      console.log('User: ', user)
 
   //Get Album Data
   const recentTopAlbums: any = await getTopAlbums();
@@ -54,7 +60,7 @@ export default async function Home() {
       mx-auto py-4
     `}>
       {/*NavBar*/}
-      <NavBar />
+      <NavBar session={user ? true : false} />
       {/* Hero Section */}
       <section className={`
         hero-section
@@ -87,22 +93,7 @@ export default async function Home() {
         `}>
           Join the community of music enthusiasts. Log your listening, rate albums, and discover new music based on your taste.
         </p>
-        <Link href='#'>
-          <div className={`
-            //General Styling
-            text-lg text-primaryText font-medium hover:text-primaryTextHover
-            my-6 px-5 py-3
-            rounded-xl
-            bg-primaryButton hover:bg-primaryButtonHover
-            transition-colors
-            ease-in-out
-            duration-200
-            //Mobile Styling
-            //Desktop Styling
-          `}>
-            Start your journey for free
-          </div>
-        </Link>
+        <SignUpButton mode="sign-up" width={5} height={3} />
       </section>
       {/* Top Albums Preview Section */}
       <section className={`

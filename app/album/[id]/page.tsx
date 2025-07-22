@@ -18,7 +18,7 @@ import AlbumPageList from "@/components/AlbumPageList";
 import UserActivityIcon from "@/components/UserActivityIcon";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
 import LogOptions from "@/components/LogOptions";
-import { supabase } from "@/lib/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 
 type StateType = string;
@@ -26,6 +26,10 @@ type StateType = string;
 export default async function Home({ params }: AlbumPageParams) {
 
     // Setup state
+    const supabase = await createClient();
+    const { data: { user } }: any = await supabase.auth.getUser();
+    console.log('User: ', user)
+    
 
     // Retrieve album id from url params
     const { id } = await params;
@@ -57,7 +61,7 @@ export default async function Home({ params }: AlbumPageParams) {
             //Mobile Styling
             //Desktop Styling
         `}>
-            <NavBar />
+            <NavBar session={user ? true : false} />
             <div className={`
                 w-[896px]
                 mx-auto
@@ -140,7 +144,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                     </div>
                                 </div>
                                 <DisplayAlbumStats id={id} rating={albumInfo.rating} />
-                                <LogOptions album={albumInfo} />
+                                <LogOptions album={albumInfo} session={user ? true : false} />
                             </div>
                         </div>
                         <div className={`
