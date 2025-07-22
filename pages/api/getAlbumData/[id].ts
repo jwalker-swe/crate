@@ -2,26 +2,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/lib/supabase/supabase";
 import getAccessToken from "@/lib/spotify/getAccessToken";
 
-type ResponseData = {
-    artists: {
-        name: string
-    }[]
-    spotify_id: string,
-    title: string,
-    release_data: string
-    cover_image_url: string,
-    total_tracks: number,
-    tracks: {
-        href: string,
-        items: {
-            name: string,
-            artists: {
-                name: string
-            }[]
-        }[]
-    }
-}
-
 type AlbumDataProps = {
     artists: {
         name: string
@@ -87,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         cover_image_url: data.images[0].url,
                         total_tracks: data.total_tracks,
                         tracks: data.tracks,
-                        rating: 1
+                        rating: null
                     }
 
                     return res.status(200).json(spotifyAlbumData);

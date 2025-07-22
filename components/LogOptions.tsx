@@ -15,10 +15,29 @@ interface FormData {
     review: string | null,
 }
 
+type AlbumProps = {
+    artists: {
+        name: string
+    }[],
+    spotify_id: string
+    title: string
+    release_date: string
+    cover_image_url: string
+    total_tracks: number
+    tracks: {
+        items: {
+            name: string,
+            track_number: number,
+            duration: number
+        }[]
+    }[]
+    rating: null | number
+}
+
 const supabase = createClient();
 
 
-export default function LogOptions({ album }: {album: SpotifyAlbum}) {
+export default function LogOptions({ album }: {album: AlbumProps}) {
 
     const [activeSession, setActiveSession] = useState<boolean>(false);
     const [logging, setLogging] = useState<boolean>(false);
@@ -68,7 +87,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                 const { data: albumData, error: albumError } = await supabase
                     .from('albums')
                     .select('id')
-                    .eq('spotify_id', album.id)
+                    .eq('spotify_id', album.spotify_id)
                     .single()
                 
                 if (albumError && albumError.code !== 'PGRST116') {
@@ -83,11 +102,11 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                         .from('albums')
                         .insert([
                             {
-                                spotify_id: album.id,
-                                title: album.name,
+                                spotify_id: album.spotify_id,
+                                title: album.title,
                                 artists: album.artists,
                                 release_date: album.release_date,
-                                cover_image_url: album.images[0].url,
+                                cover_image_url: album.cover_image_url,
                                 total_tracks: album.total_tracks,
                                 tracks: album.tracks
                             }
@@ -254,7 +273,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                             <div className={`
                                 cover-container
                             `}>
-                                <img src={'#'} width={334} height={334} className={`
+                                <img src={album.cover_image_url} width={334} height={334} className={`
                                     rounded-sm
                                 `}/>
                             </div>
@@ -267,7 +286,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                                     text-3xl font-bold
                                     line-clamp-2
                                 `}>
-                                    {album.name}
+                                    {album.title}
                                 </h2>
                                 <p className={`
                                     text-accentText
