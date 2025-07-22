@@ -46,7 +46,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                 return
             }
             if (sessionData.session) {
-                console.log('User session active: ', sessionData);
+                // console.log('User session active: ', sessionData);
                 setActiveSession(true);
                 return 
             }
@@ -254,7 +254,7 @@ export default function LogOptions({ album }: {album: SpotifyAlbum}) {
                             <div className={`
                                 cover-container
                             `}>
-                                <img src={album.images[0].url} width={334} height={334} className={`
+                                <img src={'#'} width={334} height={334} className={`
                                     rounded-sm
                                 `}/>
                             </div>

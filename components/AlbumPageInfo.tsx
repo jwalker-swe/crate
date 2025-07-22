@@ -20,10 +20,6 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
 
     const rowsPerGridColumn = getRowsPerGridColumn();
 
-    // console.log(`Rows Per Grid Column: `, rowsPerGridColumn);
-    // console.log(`Total Tracks Fetched: `, totalTracks);
-    // console.log(`Tracks Fetched: `, tracks);
-
     let trackChunks: any[] = [];
 
     for(let i = 0; i < gridColumnTotal; i++) {
@@ -41,9 +37,6 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
         return artistData.push(track.artists)
     });
 
-    // console.log(`Track Chunks: `, trackChunks);
-    console.log(`Artists Data: `, artistData);
-
     artistData.forEach(artists => {
         let currentArtist: any[] = [];
         artists.map((artist: any, artistIndex: any) => {
@@ -58,16 +51,12 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
         artistNames.push(currentArtist)
     })
 
-    // console.log(`Artists Names: `, artistNames)
-
     for (let i = 0; i < gridColumnTotal; i++) {
         const start = i * rowsPerGridColumn;
         const end = start + rowsPerGridColumn;
 
         artistChunks.push(artistNames.slice(start, end));
     }
-
-    console.log(`Arist Chunks: `, artistChunks);
 
     return (
         <div className={`

@@ -1,6 +1,6 @@
 import { StarIcon, HeartIcon, ListBulletIcon, QueueListIcon } from "@heroicons/react/24/solid";
 
-export default function DisplayAlbumStats(id: any) {
+export default function DisplayAlbumStats( { id, rating }: {id: any, rating: number}) {
 
     //Get stats from database by the album id
 
@@ -26,7 +26,7 @@ export default function DisplayAlbumStats(id: any) {
                     //Mobile Styling
                     //Desktop Styling
                 `}>
-                    3.8
+                    {rating ? rating.toFixed(1).toString() : 'N/A'}
                 </span>
                 <div className={`
                     star-container
