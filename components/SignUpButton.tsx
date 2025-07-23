@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation"
 import { Router } from "next/router"
 
-export default function SignUpButton({ mode, width, height }: {mode: 'sign-in' | 'sign-up', width: number, height: number}) {
+export default function SignUpButton({ mode}: {mode: 'sign-in' | 'sign-up' }) {
 
-        const buttonWidth: number = width
-        const buttonHeight: number = height
+        // const buttonWidth: number = width
+        // const buttonHeight: number = height
         const buttonMode: string =  mode
 
         const router = useRouter();
@@ -18,9 +18,10 @@ export default function SignUpButton({ mode, width, height }: {mode: 'sign-in' |
         }} className={`
             //General Styling
             text-lg text-primaryText font-medium hover:text-primaryTextHover
-            my-6 px-${width} py-${height}
+            my-6 px-5 py-3
             rounded-xl
             bg-primaryButton hover:bg-primaryButtonHover
+            cursor-pointer
             transition-colors
             ease-in-out
             duration-200

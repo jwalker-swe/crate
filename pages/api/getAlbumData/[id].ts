@@ -79,8 +79,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         } else {
 
-            let albumRating: number | null = null
-
             // Set rating to null by default before trying to fetch ratings from crate db
             const crateAlbumData: AlbumDataProps = {
                 artists: albumData.artists,
@@ -90,43 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 cover_image_url: albumData.cover_image_url,
                 total_tracks: albumData.total_tracks,
                 tracks: albumData.tracks, 
-                rating: null
-            }
-
-            // Try fetching ratings from crate db to determine average rating
-            try {
-            
-                const { data: crateRatingData, error: crateRatingError } = await supabase
-                    .from('user_albums')
-                    .select('rating')
-                    .eq('album_id', albumData.id)
-                    .not('rating', 'is', null)
-
-                if (crateRatingError) {
-                    console.error(`Error fetching album rating: `, crateRatingError)
-                    return
-                } 
-                
-                if (!crateRatingData || crateRatingData.length === 0) {
-                    albumRating = null
-                    crateAlbumData.rating = albumRating
-
-                    return res.status(200).json(crateAlbumData)
-                }
-
-                if (crateRatingData) {
-                    const total = crateRatingData.reduce((sum, row) => sum + row.rating, 0)
-                    const average = total / crateRatingData.length
-
-                    albumRating = average
-                    crateAlbumData.rating = albumRating
-
-                    return res.status(200).json(crateAlbumData)
-                }
-
-
-            } catch (err) {
-                console.error(`An unexpected error occured trying to fetch album rating: `, err)
+                rating: albumData.rating
             }
 
             return res.status(200).json(crateAlbumData)

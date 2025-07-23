@@ -93,7 +93,7 @@ export default async function Home() {
         `}>
           Join the community of music enthusiasts. Log your listening, rate albums, and discover new music based on your taste.
         </p>
-        <SignUpButton mode="sign-up" width={5} height={3} />
+        <SignUpButton mode="sign-up"/>
       </section>
       {/* Top Albums Preview Section */}
       <section className={`

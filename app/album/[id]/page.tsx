@@ -27,9 +27,7 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Setup state
     const supabase = await createClient();
-    const { data: { user } }: any = await supabase.auth.getUser();
-    console.log('User: ', user)
-    
+    const { data: { user } }: any = await supabase.auth.getUser();  
 
     // Retrieve album id from url params
     const { id } = await params;
@@ -48,6 +46,7 @@ export default async function Home({ params }: AlbumPageParams) {
     }
 
     const albumInfo = await res.json();
+    console.log('Album Info: ', albumInfo);
     
     // Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
