@@ -46,6 +46,50 @@ export default async function Home({ params }: AlbumPageParams) {
     }
 
     const albumInfo = await res.json();
+
+    // Fetch latest data from Spotify to ensure database is up to date
+    const spotifyAlbumInfo = await getAlbumById(id);
+    console.log(`Spotify album info: `, spotifyAlbumInfo);
+    // List of fileds to check if up to date
+    const fieldsToCompare = {
+        title: albumInfo.title !== spotifyAlbumInfo.name,
+        release_data: albumInfo.release_date !== spotifyAlbumInfo.release_date,
+        cover_image_url: albumInfo.cover_image_url !== spotifyAlbumInfo.images[0].url,
+        artists: JSON.stringify(albumInfo.artists) !== JSON.stringify(spotifyAlbumInfo.artists),
+        tracks: JSON.stringify(albumInfo.tracks) !== JSON.stringify(spotifyAlbumInfo.tracks)
+    };
+
+    //Check if any of the fields are out of sync
+    const isOutdated = Object.values(fieldsToCompare).some(isFieldOutdated => isFieldOutdated);
+
+    if (isOutdated) {
+        console.log(`Album data for ${id} is outdated. Updating...`);
+        const { error } = await supabase
+            .from('albums')
+            .update({
+                title: spotifyAlbumInfo.name,
+                release_date: spotifyAlbumInfo.release_date,
+                cover_image_url: spotifyAlbumInfo.images[0].url,
+                artists: spotifyAlbumInfo.artists,
+                tracks: spotifyAlbumInfo.tracks,
+            })
+            .eq('spotify_id', id);
+
+        if (error) {
+            console.error('Error updating album data: ', error);
+        } else {
+            // If the update was successful, update our local variable to ensure the page
+            // renders with the lastest info
+            albumInfo.title = spotifyAlbumInfo.name,
+            albumInfo.release_date = spotifyAlbumInfo.release_date,
+            albumInfo.cover_image_url = spotifyAlbumInfo.images[0].url,
+            albumInfo.artists = spotifyAlbumInfo.artists,
+            albumInfo.tracks = spotifyAlbumInfo.tracks
+
+            console.log(`Successfully updated album data for ${id}`);
+        }
+    }
+
     console.log('Album Info: ', albumInfo);
     
     // Seperate out release year from release date
