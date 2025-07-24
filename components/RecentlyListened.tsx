@@ -146,14 +146,13 @@ export default async function RecentlyListened({ username }: { username: string 
                             >
                                 {[1, 2, 3, 4, 5].map((i) => {
                                     //Get fill percentage
-                                    console.log(i);
                                     const fillPercentage = getFillPercent(activity.rating, i);
 
                                     return (
                                         <div className={`
                                             relative 
                                             w-4 h-4
-                                        `}>
+                                        `} key={i}>
                                             {/* Background stars */}
                                             <StarIcon className={`
                                                     text-secondaryText
