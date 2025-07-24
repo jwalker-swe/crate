@@ -6,6 +6,9 @@ import ProfileStat from "@/components/ProfileStat";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { createClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/supabase";
+import RecentlyListened from "@/components/RecentlyListened";
 // import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 type ProfileProps = {
@@ -17,13 +20,14 @@ type ProfileProps = {
 export default async function Profile({ params }: ProfileProps) {
 
     const { username } =  await params
+    const { data: { user }, error } = await supabase.auth.getUser()
 
     return (
         <div className={`
             w-[1200px] h-fit
             mx-auto py-4
         `}>
-            <NavBar />
+            <NavBar session={user ? true : false} />
             <div className={`
                 profile-body
                 w-[896px]
@@ -142,9 +146,10 @@ export default async function Profile({ params }: ProfileProps) {
                             <div className={`
                                 flex justify-between items-center
                             `}>
-                                <SectionTitle title={'Recently Listened'} />
+                                <SectionTitle title={'Recently Reviewed'} />
                                 <ViewAll />
                             </div>
+                            <RecentlyListened username={username} />
                             {/* Component to feth favorite albums based on username */}
                         </div>
                     </section>
