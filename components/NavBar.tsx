@@ -12,12 +12,39 @@ export default function NavBar({ session }: {session: boolean}) {
     const supabase = createClient()
 
     const [user, setUser]: any = useState(session)
+    const [userId, setUserId]: any = useState('')
+    const [username, setUsername]: any = useState('')
+
     const router = useRouter();
 
     useEffect(() => {
         // Check for an existing session on mount
         supabase.auth.getUser().then(({ data }) => {
             setUser(data.user)
+            setUserId(data.user?.id)
+            const id = data.user?.id;
+
+            if (data.user) {
+                const fetchUsername = async () => {
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('username')
+                        .eq('id', id)
+                        .single()
+                    if (error) {
+                        console.error(`Error fetching username: `, error);
+                        return null
+                    }
+                    if (!data) {
+                        console.log('No username found')
+                        return null
+                    }
+                    if (data) {
+                        await setUsername(data.username)
+                    }
+                }
+                fetchUsername();
+            }
         })
 
         // Listen for auth state changes (login/logout)
@@ -162,7 +189,7 @@ export default function NavBar({ session }: {session: boolean}) {
                                             border-t-1 border-b-1 border-primaryBackground
                                             rounded-ss-lg
                                         `}>
-                                            <Link href={`#`} className={`
+                                            <Link href={`/profile/${username}`} className={`
                                                 text-secondaryText
                                                 hover:text-accentText
                                                 mr-1

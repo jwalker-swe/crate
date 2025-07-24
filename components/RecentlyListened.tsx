@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabase } from "@/lib/supabase/supabase";
+import { StarIcon } from "@heroicons/react/24/solid";
 
 type RecentActivityProps = {
     album_id: string,
@@ -73,6 +74,17 @@ const fetchAlbumData = function(albumIds: string[]) {
     return albumData
 }
 
+const getFillPercent = function(rating: number, index: number) {
+    const diff = rating - index;
+    if ( diff >= 0 ) {
+        return 100
+    } else if (diff === -0.5) {
+        return 50
+    } else {
+        return 0
+    }
+}
+
 export default async function RecentlyListened({ username }: { username: string }) {
 
     const recentActivity = await fetchRecentActivity(username)
@@ -123,11 +135,52 @@ export default async function RecentlyListened({ username }: { username: string 
                             `}
                         >
                             <p className={`
-                                text-accentText
+                                text-secondaryText
                             `}>
                                 {/* {albumData[index].artists[0].name} */}
-                                {activity.rating}
+                                {activity.rating.toFixed(1)}
                             </p>
+                            <div className={`
+                                    flex justify-start items-center
+                                `}
+                            >
+                                {[1, 2, 3, 4, 5].map((i) => {
+                                    //Get fill percentage
+                                    console.log(i);
+                                    const fillPercentage = getFillPercent(activity.rating, i);
+
+                                    return (
+                                        <div className={`
+                                            relative 
+                                            w-4 h-4
+                                        `}>
+                                            {/* Background stars */}
+                                            <StarIcon className={`
+                                                    text-secondaryText
+                                                    w-4 h-4
+                                                `}
+                                            />
+
+                                            {/* Foreground stars */}
+                                            <div className={`
+                                                absolute
+                                                h-full top-0 left-0
+                                                overflow-hidden
+                                                pointer-events-none
+                                            `} style={{
+                                                width: `${fillPercentage}%`
+                                            }}>
+                                                <StarIcon
+                                                    className={`
+                                                        w-4 h-m-4
+                                                        text-accentText
+                                                    `}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
                         <p className={`
                             mt-2
