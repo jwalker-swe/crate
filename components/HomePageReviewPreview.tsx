@@ -1,0 +1,198 @@
+'use client'
+
+import ReviewPreview from "@/components/ReviewPreview";
+import Link from "next/link";
+import { StarIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+
+const getFillPercent = function(rating: number, index: number) {
+    const diff = rating - index;
+    if ( diff >= 0 ) {
+        return 100
+    } else if (diff === -0.5) {
+        return 50
+    } else {
+        return 0
+    }
+}
+
+export default function HomePageReviewPreview({ recentReviewData }: { recentReviewData: any }) {
+
+    console.log(recentReviewData);
+
+    return (
+        <div className={`
+            //General Styling
+            grid grid-cols-2 grid-rows-2 justify-center gap-6
+            //Mobile Styling
+            //Desktop Styling
+        `}>
+            {recentReviewData.map((review: any, i: number) => {
+                return (
+                    <div key={i} className={`
+                        //General Styling
+                        flex justify-start items-start gap-4
+                        p-6
+                        bg-secondaryBackground
+                        rounded-xl
+                        //Mobile Styling
+                        //Desktop Styling
+                    `}>
+                        <div className={`
+                            //General Styling
+                            min-w-16 min-h-16
+                            rounded-lg
+                            //Mobile Styling
+                            //Desktop Styling
+                        `}>
+                            <Link href={`/album/${review.album.spotify_id}`}
+                                className={`
+                                    cursor-pointer
+                                `}
+                            >
+                                <img src={`${review.album.cover_image_url}`} 
+                                    className={`
+                                        min-w-16 min-h-16
+                                        rounded-sm
+                                    `}
+                                />
+                            </Link>
+                        </div>
+                        <div className={`
+                            //General Styling
+                            flex flex-col items-start justify-center gap-2
+                            //Mobile Styling
+                            //Desktop Styling
+                        `}>
+                            <div className={`
+                                //General Styling
+                                flex justify-center items-center gap-2
+                                //Mobile Styling
+                                //Desktop Styling
+                            `}>
+                                <div className={`
+                                    //General Styling
+                                    w-6 h-6
+                                    bg-white
+                                    rounded-full
+                                    //Mobille Styling
+                                    //Desktop Styling
+                                `}>
+                                    <UserCircleIcon width={24} height={24}
+                                        className={`
+                                            text-accentText
+                                        `}
+                                    />
+                                    {/* User Profile Image Goes Here */}
+                                </div>
+                                <Link href={`/profile/${review.user.username}`} className={`
+                                    //General Styling
+                                    flex
+                                    //Mobile Styling
+                                    //Desktop Styling
+                                `}>
+                                    <span className={`
+                                        text-sm
+                                        text-secondaryText
+                                        hover:text-accentText
+                                    `}>
+                                        @{review.user.username}
+                                    </span>
+                                </Link>
+                            </div>
+                            <Link href={'#'}>
+                                <div className={`
+                                    //General Styling
+                                    flex flex-col justify-start items-start
+                                    //Mobile Styling
+                                    //Desktop Styling
+                                `}>
+                                    <h3 className={`
+                                        //General Styling
+                                        //Mobile Styling
+                                        //Desktop Styling
+                                    `}>
+                                        {review.album.title}
+                                    </h3>
+                                    <p className={`
+                                        //General Styling
+                                        text-xs text-accentText
+                                        //Mobile Styling
+                                        //Desktop Styling
+                                    `}>
+                                        {review.album.artists[0].name}
+                                    </p>
+                                </div>
+                            </Link>
+                            <p className={`
+                                //General Styling
+                                text-xs text-primaryText line-clamp-3
+                                //Mobile Styling
+                                //Desktop Styling
+                            `}>
+                                {review.review_text}
+                            </p>
+                            <div className={`
+                                //General Styling
+                                flex justify-start items-center gap-2
+                                //Mobile Styling
+                                //Desktop Styling
+                            `}>
+                                <p className={`
+                                    text-secondaryText
+                                `}>
+                                    {review.rating.toFixed(1)}
+                                </p>
+                                <div className={`
+                                    rating-container
+                                    //General Styling
+                                    flex justify-center items-center
+                                    //Mobile Styling
+                                    //Desktop Styling
+                                `}>
+                                    {[1, 2, 3, 4, 5].map((index: number) => {
+                                        const fillPercentage = getFillPercent(review.rating, index)
+
+                                        return (
+                                            <div 
+                                                className={`
+                                                relative 
+                                                w-4 h-4
+                                                `} 
+                                                key={`star-${index}`}
+                                            >
+                                                {/* Background stars */}
+                                                <StarIcon className={`
+                                                        text-secondaryText
+                                                        w-4 h-4
+                                                    `}
+                                                />
+
+                                                {/* Foreground stars */}
+                                                <div className={`
+                                                    absolute
+                                                    h-full top-0 left-0
+                                                    overflow-hidden
+                                                    pointer-events-none
+                                                `} style={{
+                                                    width: `${fillPercentage}%`
+                                                }}>
+                                                    <StarIcon
+                                                        className={`
+                                                            w-4 h-m-4
+                                                            text-accentText
+                                                        `}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                                {/* Post Date */}
+                            </div>
+                        </div>
+                    </div>
+                )
+            })}
+        </div>
+    )
+}

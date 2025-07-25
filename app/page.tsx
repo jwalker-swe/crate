@@ -9,11 +9,12 @@ import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import ViewAll from "@/components/ViewAll";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
-import ReviewPreview from "@/components/ReviewPreview";
 import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
 import getTopAlbums from '@/lib/spotify/getTopAlbums';
 import { createClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
+import HomePageReviewPreview from "@/components/HomePageReviewPreview";
 
 //Create function to get Album data
 
@@ -22,6 +23,7 @@ export default async function Home() {
   const supabase = await createClient();
       const { data: { user } }: any = await supabase.auth.getUser();
       console.log('User: ', user)
+
 
   //Get Album Data
   const recentTopAlbums: any = await getTopAlbums();
@@ -52,6 +54,82 @@ export default async function Home() {
     id: albumID,
     images: albumImage
   }
+
+  type userDataProps = {
+    avatar_url: string | null,
+    bio: string | null,
+    created_at: string,
+    display_name: string | null,
+    id: string,
+    updated_at: string,
+    username: string,
+  }[]
+
+  //Get recent reviews to populate recent review section
+  const getRecentReviewData = async function() {
+    try {
+      const {data: reviewData, error: reviewError} = await supabase
+        .from('user_albums')
+        .select('*')
+        .not('review_text', 'is', null)
+        .order('created_at', {ascending: false})
+        .limit(4)
+
+      if (reviewError) {
+        console.error(`Error fetching reviews: `, reviewError);
+        return null
+      } 
+      if (!reviewData) {
+        console.log(`No reviews found`);
+        return null
+      }
+      
+      const reviewUserData = await Promise.all(
+        reviewData.map(async (review) => {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', review.user_id)
+            .single()
+
+          const { data: albumData, error: albumError } = await supabase
+            .from('albums')
+            .select('*')
+            .eq('id', review.album_id)
+            .single()
+
+          if (userError) {
+            console.error(`Error fetching user data from review: `, userError);
+            return {...review, user: null};
+          }
+
+          if (albumError) {
+            console.error('Error fetching album data from review: ', albumError);
+          }
+
+          if (userData && !albumData) {
+            return {...review, user: userData, album: null}
+          }
+
+          if (albumData && !userData) {
+            return {...review, user: null, album: albumData}
+          }
+
+          if (userData && albumData) {
+            return {...review, user: userData, album: albumData}
+          }
+          // return {...review, user: userData}
+        })
+      );
+
+      return reviewUserData
+    } catch (err) {
+      console.error(`An unexpected error occurred while fetching recent reviews: `, err)
+    }
+  }
+
+  const recentReviews = await getRecentReviewData()
+
 
   return (
     <div className={`
@@ -223,17 +301,7 @@ export default async function Home() {
           <SectionTitle title="Recent Reviews" />
           <ViewAll />
         </div>
-        <div className={`
-          //General Styling
-          grid grid-cols-2 grid-rows-2 justify-center gap-6
-          //Mobile Styling
-          //Desktop Styling
-        `}>
-          <ReviewPreview />
-          <ReviewPreview />
-          <ReviewPreview />
-          <ReviewPreview />
-        </div>
+        <HomePageReviewPreview recentReviewData={recentReviews} />
       </section>
       {/* Tag Line */}
       <div className={`
