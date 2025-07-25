@@ -39,7 +39,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                     `}>
                         <div className={`
                             //General Styling
-                            min-w-16 min-h-16
+                            min-w-20 min-h-20
                             rounded-lg
                             //Mobile Styling
                             //Desktop Styling
@@ -47,19 +47,27 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                             <Link href={`/album/${review.album.spotify_id}`}
                                 className={`
                                     cursor-pointer
+                                    relative
                                 `}
                             >
                                 <img src={`${review.album.cover_image_url}`} 
                                     className={`
-                                        min-w-16 min-h-16
+                                        w-20 h-20
                                         rounded-sm
                                     `}
                                 />
+                                <div className={`
+                                    absolute top-0 left-0
+                                    w-20 h-20
+                                `}
+                                >
+                                </div>
                             </Link>
                         </div>
                         <div className={`
                             //General Styling
                             flex flex-col items-start justify-center gap-2
+                            flex-grow
                             //Mobile Styling
                             //Desktop Styling
                         `}>
