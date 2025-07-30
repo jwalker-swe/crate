@@ -35,11 +35,12 @@ In Development — This project is actively being built. Features, UI, and funct
 
 ---
 
-## Screenshots
+## Screenshots & Gifs
 ![Crate Home Page](/assets/images/readme-images/crate-readme-001.png)
 ![Crate Dynamic Album Page](/assets/images/readme-images/crate-readme-002.png)
 ![Crate Review Modal](/assets/images/readme-images/crate-readme-003.png)
 ![Crate User Profile: Recently Reviewed Section ](/assets/images/readme-images/crate-readme-004.png)
+![Crate Search Functionality](/assets/images/readme-images/crate-search-demo.gif)
 More coming soon...
 
 ---
