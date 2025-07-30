@@ -38,6 +38,7 @@ export default async function Home({ params }: SearchPageParams) {
             <main>
                 <div className={`
                     flex justify-center items-start
+                    mb-16
                 `}>
                     <ResultsList results={arrangedResults} sk={searchParams.query} />
                 </div>

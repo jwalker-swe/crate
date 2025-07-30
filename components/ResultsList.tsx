@@ -50,12 +50,17 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                             <div key={index}>
                                 <li key={index}>
                                     <div className={`
-                                        w-full h-fit p-4
+                                        w-full h-fit p-4 my-4
                                         flex justify-start items-start gap-4
+                                        bg-secondaryBackground
+                                        rounded-lg
+                                        transition-transform duration-200 ease-in-out
+                                        cursor-pointer
+                                        hover:scale-105
                                     `}>
                                         <img src={album.images[1].url} width={96} height={96} 
                                             className={`
-                                                rounded-lg 
+                                                rounded-sm
                                                 cursor-pointer                                           
                                             `}
                                         />
