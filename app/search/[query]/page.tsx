@@ -5,6 +5,7 @@ import { SearchPageParams } from "@/types/spotify";
 import { searchSpotify } from '@/lib/spotify/search'
 import arrangeSearch from "@/lib/spotify/arrangeSearch";
 import ResultsList from "@/components/ResultsList";
+import Footer from "@/components/Footer";
 
 export default async function Home({ params }: SearchPageParams) {
 
@@ -41,6 +42,9 @@ export default async function Home({ params }: SearchPageParams) {
                     <ResultsList results={arrangedResults} sk={searchParams.query} />
                 </div>
             </main>
+            <footer>
+                <Footer />
+            </footer>
         </div>
     )
 }

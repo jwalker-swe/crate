@@ -1,5 +1,7 @@
 'use client'
 
+import getReleaseDate from "@/lib/spotify/getReleaseDate";
+
 interface Results {
     albums: {
         [key: string]: any,
@@ -29,6 +31,7 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
             `}>
                 <div className={`
                     w-full h-fit
+                    border-b-1 border-primaryBorder
                 `}>
                     <h2 className={`
                         text-secondaryText
@@ -41,22 +44,43 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                     w-full h-fit
                 `}>
                     {results.albums?.map((album: any, index: number) => {
+                        const releaseDate = getReleaseDate(album.release_date);
+
                         return (
-                            <>
+                            <div key={index}>
                                 <li key={index}>
                                     <div className={`
                                         w-full h-fit p-4
-                                        flex justify-start items-start gap-2
+                                        flex justify-start items-start gap-4
                                     `}>
-                                        <img src={album.images[1].url} width={144} height={144} 
+                                        <img src={album.images[1].url} width={96} height={96} 
                                             className={`
                                                 rounded-lg 
                                                 cursor-pointer                                           
                                             `}
                                         />
+                                        <div className={`
+                                            item-info
+                                            flex flex-col justify-start items-start
+                                            w-full h-fit
+                                        `}>
+                                            <h3 className={`
+                                                text-2xl
+                                            `}>
+                                                {album.name}
+                                            </h3>
+                                            <h4 className={`
+                                                text-lg text-accentText
+                                            `}>
+                                                {album.artists[0].name}
+                                            </h4>
+                                            <p>
+                                                {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
+                                            </p>
+                                        </div>
                                     </div>
                                 </li>
-                            </>
+                            </div>
                         )
                     })}                    
                 </ul>

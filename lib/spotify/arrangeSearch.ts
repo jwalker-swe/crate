@@ -70,8 +70,14 @@ export default function arrangeSearch(sk: string, sr: SearchResults) {
                 return {albums}
             }
 
-            const artistMatchScore = artist[0].score
-            return {albums, artist, artistMatchScore}
+            if (!artist[0].score) {
+                return {albums, artist}
+            }
+
+            if (artist[0].score) {
+                const artistMatchScore: number = artist[0].score;
+                return {albums, artist, artistMatchScore}
+            }
 
         } catch (error) {
 
