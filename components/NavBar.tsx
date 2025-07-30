@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client';
-import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 export default function NavBar({ session }: {session: boolean}) {
@@ -14,6 +14,7 @@ export default function NavBar({ session }: {session: boolean}) {
     const [user, setUser]: any = useState(session)
     const [userId, setUserId]: any = useState('')
     const [username, setUsername]: any = useState('')
+    const [searchInput, setSearchInput] = useState('')
 
     const router = useRouter();
 
@@ -56,7 +57,23 @@ export default function NavBar({ session }: {session: boolean}) {
         return () => {
             listener.subscription.unsubscribe()
         }
+
     }, [])
+
+    const handleSearchSubmit = function(e: React.FocusEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        if (!searchInput.trim()) {
+            return
+        }
+
+        const slug = encodeURIComponent(searchInput.trim().toLowerCase().replace(/\s+/g, '-'));
+
+        console.log('Original Input: ', searchInput);
+        console.log('Encode Input: ', slug);
+
+        router.push(`/search/${slug}`);
+    };
 
     return (
         <div className={`
@@ -82,17 +99,42 @@ export default function NavBar({ session }: {session: boolean}) {
              `}>
                 <div className={`flex items-center gap-4`}>
                     <div className={`flex items-center`}>
-                        <input placeholder='Search' className={`
-                            //General Styling
-                            px-4 py-2 
-                            text-sm text-end
-                            bg-secondaryBackground
-                            rounded-lg
-                            focus:outline-0
-                            //Mobile Styling
-                            //Desktop Styling
-                        `}>
-                        </input>
+                        <form className={`
+                                relative w-full max-w-md
+                            `}
+                            onSubmit={handleSearchSubmit}
+                        >
+                            <input placeholder='Search' 
+                                className={`
+                                    //General Styling
+                                    pl-4 pr-8 py-2 
+                                    text-sm text-end
+                                    bg-secondaryBackground
+                                    rounded-lg
+                                    focus:outline-0
+                                    //Mobile Styling
+                                    //Desktop Styling
+                                `}
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                            >
+                            </input>
+                            <button
+                                type='submit'
+                                className={`
+                                    absolute 
+                                    top-[9px] right-2 
+                                    cursor-pointer
+                                `}
+                            >
+                                <MagnifyingGlassIcon className={`
+                                        w-4 h-4
+                                        text-secondaryText
+                                        hover:text-accentText
+                                    `} 
+                                />
+                            </button>
+                        </form>
                     </div>
                     <ul className={`
                         //General Styling

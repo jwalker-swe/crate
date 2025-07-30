@@ -95,3 +95,9 @@ export type AlbumPageInfoProps = {
     }[],
     totalTracks: number,
 }
+
+export interface SearchPageParams {
+    params: {
+        query: string;
+    }
+}

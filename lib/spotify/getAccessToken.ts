@@ -4,7 +4,7 @@ let tokenExpiresAt: number = 0;
 export default async function getAccessToken() {
 
     // Check if current accessToken is available and hasn't expired
-    if (!accessToken && Date.now() < tokenExpiresAt ) {
+    if (accessToken && Date.now() < tokenExpiresAt ) {
         return accessToken;
     } else {
 

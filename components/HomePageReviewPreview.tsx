@@ -77,7 +77,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
-                                <div className={`
+                                {/* <div className={`
                                     //General Styling
                                     w-6 h-6
                                     bg-white
@@ -90,8 +90,8 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                             text-accentText
                                         `}
                                     />
-                                    {/* User Profile Image Goes Here */}
-                                </div>
+                                    
+                                </div> */}
                                 <Link href={`/profile/${review.user.username}`} className={`
                                     //General Styling
                                     flex
@@ -110,7 +110,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                             <Link href={'#'}>
                                 <div className={`
                                     //General Styling
-                                    flex flex-col justify-start items-start
+                                    flex justify-start items-center gap-1
                                     //Mobile Styling
                                     //Desktop Styling
                                 `}>
@@ -119,15 +119,15 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                         //Mobile Styling
                                         //Desktop Styling
                                     `}>
-                                        {review.album.title}
+                                        {review.album.title} 
                                     </h3>
                                     <p className={`
                                         //General Styling
-                                        text-xs text-accentText
+                                        text-xs text-secondaryText
                                         //Mobile Styling
                                         //Desktop Styling
                                     `}>
-                                        {review.album.artists[0].name}
+                                        by {review.album.artists[0].name}
                                     </p>
                                 </div>
                             </Link>

@@ -4,12 +4,13 @@ import getAlbumPopularity from "@/lib/spotify/getAlbumPopularity";
 export default async function getTopAlbums() {
 
     const token = await getAccessToken();
-    // console.log(token);
+    console.log(token);
 
     if (!token) {
 
         console.error('Unable to retrieve Spotify access token');
-
+        return
+        
     } else {
     
         try {
