@@ -14,8 +14,6 @@ export default async function Home() {
     
     const albumData = await fetchTopAlbums();
 
-    // console.log('Top Albums: ', topAlbumData);
-
     return (
         <div
             className={`

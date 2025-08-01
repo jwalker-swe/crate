@@ -62,10 +62,6 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
         const albums = data.albums
         const users = data.users
 
-        console.log('data: ', data)
-        console.log('reviews: ', reviews)
-        console.log('albums: ', albums)
-        console.log('users: ', users)
         return (
                 <div
                     className={`
