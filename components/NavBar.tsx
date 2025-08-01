@@ -142,7 +142,7 @@ export default function NavBar({ session }: {session: boolean}) {
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <Link href='#'>
+                        <Link href='/albums'>
                             <li className={`text-secondaryText text-sm hover:text-primaryText`}>
                                 Albums
                             </li>

@@ -65,20 +65,8 @@ export default function arrangeSearch(sk: string, sr: SearchResults) {
 
         try {    
             const artist = search(keyword, searchResults.artists.items, {keySelector: (item: {name: string}) => item.name, returnMatchData: true})
-
-            if (!artist) {
-                return {albums}
-            }
-
-            if (!artist[0].score) {
-                return {albums, artist}
-            }
-
-            if (artist[0].score) {
-                const artistMatchScore: number = artist[0].score;
-                return {albums, artist, artistMatchScore}
-            }
-
+            
+            return {albums}
         } catch (error) {
 
             console.error('Error finding artists: ', error)
@@ -91,3 +79,6 @@ export default function arrangeSearch(sk: string, sr: SearchResults) {
         
     }
 }
+
+
+// return {albums, artist, artistMatchScore}

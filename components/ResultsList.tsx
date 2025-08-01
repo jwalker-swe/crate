@@ -1,6 +1,7 @@
 'use client'
 
 import getReleaseDate from "@/lib/spotify/getReleaseDate";
+import Link from "next/link";
 
 interface Results {
     albums: {
@@ -58,22 +59,27 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                                         cursor-pointer
                                         hover:scale-105
                                     `}>
-                                        <img src={album.images[1].url} width={96} height={96} 
-                                            className={`
-                                                rounded-sm
-                                                cursor-pointer                                           
-                                            `}
-                                        />
+                                        <Link href={`/album/${album.id}`}>
+                                            <img src={album.images[1].url} width={96} height={96}
+                                                className={`
+                                                    rounded-sm
+                                                    cursor-pointer                                           
+                                                `}
+                                            />
+                                        </Link>
                                         <div className={`
                                             item-info
                                             flex flex-col justify-start items-start
                                             w-full h-fit
                                         `}>
-                                            <h3 className={`
-                                                text-2xl
-                                            `}>
-                                                {album.name}
-                                            </h3>
+                                            <Link href={`/album/${album.id}`}>
+                                                <h3 className={`
+                                                    text-2xl
+                                                    hover:text-accentText
+                                                `}>
+                                                    {album.name}
+                                                </h3>
+                                            </Link>
                                             <h4 className={`
                                                 text-lg text-accentText
                                             `}>
