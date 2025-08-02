@@ -101,3 +101,9 @@ export interface SearchPageParams {
         query: string;
     }
 }
+
+export interface ReviewPageParams {
+    params: {
+        sortMethod: string
+    }
+}

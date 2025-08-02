@@ -2,6 +2,8 @@ import recentlyReviewed from "@/lib/spotify/getRecentlyReviewed";
 import ReviewRating from "./ReviewRating";
 import SectionTitle from "./SectionTitle";
 import Link from "next/link";
+import ViewAll from "./ViewAll";
+import LikeButton from "./LikeButton";
 
 interface RecentReviews {
     albums: {
@@ -55,12 +57,12 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
 
     const data: any = await recentlyReviewed(10);
 
-    
-
     if (data) {
         const reviews = data.reviews
         const albums = data.albums
         const users = data.users
+
+        console.log(users);
 
         return (
                 <div
@@ -68,7 +70,14 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                         w-[1200px] h-fit mt-16
                     `}
                 >
-                    <SectionTitle title="Recently Reviewed" />
+                    <div
+                        className={`
+                            flex justify-between items-center
+                        `}
+                    >
+                        <SectionTitle title="Recently Reviewed" />
+                        <ViewAll pageLink="reviews/popular" />
+                    </div>
                     <div
                         className={`
                             mt-4
@@ -152,9 +161,32 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                             {reviews[index].review_text}
                                         </p>
                                         <div
-                                            className={``}
+                                            className={`
+                                                w-full
+                                                flex justify-between items-center
+                                            `}
                                         >
-                                            <ReviewRating rating={reviews[index].rating} />
+                                            <div
+                                                className={`
+                                                    flex justify-center items-center gap-4
+                                                `}
+                                            >
+                                                <ReviewRating rating={reviews[index].rating} />
+                                                <LikeButton size={4} liked={false} reviewId={review.id} />
+                                            </div>
+                                            <Link
+                                                href={`/${users[index].username}/review/${albums[index].spotify_id}`}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-sm text-secondaryText
+                                                        cursor-pointer
+                                                        hover:text-accentText
+                                                    `}
+                                                >
+                                                    read more
+                                                </p>
+                                            </Link>
                                         </div>
                                     </div>                                  
                                 </div>

@@ -25,6 +25,7 @@ export default async function recentlyReviewed(reviewTotal: number) {
 
                 let albums: any[]
                 let users: any[]
+                let likes: any[];
 
                 albums = await Promise.all(
                     reviews.map(async (review) => {
@@ -72,12 +73,39 @@ export default async function recentlyReviewed(reviewTotal: number) {
                     })
                 )
 
+                likes = await Promise.all(
+                    reviews.map(async (review) => {
+                        const { data, error } = await supabase
+                            .from('review_likes')
+                            .select('*')
+                            .eq('review_id', review.id)
+                            .single()
+
+                        if (error) {
+                            console.error(`Couldn't fetch like data: `, error)
+                            return null
+                        }
+
+                        if (!data) {
+                            console.log(`No likes found`);
+                            return null
+                        }
+
+                        const likeData = data;
+                        return likeData;
+                    })
+                )
+
                 if (!albums && !users) {
                     return null
                 }
 
                 if (albums && users) {
                     return {reviews, albums, users}
+                }
+
+                if (albums && users && likes) {
+                    return {reviews, albums, users, likes}
                 }
                 
             } catch (error) {

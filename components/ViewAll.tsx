@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { ArrowRightIcon } from "@heroicons/react/24/solid"
 
-export default function ViewAll() {
+export default function ViewAll({ pageLink }: { pageLink: string }) {
     return (
         <div className={`
             //General Styling
             //Mobile Styling
             //Desktop Styling
         `}>
-            <Link href='#' className={`
+            <Link href={`/${pageLink}`} className={`
                 //General Styling
                 flex justify-between items-center gap-2
                 text-accentText
