@@ -16,16 +16,17 @@ export default function RecentlyReleased({albums, columns, gap }: { albums: any[
                         <div
                             className={`
                                 mt-4
-                                grid grid-cols-${cols} grid-rows-1 gap-${gap}
+                                grid grid-cols-7 grid-rows-1 gap-${gap}
                             `}
                         >
                             {albums.map((album, index) => {
-                                if (index < columns) {
+                                if (index < 7) {
                                     return (
                                         <div
                                             key={index}
                                             className={`
                                                 rounded-lg
+                                                w-fit h-fit
                                             `}
                                         >
                                             <Link
@@ -33,7 +34,7 @@ export default function RecentlyReleased({albums, columns, gap }: { albums: any[
                                             >
                                                 <img 
                                                     src={album.images[0].url}
-                                                    width={144} height={144}
+                                                    width={172} height={172}
                                                     className={`
                                                         rounded-lg
                                                         cursor-pointer

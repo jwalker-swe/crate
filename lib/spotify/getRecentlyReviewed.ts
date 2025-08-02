@@ -12,6 +12,7 @@ export default async function recentlyReviewed(reviewTotal: number) {
         const { data, error } = await supabase
             .from('user_albums')
             .select('*')
+            .not('review_text', 'is', null)
             .order('created_at', { ascending: false })
             .limit(10)
 

@@ -151,7 +151,11 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                         >
                                             {reviews[index].review_text}
                                         </p>
-                                        <ReviewRating rating={reviews[index].rating} />
+                                        <div
+                                            className={``}
+                                        >
+                                            <ReviewRating rating={reviews[index].rating} />
+                                        </div>
                                     </div>                                  
                                 </div>
                             )

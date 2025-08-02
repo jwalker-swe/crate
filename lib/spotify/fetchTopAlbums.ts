@@ -9,9 +9,11 @@ function removeDupes(albums: any[]) {
         seen.add(key);
         return true;
     })
+
+    
 }
 
-async function removeUnpopular(albums: any[], token: any) {
+async function removeUnpopular(albums: any[], minPopularity: number, token: any) {
     const results = await Promise.all(
         albums.map(async (album) => {
             const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}`, {
@@ -30,15 +32,11 @@ async function removeUnpopular(albums: any[], token: any) {
     );
 
     const filtered = results.filter((album) => {
-        return album.popularity > 80;
+        return album.popularity > minPopularity;
     })
 
     // console.log('Results: ', results);
     return filtered;
-}
-
-function sortByPopularity(albums: any[]) {
-    
 }
 
 export async function fetchTopAlbums() {
@@ -49,6 +47,7 @@ export async function fetchTopAlbums() {
     oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
     let albums: any = [];
+    let nonDuplicateAlbums: any = [];
     let recentAlbums: any = [];
     let topAlbums: any = [];
 
@@ -78,8 +77,10 @@ export async function fetchTopAlbums() {
         return isAlbum && isRecent;
     })
 
-    recentAlbums = removeDupes(recentAlbums); 
-    topAlbums = await removeUnpopular(recentAlbums, token)
+    nonDuplicateAlbums = await removeDupes(recentAlbums); 
+    
+    recentAlbums = await removeUnpopular(nonDuplicateAlbums, 50, token);
+    topAlbums = await removeUnpopular(recentAlbums, 80, token)
 
     return {recentAlbums, topAlbums};
 }

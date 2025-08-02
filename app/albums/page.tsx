@@ -13,6 +13,7 @@ export default async function Home() {
     const { data: { user } } = await supabase.auth.getUser()
     
     const albumData = await fetchTopAlbums();
+    console.log(albumData);
 
     return (
         <div
