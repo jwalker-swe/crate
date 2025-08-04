@@ -4,64 +4,48 @@ import { HeartIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { supabase } from "@/lib/supabase/supabase";
+import { handleLike } from "@/lib/supabase/handleLike";
 
-export default function LikeButton({ size, liked, reviewId }: { size: number, liked: boolean, reviewId: string }) {
+export default function LikeButton({ size, likeData, reviewId, likeTotal }: { size: number, likeData: any, reviewId: string, likeTotal: number }) {
 
     const iconSize = size * 4;
+    console.log('like data: ', likeData);
 
-    const [like, setLike] = useState<boolean>(liked);
+    const [like, setLike] = useState<boolean>(likeData);
     const [loading, setLoading] = useState<boolean>(false);
+    const [likeCounter, setLikeCounter] = useState<number>(likeTotal);
 
-    const handleClick = async function() {
-        setLoading(true);
-        
-        const supabase = await createClient()
-
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (user) {
-            if (!like) {
-                const { error } = await supabase
-                    .from('review_likes')
-                    .insert({
-                        user_id: user.id,
-                        review_id: reviewId
-                    });
-
-                if (error) {
-                    console.error('Error liking review')
-                } else {
-                    setLike(true);
-                    setLoading(false);
-                }
-            } else {
-                const { error } = await supabase
-                    .from('review_likes')
-                    .delete()
-                    .eq('user_id', user.id)
-                    .eq('review_id', reviewId)
-
-                if (error) {
-                    console.error('Error removing like from review')
-                } else {
-                    setLike(false);
-                    setLoading(false);
-                }
-            }
-        }
-    }
+    
 
     return (
-        <button >
-            <HeartIcon
-                width={iconSize}    
-                height={iconSize}
-                onClick={handleClick}
+        <div
+            className={`
+                flex justify-center items-center gap-2
+            `}
+        >
+            <p
                 className={`
-                    cursor-pointer 
-                    ${like ? 'text-accentText hover:text-secondaryText' : 'text-secondaryText hover:text-accentText'}
+                    text-secondaryText
                 `}
-            />
-        </button>
+            >
+                {likeCounter}
+            </p>
+            <button >
+                <HeartIcon
+                    width={iconSize}    
+                    height={iconSize}
+                    onClick={() => {
+                        handleLike(reviewId, like);
+                        like ? setLikeCounter(likeCounter - 1) : setLikeCounter(likeCounter + 1)
+                        like ? setLike(false) : setLike(true);
+
+                    }}
+                    className={`
+                        cursor-pointer 
+                        ${like ? 'text-accentText hover:text-secondaryText' : 'text-secondaryText hover:text-accentText'}
+                    `}
+                />
+            </button>
+        </div>
     )
 }

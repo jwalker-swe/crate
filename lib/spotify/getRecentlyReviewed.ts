@@ -79,7 +79,6 @@ export default async function recentlyReviewed(reviewTotal: number) {
                             .from('review_likes')
                             .select('*')
                             .eq('review_id', review.id)
-                            .single()
 
                         if (error) {
                             console.error(`Couldn't fetch like data: `, error)
@@ -96,28 +95,17 @@ export default async function recentlyReviewed(reviewTotal: number) {
                     })
                 )
 
-                if (!albums && !users) {
-                    return null
-                }
-
-                if (albums && users) {
-                    return {reviews, albums, users}
-                }
-
-                if (albums && users && likes) {
-                    return {reviews, albums, users, likes}
-                }
+                return {reviews, albums, users, likes}
                 
             } catch (error) {
                 console.error('Error fetching album data: ', error);
-                return reviews       
+                return null    
             } 
 
-            return reviews;
         }
     } catch (error) {
-
         console.log('Error fetching data: ', error);
+        return null
     }
 
 }

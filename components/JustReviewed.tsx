@@ -4,6 +4,9 @@ import SectionTitle from "./SectionTitle";
 import Link from "next/link";
 import ViewAll from "./ViewAll";
 import LikeButton from "./LikeButton";
+import { createClient } from "@/lib/supabase/server";
+import { lockInternals } from "@supabase/supabase-js";
+import SearchDataForCurrentUser from "@/lib/supabase/searchDataForCurrentUser";
 
 interface RecentReviews {
     albums: {
@@ -56,13 +59,19 @@ interface RecentReviews {
 export default async function JustReviewed({ columns, rows, gap }: { columns: number, rows: number, gap: number }) {
 
     const data: any = await recentlyReviewed(10);
+    const supabase = await createClient()
+    
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (data) {
         const reviews = data.reviews
         const albums = data.albums
         const users = data.users
+        const likes = data.likes
+        let liked: boolean
+        let count: number
 
-        console.log(users);
+        
 
         return (
                 <div
@@ -85,6 +94,13 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                         `}  
                     >
                         {reviews.map((review: any, index: number) => {
+
+                            if (user) {
+                                const likeData = SearchDataForCurrentUser(user.id, likes[index]);
+                                liked = likeData.liked;
+                                count = likeData.count;
+                            }
+
                             return (
                                 <div
                                     key={index}
@@ -172,7 +188,7 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                                 `}
                                             >
                                                 <ReviewRating rating={reviews[index].rating} />
-                                                <LikeButton size={4} liked={false} reviewId={review.id} />
+                                                <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={count} />
                                             </div>
                                             <Link
                                                 href={`/${users[index].username}/review/${albums[index].spotify_id}`}
