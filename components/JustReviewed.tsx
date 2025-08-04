@@ -99,6 +99,9 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                 const likeData = SearchDataForCurrentUser(user.id, likes[index]);
                                 liked = likeData.liked;
                                 count = likeData.count;
+                            } else {
+                                count = likes[index].length;
+                                liked = false;
                             }
 
                             return (
@@ -188,7 +191,7 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                                 `}
                                             >
                                                 <ReviewRating rating={reviews[index].rating} />
-                                                <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={count} />
+                                                <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={count} user={user ? true : false} />
                                             </div>
                                             <Link
                                                 href={`/${users[index].username}/review/${albums[index].spotify_id}`}

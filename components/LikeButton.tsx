@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { supabase } from "@/lib/supabase/supabase";
 import { handleLike } from "@/lib/supabase/handleLike";
 
-export default function LikeButton({ size, likeData, reviewId, likeTotal }: { size: number, likeData: any, reviewId: string, likeTotal: number }) {
+export default function LikeButton({ size, likeData, reviewId, likeTotal, user }: { size: number, likeData: any, reviewId: string, likeTotal: number, user: boolean }) {
 
     const iconSize = size * 4;
     console.log('like data: ', likeData);
@@ -16,36 +16,61 @@ export default function LikeButton({ size, likeData, reviewId, likeTotal }: { si
     const [likeCounter, setLikeCounter] = useState<number>(likeTotal);
 
     
-
-    return (
-        <div
-            className={`
-                flex justify-center items-center gap-2
-            `}
-        >
-            <p
+    if (user) {
+        return (
+            <div
                 className={`
-                    text-secondaryText
+                    flex justify-center items-center gap-2
                 `}
             >
-                {likeCounter}
-            </p>
-            <button >
-                <HeartIcon
-                    width={iconSize}    
-                    height={iconSize}
-                    onClick={() => {
-                        handleLike(reviewId, like);
-                        like ? setLikeCounter(likeCounter - 1) : setLikeCounter(likeCounter + 1)
-                        like ? setLike(false) : setLike(true);
-
-                    }}
+                <p
                     className={`
-                        cursor-pointer 
-                        ${like ? 'text-accentText hover:text-secondaryText' : 'text-secondaryText hover:text-accentText'}
+                        text-secondaryText
                     `}
-                />
-            </button>
-        </div>
-    )
+                >
+                    {likeCounter}
+                </p>
+                <button >
+                    <HeartIcon
+                        width={iconSize}    
+                        height={iconSize}
+                        onClick={() => {
+                            handleLike(reviewId, like);
+                            like ? setLikeCounter(likeCounter - 1) : setLikeCounter(likeCounter + 1)
+                            like ? setLike(false) : setLike(true);
+                        }}
+                        className={`
+                            cursor-pointer 
+                            ${like ? 'text-accentText hover:text-secondaryText' : 'text-secondaryText hover:text-accentText'}
+                        `}
+                    />
+                </button>
+            </div>
+        )
+    } else {
+        return (
+            <div
+                className={`
+                    flex justify-center items-center gap-2
+                `}
+            >
+                <p
+                    className={`
+                        text-secondaryText
+                    `}
+                >
+                    {likeCounter}
+                </p>
+                <button >
+                    <HeartIcon
+                        width={iconSize}    
+                        height={iconSize}
+                        className={`
+                            text-secondaryText
+                        `}
+                    />
+                </button>
+            </div>
+        )
+    }
 }
