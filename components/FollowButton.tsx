@@ -13,16 +13,19 @@ type ViewingOwnProfileProps = {
     profile: string
 }
 
-export default function FollowButton({profile}: FollowButtonProps) {
+export default function FollowButton({profile, user, following}: {profile: FollowButtonProps, user: string | null, following: boolean}) {
 
     const supabase = createClient()
 
-    const [userId, setUserId] = useState<string | null>(null)
+    const [userId, setUserId] = useState<string | null>(user)
     const [sameUser, setSameUser] = useState<boolean>(false)
+	const [isFollowing, setFollowing] = useState<boolean>(following)
+
+	console.log('User', userId);
 
     useEffect(() => {
         // Check if signed in
-        async function checkIfSignedIn() {
+        async function checkIfSignedIn() { 
             const { data: {session}, error: sessionError} = await supabase.auth.getSession()
 
             if (sessionError) {
@@ -32,8 +35,7 @@ export default function FollowButton({profile}: FollowButtonProps) {
                 console.log(`User not signed in`)
                 return
             } else {
-                console.log(`User signed in`)
-                const { data: { user }, error: userError } = await supabase.auth.getUser()
+				const { data: { user }, error: userError } = await supabase.auth.getUser()
 
                 if (userError) {
                     console.error(`Error fetching user id: `, userError)
@@ -42,7 +44,6 @@ export default function FollowButton({profile}: FollowButtonProps) {
                     console.log(`No id found`)
                     return
                 } else {
-                    console.log(`User id found`)
                     setUserId(user.id)
                     return
                 }
@@ -80,26 +81,139 @@ export default function FollowButton({profile}: FollowButtonProps) {
         checkIfViewingOwnProfile({userId, profile})
     }, [userId, profile])
 
+
+	useEffect(() => {
+	
+		async function checkIfFollowing({profile, userId}: {profile: string, userId: string}) {
+			//get id for profile
+			const { data: dataA, errorA } = await supabase
+				.from('users')
+				.select('*')
+				.eq('username', profile)
+				.single()
+
+			if (errorA) {
+				console.error('Error fetching profile data')
+				setFollowing(false)
+			}
+
+			const profileId = dataA.id;
+
+			const { data: dataB, errorB } = await supabase
+				.from('follows')
+				.select('*')
+				.eq('follower_id', userId)
+				.eq('following_id', profileId)
+				.single()
+
+			if (errorB) {
+				console.error('Error determining if following user: ', profile)
+				setFollowing(false)
+				return null
+			}
+
+			if (!dataB) {
+				setFollowing(false)
+				return null
+			}
+
+			if (dataB) {
+				setFollowing(true);
+			}
+		}
+		
+		checkIfFollowing({profile, userId})
+	}, [userId, profile, following])
+
+
+const followUser = async function({profile, userId}: {profile: string, userId: string}) {
+
+	const { data, error } = await supabase
+		.from('users')
+		.select('*')
+		.eq('username', profile)
+		.single()
+
+	if (error) {
+		console.error('Error fetching profile data: ', error)
+		return null
+	}
+
+	if (data) {
+		const { error } = await supabase
+			.from('follows')
+			.insert({
+					following_id: data.id,
+					follower_id: userId
+				})
+
+		if (error) {
+			console.error('Error following user: ', profile)
+		}
+
+		console.log('Successfully followed user: ', profile)
+	}
+}
+
+const unfollowUser = async function({profile, userId}: {profile: string, userId: string}) {
+
+	const { data, error } = await supabase
+		.from('users')
+		.select('*')
+		.eq('username', profile)
+		.single()
+
+	if (error) {
+		console.error('Error fetching profile data: ', error)
+	}
+
+	if (data) {
+		const { error } = await supabase
+			.from('follows')
+			.delete()
+			.match({
+					follower_id: userId,
+					following_id: data.id
+				})
+
+		if (error) {
+			console.error('Error unfollowing user: ', profile)
+			return null
+		}
+
+		console.log('Successfully unfollowed user: ', profile)
+	}
+}
+
+	console.log('Following: ', isFollowing);
+
     if (sameUser || !userId) {
         return(
             <></>
         )
     } else {
-        return (
-            <button onClick={() => {
-
-            }} className={`
-                w-[78px] h-8
-                rounded-lg
-                text-primaryText
-                bg-accentText
-                hover:cursor-pointer
-                hover:bg-primaryButtonHover
-                hover:text-primaryTextHover
-            `}>
-                Follow
-            </button>
-        )
+		
+			return (
+				<button onClick={() => {
+					if (!isFollowing) {
+						followUser({profile, userId})
+						setFollowing(true)
+					} else {
+						unfollowUser({profile, userId})
+						setFollowing(false)
+					}
+				}} className={`
+					w-[78px] h-8
+					rounded-lg
+					text-primaryText
+					bg-accentText
+					hover:cursor-pointer
+					hover:bg-primaryButtonHover
+					hover:text-primaryTextHover
+				`}>
+					{ isFollowing ? 'Unfollow' : 'Follow' }
+				</button>
+			)
     }
 
 }

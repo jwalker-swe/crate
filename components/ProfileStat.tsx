@@ -70,8 +70,6 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
     } catch (error) {
         console.error(`Couldn't fetch user id: `, error)
     }
-    
-    console.log(`Following: `, following)
 
     switch (statName) {
         case 'followers':

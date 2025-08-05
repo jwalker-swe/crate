@@ -19,8 +19,33 @@ type ProfileProps = {
 
 export default async function Profile({ params }: ProfileProps) {
 
+	const supabase = await createClient();
+
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
+
+	async function checkIfFollowing(userId: string, username: string) {
+		const { data: { user }, error } = await supabase
+			.from('users')
+			.select('*')
+			.eq('username', username)
+			.single()
+
+		if (error) {
+			console.error('Error determining if following: ', username);
+			return false;
+		}
+		if (!data) {
+			console.log('Not following user: ', username);
+			return false;
+		}
+		if (data) {
+			console.log('Already following user: ', username);
+			return true;
+		}
+	}
+
+	const following = checkIfFollowing(user?.id, username);
 
     return (
         <div className={`
@@ -67,7 +92,7 @@ export default async function Profile({ params }: ProfileProps) {
                                     {/* <DisplayName /> */}
                                     Jordan Walker
                                 </h1>
-                                <FollowButton profile={username} />
+                                <FollowButton profile={username} activeUser={user?.id} following={following}/>
                             </div>
                             <h2 className={`
                                 username

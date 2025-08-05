@@ -94,7 +94,6 @@ export default async function RecentlyListened({ username }: { username: string 
     
     const isolatedIds = await isolateAlbumIds(recentActivity)
     const albumData = await Promise.all(fetchAlbumData(isolatedIds));
-    console.log(albumData)
 
     return (
         <div className={`
