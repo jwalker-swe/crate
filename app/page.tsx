@@ -15,7 +15,6 @@ import { createClient } from "@/lib/supabase/server";
 import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
 import HomePageReviewPreview from "@/components/HomePageReviewPreview";
-
 import { Suspense } from 'react';
 import TopAlbumsSection from '@/components/TopAlbumsSection';
 import TopAlbumsLoading from '@/components/TopAlbumsLoading';
@@ -27,6 +26,37 @@ export default async function Home() {
   const supabase = await createClient();
       const { data: { user } }: any = await supabase.auth.getUser();
       console.log('User: ', user)
+
+
+  //Get Album Data
+  const recentTopAlbums: any = await getTopAlbums();
+
+  interface AlbumProps {
+    title: string[],
+    artist: string[],
+    id: string[],
+    images: string[]
+  }
+
+  let albumTitle: string[] = [];
+  let albumArtist: string[] = [];
+  let albumID: string[] = [];
+  let albumImage: string[] = [];
+
+  recentTopAlbums.forEach((item: any) => {
+    albumTitle.push(item.album.name);
+    albumArtist.push(item.album.artists[0].name)
+    albumID.push(item.album.id);
+    albumImage.push(item.album.images[0].url)
+
+  })
+
+  let albums: AlbumProps = {
+    title: albumTitle,
+    artist: albumArtist,
+    id: albumID,
+    images: albumImage
+  }
 
   type userDataProps = {
     avatar_url: string | null,
@@ -316,6 +346,45 @@ export default async function Home() {
           grid grid-cols-3 grid-rows-1 gap-4 justify-center
           mb-14 mx-auto 
           //Mobile Styling
+          //Desktop Styling
+        `}>
+          <ArticlePreview />
+          <ArticlePreview />
+          <ArticlePreview />
+        </div>
+      </section>
+      {/* Call to Action Section */}
+      <section className={`
+        //General Styling
+        w-[1200px]
+        flex flex-col justify-center items-center
+        mt-16 mb-16 p-16
+        text-center
+        bg-secondaryBackground
+        rounded-lg
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        <h3 className={`
+          //General Styling
+          text-3xl text-primaryText font-bold
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Join the Crate community
+        </h3>
+        <p className={`
+          //General Styling
+          w-lg
+          text-secondaryText font-sans
+          //Mobile Styling
+          //Desktop Styling
+        `}>
+          Track your music journey, discover new albums, and connect with music lovers from around the world.
+        </p>
+        <div className={`
+          //General Styling
+          flex justify-center items-center gap-4
           //Desktop Styling
         `}>
           <ArticlePreview />
