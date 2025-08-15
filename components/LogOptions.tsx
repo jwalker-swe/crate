@@ -43,6 +43,7 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
     const [logging, setLogging] = useState<boolean>(false);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [rating, setRating] = useState<number>(0);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         rating: null,
         liked: false,
@@ -128,6 +129,7 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
 
     const handleSubmit = async function(e: React.FormEvent) {
         e.preventDefault()
+        setIsSubmitting(true);
 
         //Send form data to database
         try {
@@ -161,6 +163,7 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
         } catch (err) {
             console.error('An unexpected error occurred while fetching user data: ', err)
         }
+        setIsSubmitting(false);
     }
 
     const handleMouseMove = function(e: MouseEvent<HTMLDivElement>, starIndex: number) {
@@ -425,9 +428,11 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                                                 cursor-pointer
                                                 bg-accentText
                                                 hover:bg-primaryButtonHover hover:text-primaryTextHover
+                                                disabled:opacity-50 disabled:cursor-not-allowed
                                             `}
+                                            disabled={isSubmitting}
                                         >
-                                            Submit
+                                            {isSubmitting ? 'Submitting...' : 'Submit'}
                                         </button>
                                     </div>
                                 </form>
