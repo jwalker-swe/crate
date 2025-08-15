@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import Link from "next/link";
 
@@ -15,7 +17,17 @@ interface Results {
 
 export default function ResultsList ({ results, sk }: { results: any, sk: string }) {
 
+    const [loading, setLoading] = useState(Array(results.albums?.length || 0).fill(false));
+    const router = useRouter();
+
     const slug = sk.replace(/-/g, ' ');
+
+    const handleClick = (index: number, href: string) => {
+        const newLoading = [...loading];
+        newLoading[index] = true;
+        setLoading(newLoading);
+        router.push(href);
+    };
 
     // if (results.artists && results.artistMatchScore > 0.75) {
     //     return (
@@ -48,7 +60,12 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                         const releaseDate = getReleaseDate(album.release_date);
 
                         return (
-                            <div key={index}>
+                            <div key={index} onClick={() => handleClick(index, `/album/${album.id}`)} className="relative cursor-pointer">
+                                {loading[index] && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                        <div className="loader"></div>
+                                    </div>
+                                )}
                                 <li key={index}>
                                     <div className={`
                                         w-full h-fit p-4 my-4
@@ -56,30 +73,33 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                                         bg-secondaryBackground
                                         rounded-lg
                                         transition-transform duration-200 ease-in-out
-                                        cursor-pointer
                                         hover:scale-105
+                                        ${loading[index] ? 'filter brightness-50' : ''}
                                     `}>
-                                        <Link href={`/album/${album.id}`}>
+                                        <div className="relative">
                                             <img src={album.images[1].url} width={96} height={96}
                                                 className={`
                                                     rounded-sm
-                                                    cursor-pointer                                           
+                                                    ${loading[index] ? 'filter brightness-50' : ''}
                                                 `}
                                             />
-                                        </Link>
+                                            {loading[index] && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="loader"></div>
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className={`
                                             item-info
                                             flex flex-col justify-start items-start
                                             w-full h-fit
                                         `}>
-                                            <Link href={`/album/${album.id}`}>
-                                                <h3 className={`
-                                                    text-2xl
-                                                    hover:text-accentText
-                                                `}>
-                                                    {album.name}
-                                                </h3>
-                                            </Link>
+                                            <h3 className={`
+                                                text-2xl
+                                                hover:text-accentText
+                                            `}>
+                                                {album.name}
+                                            </h3>
                                             <h4 className={`
                                                 text-lg text-accentText
                                             `}>

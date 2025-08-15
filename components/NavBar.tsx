@@ -15,6 +15,7 @@ export default function NavBar({ session }: {session: boolean}) {
     const [userId, setUserId]: any = useState('')
     const [username, setUsername]: any = useState('')
     const [searchInput, setSearchInput] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const router = useRouter();
 
@@ -67,6 +68,8 @@ export default function NavBar({ session }: {session: boolean}) {
             return
         }
 
+        setLoading(true);
+
         const slug = encodeURIComponent(searchInput.trim().toLowerCase().replace(/\s+/g, '-'));
 
         console.log('Original Input: ', searchInput);
@@ -104,36 +107,43 @@ export default function NavBar({ session }: {session: boolean}) {
                             `}
                             onSubmit={handleSearchSubmit}
                         >
-                            <input placeholder='Search' 
-                                className={`
-                                    //General Styling
-                                    pl-4 pr-8 py-2 
-                                    text-sm text-end
-                                    bg-secondaryBackground
-                                    rounded-lg
-                                    focus:outline-0
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                            >
-                            </input>
-                            <button
-                                type='submit'
-                                className={`
-                                    absolute 
-                                    top-[9px] right-2 
-                                    cursor-pointer
-                                `}
-                            >
-                                <MagnifyingGlassIcon className={`
-                                        w-4 h-4
-                                        text-secondaryText
-                                        hover:text-accentText
-                                    `} 
-                                />
-                            </button>
+                            <div className="relative w-full max-w-md">
+                                {loading ? (
+                                    <div className="pl-4 pr-8 py-2 text-sm text-end text-secondaryText bg-secondaryBackground rounded-lg">
+                                        Searching...
+                                    </div>
+                                ) : (
+                                    <input placeholder='Search' 
+                                        className={`
+                                            //General Styling
+                                            pl-4 pr-8 py-2 
+                                            text-sm text-end
+                                            bg-secondaryBackground
+                                            rounded-lg
+                                            focus:outline-0
+                                            //Mobile Styling
+                                            //Desktop Styling
+                                        `}
+                                        value={searchInput}
+                                        onChange={(e) => setSearchInput(e.target.value)}
+                                    />
+                                )}
+                                <button
+                                    type='submit'
+                                    className={`
+                                        absolute 
+                                        top-[9px] right-2 
+                                        cursor-pointer
+                                    `}
+                                >
+                                    <MagnifyingGlassIcon className={`
+                                            w-4 h-4
+                                            text-secondaryText
+                                            hover:text-accentText
+                                        `} 
+                                    />
+                                </button>
+                            </div>
                         </form>
                     </div>
                     <ul className={`

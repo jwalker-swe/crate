@@ -1,3 +1,8 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 //Build component to shove album cover
 
 import Image from "next/image";
@@ -16,14 +21,24 @@ type AlbumPreviewProps = {
 
 export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist, imageUrl }: AlbumPreviewProps ) {
 
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
     let coverWidthString = coverWidth?.toString();
     let coverHeightSting = coverHeight?.toString();
 
+    const handleClick = () => {
+        setLoading(true);
+        router.push(`/album/${id}`);
+    };
+
 
     return (
-        <Link href={`/album/${id}`} className={`
+        <div onClick={handleClick} className={`
             //General Styling
             transition-transform duration-200 ease-in-out
+            cursor-pointer
+            relative
             //Mobile Styling
             // Desktop Styling
         `} >
@@ -32,12 +47,20 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
                 //Mobile Styling
                 //Desktop Styling
             `}>
-                <img src={imageUrl}
-                    width={coverHeight} height={coverHeight} alt="album cover"
-                    className={`
-                        rounded-ss-lg rounded-se-lg
-                        mx-auto
-                `}/>
+                <div className="relative">
+                    <img src={imageUrl}
+                        width={coverHeight} height={coverHeight} alt="album cover"
+                        className={`
+                            rounded-ss-lg rounded-se-lg
+                            mx-auto
+                            ${loading ? 'filter brightness-50' : ''}
+                    `}/>
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="loader"></div>
+                        </div>
+                    )}
+                </div>
                 <div className={`
                     w-[${coverWidthString}px]
                     flex flex-col
@@ -59,6 +82,6 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
                     </span>
                 </div>
             </li>   
-        </Link>
+        </div>
     )
 }

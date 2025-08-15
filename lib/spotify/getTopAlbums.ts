@@ -1,77 +1,67 @@
 import getAccessToken from "@/lib/spotify/getAccessToken";
-import getAlbumPopularity from "@/lib/spotify/getAlbumPopularity";
 
 export default async function getTopAlbums() {
 
     const token = await getAccessToken();
-    console.log(token);
 
     if (!token) {
-
         console.error('Unable to retrieve Spotify access token');
-        return
-        
-    } else {
-    
-        try {
+        return;
+    }
 
-            const currentYear = new Date().getFullYear();
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+    try {
+        const currentYear = new Date().getFullYear();
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
-            let albums: any = [];
+        const searchQuery = `year:${currentYear}`;
+        const encodedQuery = encodeURIComponent(searchQuery);
+        const searchURL = `https://api.spotify.com/v1/search?q=${encodedQuery}&type=album&limit=50&market=US`;
 
-            const searchQuery = `year:${currentYear}`;
-            const encodedQuery = encodeURIComponent(searchQuery);
-            const searchURL = `https://api.spotify.com/v1/search?q=${encodedQuery}&type=album&limit=50&market=US`;
+        // Fetch Albums with caching
+        const res = await fetch(searchURL, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            next: {
+                revalidate: 604800 // Revalidate every week
+            }
+        });
 
-            //Fetch Albums
-            const res = await fetch(`${searchURL}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            const data = await res.json();
+        const data = await res.json();
 
-            const fetchedAlbums: any[] = [];
-            data.albums.items.map((item: any) => {
-                if ( item.album_type === 'album' ) {
-                    fetchedAlbums.push(item);
-                }
-            })
+        const fetchedAlbums = data.albums.items.filter((item: any) => item.album_type === 'album');
 
-            const recentAlbums: any[] = [];
-            fetchedAlbums.map((album: any) => {
-                const releaseDate = new Date(album.release_date);
-                if ( releaseDate >= oneMonthAgo ) {
-                    recentAlbums.push(album);
-                }
-            })
+        const recentAlbums = fetchedAlbums.filter((album: any) => {
+            const releaseDate = new Date(album.release_date);
+            return releaseDate >= oneMonthAgo;
+        });
 
-            const popularAlbums: any[] = [];
-            for (const album of recentAlbums ) {
-                const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+        const albumIds = recentAlbums.map((album: any) => album.id);
 
-                const data = await res.json();
-                const popularity = data.popularity;
-                if ( popularity >= 75 ) {
-                    popularAlbums.push({album, popularity});
-                }
-
-                popularAlbums.sort((a, b) => b.popularity - a.popularity)
-            };        
-
-            return popularAlbums;
-
-        } catch(err) {
-
-            console.error('Error fetching top albums: ', err);
-
+        if (albumIds.length === 0) {
+            return [];
         }
 
+        const albumDetailsRes = await fetch(`https://api.spotify.com/v1/albums?ids=${albumIds.join(',')}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            next: {
+                revalidate: 604800 // Revalidate every week
+            }
+        });
+
+        const albumDetailsData = await albumDetailsRes.json();
+
+        const popularAlbums = albumDetailsData.albums
+            .map((album: any) => ({ album, popularity: album.popularity }))
+            .filter((item: any) => item.popularity >= 75)
+            .sort((a: any, b: any) => b.popularity - a.popularity);
+
+        return popularAlbums;
+
+    } catch (err) {
+        console.error('Error fetching top albums: ', err);
     }
 }

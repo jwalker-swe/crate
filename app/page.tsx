@@ -16,6 +16,10 @@ import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
 import HomePageReviewPreview from "@/components/HomePageReviewPreview";
 
+import { Suspense } from 'react';
+import TopAlbumsSection from '@/components/TopAlbumsSection';
+import TopAlbumsLoading from '@/components/TopAlbumsLoading';
+
 //Create function to get Album data
 
 export default async function Home() {
@@ -23,37 +27,6 @@ export default async function Home() {
   const supabase = await createClient();
       const { data: { user } }: any = await supabase.auth.getUser();
       console.log('User: ', user)
-
-
-  //Get Album Data
-  const recentTopAlbums: any = await getTopAlbums();
-
-  interface AlbumProps {
-    title: string[],
-    artist: string[],
-    id: string[],
-    images: string[]
-  }
-
-  let albumTitle: string[] = [];
-  let albumArtist: string[] = [];
-  let albumID: string[] = [];
-  let albumImage: string[] = [];
-
-  recentTopAlbums.forEach((item: any) => {
-    albumTitle.push(item.album.name);
-    albumArtist.push(item.album.artists[0].name)
-    albumID.push(item.album.id);
-    albumImage.push(item.album.images[0].url)
-
-  })
-
-  let albums: AlbumProps = {
-    title: albumTitle,
-    artist: albumArtist,
-    id: albumID,
-    images: albumImage
-  }
 
   type userDataProps = {
     avatar_url: string | null,
@@ -191,21 +164,9 @@ export default async function Home() {
           {/* <SectionTitle title={'Albums from all your favorite artist'} />
           <ViewAll /> */}
         </div>
-        <ul className={`
-          //General Styling
-          w-[1200px]
-          grid grid-cols-[224px_224px_224px_224px_224px] gap-5 grid-rows-1
-          mx-auto items-center justify-center
-          //Mobile Styling
-          //Desktop Styling
-        `}>
-          <AlbumPreview coverHeight={224} id={albums.id[0]} name={albums.title[0]} artist={albums.artist[0]} imageUrl={albums.images[0]} />
-          <AlbumPreview coverHeight={224} id={albums.id[1]} name={albums.title[1]} artist={albums.artist[1]} imageUrl={albums.images[1]} />
-          <AlbumPreview coverHeight={224} id={albums.id[2]} name={albums.title[2]} artist={albums.artist[2]} imageUrl={albums.images[2]} />
-          <AlbumPreview coverHeight={224} id={albums.id[3]} name={albums.title[3]} artist={albums.artist[3]} imageUrl={albums.images[3]} />
-          <AlbumPreview coverHeight={224} id={albums.id[4]} name={albums.title[4]} artist={albums.artist[4]} imageUrl={albums.images[4]} />
-
-        </ul>
+        <Suspense fallback={<TopAlbumsLoading />}>
+          <TopAlbumsSection />
+        </Suspense>
       </section>
       {/* Tag Line */}
       <div className={`

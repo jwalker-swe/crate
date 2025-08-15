@@ -5,6 +5,7 @@ import TopAlbums from "@/components/TopAlbums";
 import JustReviewed from "@/components/JustReviewed";
 import { createClient } from "@/lib/supabase/server";
 import RecentlyReleased from "@/components/RecentlyReleased";
+import recentlyReviewed from "@/lib/spotify/getRecentlyReviewed";
 
 
 export default async function Home() {
@@ -13,6 +14,7 @@ export default async function Home() {
     const { data: { user } } = await supabase.auth.getUser()
     
     const albumData = await fetchTopAlbums();
+    const justReviewedData = await recentlyReviewed(10);
 
     return (
         <div
@@ -50,7 +52,7 @@ export default async function Home() {
                         w-full
                     `}
                 >
-                    <JustReviewed columns={2} rows={2} gap={6} />
+                    <JustReviewed columns={2} rows={2} gap={6} data={justReviewedData} user={user} />
                 </section>
             </main>
             <footer>

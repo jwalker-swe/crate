@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ReviewPreview from "@/components/ReviewPreview";
 import Link from "next/link";
 import { StarIcon, UserCircleIcon } from "@heroicons/react/24/solid";
@@ -16,6 +18,16 @@ const getFillPercent = function(rating: number, index: number) {
 }
 
 export default function HomePageReviewPreview({ recentReviewData }: { recentReviewData: any }) {
+
+    const [loading, setLoading] = useState(Array(recentReviewData.length).fill(false));
+    const router = useRouter();
+
+    const handleClick = (index: number, href: string) => {
+        const newLoading = [...loading];
+        newLoading[index] = true;
+        setLoading(newLoading);
+        router.push(href);
+    };
 
     console.log(recentReviewData);
 
@@ -41,28 +53,25 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                             //General Styling
                             min-w-20 min-h-20
                             rounded-lg
+                            relative
+                            cursor-pointer
                             //Mobile Styling
                             //Desktop Styling
-                        `}>
-                            <Link href={`/album/${review.album.spotify_id}`}
-                                className={`
-                                    cursor-pointer
-                                    relative
-                                `}
-                            >
+                        `} onClick={() => handleClick(i, `/album/${review.album.spotify_id}`)}>
+                            <div className="relative">
                                 <img src={`${review.album.cover_image_url}`} 
                                     className={`
                                         w-20 h-20
                                         rounded-sm
+                                        ${loading[i] ? 'filter brightness-50' : ''}
                                     `}
                                 />
-                                <div className={`
-                                    absolute top-0 left-0
-                                    w-20 h-20
-                                `}
-                                >
-                                </div>
-                            </Link>
+                                {loading[i] && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="loader"></div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className={`
                             //General Styling

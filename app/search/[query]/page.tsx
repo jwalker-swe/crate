@@ -17,9 +17,7 @@ export default async function Home({ params }: SearchPageParams) {
     const searchParams = await params;
     const slug = encodeURIComponent(searchParams.query.replace(/-/g, ' '));
 
-    // console.log('Search Params: ', searchParams);
-    // console.log('Slug: ', slug);
-
+	// If searchParams begins with @ (%40) search for user
     // Make api call to search spotify
     const searchResults = await searchSpotify(slug)
     // console.log('Search Results: ', searchResults);

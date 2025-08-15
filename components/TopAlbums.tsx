@@ -1,8 +1,22 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import SectionTitle from "./SectionTitle"
 import Link from "next/link"
 
 
 export default function TopAlbums({albums, columns, gap}: {albums: any[], columns: number, gap: number}) {
+
+    const [loading, setLoading] = useState(Array(albums.length).fill(false));
+    const router = useRouter();
+
+    const handleClick = (index: number, href: string) => {
+        const newLoading = [...loading];
+        newLoading[index] = true;
+        setLoading(newLoading);
+        router.push(href);
+    };
 
     return (
         <>
@@ -22,51 +36,48 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
                 {albums.map((album, index) => {
                     if (index < columns) {
                         return (
-                            <Link href={`/album/${album.id}`} 
+                            <div onClick={() => handleClick(index, `/album/${album.id}`)} 
                                 key={index}
+                                className="relative cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
                             >
-                                <div 
-                                    key={index}
-                                    className={`
-                                        bg-secondaryBackground
-                                        w-full h-full
-                                        flex flex-col justify-center items-start
-                                        rounded-lg
-                                        cursor-pointer
-                                        hover:scale-105 transition-transform duration-200 ease-in-out
-                                    `}
-                                >
+                                <div className="relative">
                                     <img 
                                         src={album.images[0].url}
                                         className={`
                                             rounded-ss-lg rounded-se-lg
+                                            ${loading[index] ? 'filter brightness-50' : ''}
                                         `}
                                     />
-                                    <div
+                                    {loading[index] && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="loader"></div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div
+                                    className={`
+                                        p-4
+                                        bg-secondaryBackground
+                                        rounded-es-lg rounded-ee-lg
+                                    `}
+                                >
+                                    <h2
                                         className={`
-                                            p-4
-                                            bg-secondaryBackground
-                                            rounded-es-lg rounded-ee-lg
+                                            text-xl
+                                            line-clamp-1                                
                                         `}
                                     >
-                                        <h2
-                                            className={`
-                                                text-xl
-                                                line-clamp-1                                
-                                            `}
-                                        >
-                                            {album.name}
-                                        </h2>
-                                        <h3
-                                            className={`
-                                                text-secondaryText
-                                            `}
-                                        >
-                                            {album.artists[0].name}
-                                        </h3>
-                                    </div>
+                                        {album.name}
+                                    </h2>
+                                    <h3
+                                        className={`
+                                            text-secondaryText
+                                        `}
+                                    >
+                                        {album.artists[0].name}
+                                    </h3>
                                 </div>
-                            </Link>
+                            </div>
                         )
                     }
                 })}

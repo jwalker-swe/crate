@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import recentlyReviewed from "@/lib/spotify/getRecentlyReviewed";
 import ReviewRating from "./ReviewRating";
 import SectionTitle from "./SectionTitle";
@@ -56,12 +60,17 @@ interface RecentReviews {
     }[]
 }
 
-export default async function JustReviewed({ columns, rows, gap }: { columns: number, rows: number, gap: number }) {
+export default function JustReviewed({ columns, rows, gap, data, user }: { columns: number, rows: number, gap: number, data: any, user: any }) {
 
-    const data: any = await recentlyReviewed(10);
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser();
+    const [loading, setLoading] = useState(Array(data.reviews.length).fill(false));
+    const router = useRouter();
+
+    const handleClick = (index: number, href: string) => {
+        const newLoading = [...loading];
+        newLoading[index] = true;
+        setLoading(newLoading);
+        router.push(href);
+    };
 
     if (data) {
         const reviews = data.reviews
@@ -114,26 +123,29 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                     `}
                                 >
                                     <div
+                                        onClick={() => handleClick(index, `/album/${albums[index].spotify_id}`)}
                                         className={`
                                             min-w-20 min-h-20
                                             rounded-lg
+                                            relative
+                                            cursor-pointer
                                         `}
                                     >
-                                        <Link 
-                                            href={`/album/${albums[index].spotify_id}`}
-                                            className={`
-                                                relative
-                                                cursor-pointer
-                                            `}
-                                        >
+                                        <div className="relative">
                                             <img 
                                                 src={albums[index].cover_image_url}
                                                 className={`
                                                     w-20 h-20
                                                     rounded-lg
+                                                    ${loading[index] ? 'filter brightness-50' : ''}
                                                 `}
-                                            />  
-                                        </Link>
+                                            />
+                                            {loading[index] && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="loader"></div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div
                                         className={`
@@ -150,10 +162,10 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                                 @{users[index].username}
                                             </span>
                                         </Link>
-                                        <Link href={`/album/${albums[index].spotify_id}`}>
+                                        <div onClick={() => handleClick(index, `/album/${albums[index].spotify_id}`)}>
                                             <div
                                                 className={`
-                                                    flex justify-start items-center gap-1
+                                                    flex justify-start items-center gap-1 cursor-pointer
                                                 `}
                                             >
                                                 <h3
@@ -171,7 +183,7 @@ export default async function JustReviewed({ columns, rows, gap }: { columns: nu
                                                     by {albums[index].artists[0].name}
                                                 </p>
                                             </div>
-                                        </Link>
+                                        </div>
                                         <p
                                             className={`
                                                 text-xs line-clamp-3

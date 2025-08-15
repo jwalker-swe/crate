@@ -80,7 +80,7 @@ export async function fetchTopAlbums() {
     nonDuplicateAlbums = await removeDupes(recentAlbums); 
     
     recentAlbums = await removeUnpopular(nonDuplicateAlbums, 50, token);
-    topAlbums = await removeUnpopular(recentAlbums, 80, token)
+    topAlbums = await removeUnpopular(recentAlbums, 70, token)
 
     return {recentAlbums, topAlbums};
 }
