@@ -44,7 +44,7 @@ export async function fetchTopAlbums() {
     const token = await getAccessToken()
     const currentYear = new Date().getFullYear();
     const oneMonthAgo = new Date();
-    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+    oneMonthAgo.setDate(oneMonthAgo.getDate() - 40);
 
     let albums: any = [];
     let nonDuplicateAlbums: any = [];

@@ -14,7 +14,7 @@ export default async function Home() {
     const { data: { user } } = await supabase.auth.getUser()
     
     const albumData = await fetchTopAlbums();
-    const justReviewedData = await recentlyReviewed(10);
+	const justReviewedData = await recentlyReviewed(10);
 
     return (
         <div
@@ -29,7 +29,7 @@ export default async function Home() {
             </header>
             <main
                 className={`
-                    w-full pb-16
+n                   w-full pb-16
                 `}
             >
                 <section 
@@ -52,7 +52,7 @@ export default async function Home() {
                         w-full
                     `}
                 >
-                    <JustReviewed columns={2} rows={2} gap={6} data={justReviewedData} user={user} />
+                    <JustReviewed columns={2} rows={3} gap={6} data={justReviewedData} user={user} />
                 </section>
             </main>
             <footer>

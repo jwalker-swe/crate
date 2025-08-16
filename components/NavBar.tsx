@@ -211,124 +211,131 @@ export default function NavBar({ session }: {session: boolean}) {
                     )}
                     {user && (
                         <>
-                            <div>
+                            <div 
+								className={`
+									group 
+									relative 
+									hover:bg-secondaryBackground 
+									hover:rounded-ss-lg 
+									hover:rounded-se-lg
+								`}>
                                 <div className={`
                                     profile-nav-container
-                                    group
                                     flex justify-start items-center
                                     p-2
-                                    hover:bg-secondaryBackground
                                     hover:rounded-ss-lg hover:rounded-se-lg
                                 `}>
                                     <UserCircleIcon className={`
                                         w-8 h-8 
                                         text-secondaryText
                                     `}/>
+                                </div>
+                                <div className={`
+                                    profile-nav-menu
+                                    absolute
+                                    flex flex-col justify-end items-end
+                                    invisible
+                                    -translate-x-24
+                                    bg-secondaryBackground
+                                    rounded-ss-lg rounded-es-lg rounded-ee-lg
+                                    group-hover:visible 
+                                    z-50
+                                `}>
                                     <div className={`
-                                        absolute
-                                        flex flex-col justify-end items-end
-                                        invisible
-                                        translate-y-37 -translate-x-26
+                                        w-36
+                                        p-2 
+                                        flex items-center justify-end
                                         bg-secondaryBackground
-                                        rounded-ss-lg rounded-es-lg rounded-ee-lg
-                                        group-hover:visible 
+                                        border-t-1 border-b-1 border-primaryBackground
+                                        rounded-ss-lg
                                     `}>
-                                        <div className={`
-                                            w-36
-                                            p-2 
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-t-1 border-b-1 border-primaryBackground
-                                            rounded-ss-lg
+                                        <Link href={`/profile/${username}`} className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            mr-1
                                         `}>
-                                            <Link href={`/profile/${username}`} className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                mr-1
-                                            `}>
-                                                Profile
-                                            </Link>
-                                        </div>
-                                        <div className={`
-                                            w-36
-                                            p-2
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-b-1 border-primaryBackground
+                                            Profile
+                                        </Link>
+                                    </div>
+                                    <div className={`
+                                        w-36
+                                        p-2
+                                        flex items-center justify-end
+                                        bg-secondaryBackground
+                                        border-b-1 border-primaryBackground
+                                    `}>
+                                        <Link href='#' className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            mr-1
                                         `}>
-                                            <Link href='#' className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                mr-1
-                                            `}>
-                                                Albums
-                                            </Link>
-                                        </div>
-                                        <div className={`
-                                            w-36
-                                            p-2
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-b-1 border-primaryBackground
+                                            Albums
+                                        </Link>
+                                    </div>
+                                    <div className={`
+                                        w-36
+                                        p-2
+                                        flex items-center justify-end
+                                        bg-secondaryBackground
+                                        border-b-1 border-primaryBackground
+                                    `}>
+                                        <Link href='#' className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            mr-1
                                         `}>
-                                            <Link href='#' className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                mr-1
-                                            `}>
-                                                Reviews
-                                            </Link>
-                                        </div>
-                                        <div className={`
-                                            w-36
-                                            p-2
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-b-1 border-primaryBackground
+                                            Reviews
+                                        </Link>
+                                    </div>
+                                    <div className={`
+                                        w-36
+                                        p-2
+                                        flex items-center justify-end
+                                        bg-secondaryBackground
+                                        border-b-1 border-primaryBackground
+                                    `}>
+                                        <Link href='#' className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            mr-1
                                         `}>
-                                            <Link href='#' className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                mr-1
-                                            `}>
-                                                Lists
-                                            </Link>
-                                        </div>
-                                        <div className={`
-                                            w-36
-                                            p-2
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-b-1 border-primaryBackground
+                                            Lists
+                                        </Link>
+                                    </div>
+                                    <div className={`
+                                        w-36
+                                        p-2
+                                        flex items-center justify-end
+                                        bg-secondaryBackground
+                                        border-b-1 border-primaryBackground
+                                    `}>
+                                        <Link href='#' className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            mr-1
                                         `}>
-                                            <Link href='#' className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                mr-1
-                                            `}>
-                                                Likes
-                                            </Link>
-                                        </div>
-                                        <div className={`
-                                            w-36
-                                            p-2
-                                            flex items-center justify-end
-                                            bg-secondaryBackground
-                                            border-b-1 border-primaryBackground
-                                            rounded-es-lg rounded-ee-lg
+                                            Likes
+                                        </Link>
+                                    </div>
+                                    <div className={`
+                                        w-36
+                                        p-2
+                                        flex items-center justify-end
+                                        bg-secondaryBackground
+                                        border-b-1 border-primaryBackground
+                                        rounded-es-lg rounded-ee-lg
+                                    `}>
+                                        <button onClick={() => {
+                                            supabase.auth.signOut();
+                                            router.push('/')
+                                        }} className={`
+                                            text-secondaryText
+                                            hover:text-accentText
+                                            hover:cursor-pointer
+                                            mr-1
                                         `}>
-                                            <button onClick={() => {
-                                                supabase.auth.signOut();
-                                                router.push('/')
-                                            }} className={`
-                                                text-secondaryText
-                                                hover:text-accentText
-                                                hover:cursor-pointer
-                                                mr-1
-                                            `}>
-                                                Sign Out
-                                            </button>
-                                        </div>
+                                            Sign Out
+                                        </button>
                                     </div>
                                 </div>
                             </div>

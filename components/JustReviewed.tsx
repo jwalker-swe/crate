@@ -62,8 +62,10 @@ interface RecentReviews {
 
 export default function JustReviewed({ columns, rows, gap, data, user }: { columns: number, rows: number, gap: number, data: any, user: any }) {
 
-    const [loading, setLoading] = useState(Array(data.reviews.length).fill(false));
+    const [loading, setLoading] = useState(Array(data?.reviews?.length || 0).fill(false));
     const router = useRouter();
+
+	const totalReviewsToDisplay = rows * columns;
 
     const handleClick = (index: number, href: string) => {
         const newLoading = [...loading];
@@ -73,10 +75,10 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
     };
 
     if (data) {
-        const reviews = data.reviews
-        const albums = data.albums
-        const users = data.users
-        const likes = data.likes
+        const reviews = data.reviews.slice(0, totalReviewsToDisplay);
+        const albums = data.albums.slice(0, totalReviewsToDisplay);
+        const users = data.users.slice(0, totalReviewsToDisplay);
+        const likes = data.likes.slice(0, totalReviewsToDisplay);
         let liked: boolean
         let count: number
 

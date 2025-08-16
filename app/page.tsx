@@ -7,17 +7,17 @@ import AlbumPreview from "@/components/AlbumPreview";
 import FeatureDescription from "@/components/FeatureDescription";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import ViewAll from "@/components/ViewAll";
+import { Suspense } from "react";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
 import getTopAlbums from '@/lib/spotify/getTopAlbums';
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
 import HomePageReviewPreview from "@/components/HomePageReviewPreview";
-import { Suspense } from 'react';
-import TopAlbumsSection from '@/components/TopAlbumsSection';
-import TopAlbumsLoading from '@/components/TopAlbumsLoading';
+import TopAlbumsLoading from "@/components/TopAlbumsLoading";
+import TopAlbumsSection from "@/components/TopAlbumsSection";
 
 //Create function to get Album data
 
@@ -125,7 +125,7 @@ export default async function Home() {
         })
       );
 
-      return reviewUserData
+      return reviewUserData;
     } catch (err) {
       console.error(`An unexpected error occurred while fetching recent reviews: `, err)
     }
@@ -346,45 +346,6 @@ export default async function Home() {
           grid grid-cols-3 grid-rows-1 gap-4 justify-center
           mb-14 mx-auto 
           //Mobile Styling
-          //Desktop Styling
-        `}>
-          <ArticlePreview />
-          <ArticlePreview />
-          <ArticlePreview />
-        </div>
-      </section>
-      {/* Call to Action Section */}
-      <section className={`
-        //General Styling
-        w-[1200px]
-        flex flex-col justify-center items-center
-        mt-16 mb-16 p-16
-        text-center
-        bg-secondaryBackground
-        rounded-lg
-        //Mobile Styling
-        //Desktop Styling
-      `}>
-        <h3 className={`
-          //General Styling
-          text-3xl text-primaryText font-bold
-          //Mobile Styling
-          //Desktop Styling
-        `}>
-          Join the Crate community
-        </h3>
-        <p className={`
-          //General Styling
-          w-lg
-          text-secondaryText font-sans
-          //Mobile Styling
-          //Desktop Styling
-        `}>
-          Track your music journey, discover new albums, and connect with music lovers from around the world.
-        </p>
-        <div className={`
-          //General Styling
-          flex justify-center items-center gap-4
           //Desktop Styling
         `}>
           <ArticlePreview />
