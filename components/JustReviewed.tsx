@@ -45,7 +45,6 @@ interface RecentReviews {
         liked: boolean,
         listen_date: null,
         rating: number,
-        review_text: string,
         updated_at: string,
         user_id: string
     }[],
@@ -208,7 +207,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                                 <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={count} user={user ? true : false} />
                                             </div>
                                             <Link
-                                                href={`/${users[index].username}/review/${albums[index].spotify_id}`}
+                                                href={`/profile/${users[index].username}/review/${albums[index].spotify_id}`}
                                             >
                                                 <p
                                                     className={`
