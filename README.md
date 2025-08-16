@@ -48,6 +48,7 @@ More coming soon...
 ![Crate Dynamic Album Page](/assets/images/readme-images/crate-readme-002.png)
 ![Crate Review Modal](/assets/images/readme-images/crate-readme-003.png)
 ![Crate User Profile: Recently Reviewed Section ](/assets/images/readme-images/crate-readme-004.png)
+![Crate Loading State Animations](/assets/images/readme-images/crate-loading-state-animation-demo.gif)
 More coming soon...
 
 ---
