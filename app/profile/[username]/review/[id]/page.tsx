@@ -1,9 +1,10 @@
-
 import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
 import { createClient } from "@/lib/supabase/server";
 import { ReviewPageParams } from "@/types/spotify";
 import getSelectedReview from "@/lib/supabase/getSelectedReview";
+import getReleaseDate from "@/lib/spotify/getReleaseDate";
+import DisplayAlbumStats from "@/components/DisplayAlbumStats";
 
 export default async function Home({ params }: ReviewPageParams) {
 
@@ -15,8 +16,22 @@ export default async function Home({ params }: ReviewPageParams) {
 
     //fetch reviews
 	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
-	console.log("Review Data: ", review_data);
-    
+	console.log("Review Data: ", review_data.review);
+	console.log("Spotify Data: ", review_data.spotify);
+
+	const release_date = getReleaseDate(review_data.spotify.release_date);
+
+	const format_date = function(date)	{
+		let numerical_date: string[] = [date.getFullYear(), date.getMonth(), date.getDay()]
+		const string_date: string = numerical_date.join("-");
+
+		const date_reviewed = getReleaseDate(string_date);
+		return date_reviewed;
+	}
+
+	const date_reviewed = format_date(review_data.review.date_review_written);
+
+	console.log("Date review written: ", date_reviewed);   
     //sort reviews
     //display reviews
 
@@ -31,7 +46,144 @@ export default async function Home({ params }: ReviewPageParams) {
                 <NavBar session={ user ? true : false } />
             </header>
             <main>
-                
+				<div className={`
+					w-[896px]
+					mx-auto
+					pb-18
+				`}>
+					<section>
+						<div className={`
+							//General Styling
+							//Mobile Styling
+							//Desktop Styling
+						`}>
+							<div className="
+								//General Styling
+								flex justify-center items-center gap-8
+								pt-16 pb-8
+								//Mobile Styling
+								//Desktop Styling
+							">
+								<img src={review_data.review.album_cover_art} width={320} height={320} alt={`album cover for ${review_data.spotify.name}`} 
+									className={`
+										//General Styling
+										rounded-lg
+										//Mobile Styling
+										//Desktop Styling
+								`} />
+								<div className={`
+									//General Styling
+									h-[320px]
+									flex flex-col justify-center
+									//Mobile Styling
+									//Desktop Styling
+								`}>
+									<div className={`
+										album-info-container
+										//General Styling
+										w-136
+										flex flex-col justify-center items-left
+										//Mobile Styling
+										//Desktop Styling
+									`}>
+										<h1 className={`
+											album-title
+											//General Styling
+											text-primaryText text-3xl font-bold font-sans 
+											//Mobile Styling
+											//Desktop Styling
+										`}>
+											{review_data.spotify.name}
+										</h1>
+										<h2 className={`
+											artist-name
+											//General Styling
+											text-accentText text-3xl font-sans
+											//Mobile Styling
+											//Desktop Styling
+										`}>
+											{review_data.spotify.artists[0].name}
+										</h2>
+										<div className={`
+											album-info-container
+											//General Styling
+											flex justify-start items-center gap-2
+											text-secondaryText font-sans
+											//Mobile Styling
+											//Desktop Styling
+										`}>
+											<span className={`year-of-release`}>
+												{`${release_date.releaseMonth} ${release_date.releaseDateInfo[2]}, ${release_date.releaseDateInfo[0]}`}
+											</span>
+											<div className={`
+												bg-secondaryText
+												w-1 h-1
+												rounded-full
+											`}>
+											</div>
+											<span className={`total-tracks`}>
+												{`${review_data.spotify.total_tracks} Songs`}
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<section className="
+						review-section
+					">
+						<div
+							className={`
+								reviewer-user-info
+								flex justify-start items-center gap-2
+								pb-2
+								
+							`}
+						>
+							<div
+								className={`
+									user-profile-icon-container
+									w-8 h-8
+									rounded-full
+									bg-white
+								`}
+							>	
+							</div>
+							<div
+								className={`
+									w-full
+									flex justify-between items-center
+								`}
+							>
+								<p
+									className={`
+										text-secondaryText
+									`}
+								>
+									Review by @{params.username}
+								</p>
+								<p
+									className={`
+										text-secondaryText
+									`}
+								>
+									written {date_reviewed.releaseMonth} {date_reviewed.releaseDateInfo[2]}, {date_reviewed.releaseDateInfo[0]}
+								</p>
+							</div>
+						</div>
+						<div
+							className={`
+								mt-4
+								font-serif
+								text-secondaryText
+								whitespace-pre-line
+							`}
+						>
+							{review_data.review.review_text}
+						</div>
+					</section>
+				</div>
             </main>
             <footer>
                 <Footer />
@@ -39,4 +191,5 @@ export default async function Home({ params }: ReviewPageParams) {
         </div>
     )
 }
+
 

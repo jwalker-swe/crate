@@ -9,7 +9,7 @@ export default function DisplayAlbumStats( { id, rating }: {id: any, rating: num
         <div className={`
             //General Styling
             flex justify-start items-center
-            mt-4
+			mt-4
             //Mobile Styling
             //Desktop Styling
         `}>
