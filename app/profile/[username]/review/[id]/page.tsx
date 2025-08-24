@@ -5,6 +5,8 @@ import { ReviewPageParams } from "@/types/spotify";
 import getSelectedReview from "@/lib/supabase/getSelectedReview";
 import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import DisplayAlbumStats from "@/components/DisplayAlbumStats";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
 
 export default async function Home({ params }: ReviewPageParams) {
 
@@ -40,6 +42,7 @@ export default async function Home({ params }: ReviewPageParams) {
             className={`
                 w-[1200px] h-fit
                 mx-auto py-4
+				font-system
             `}
         >
             <header>
@@ -55,8 +58,7 @@ export default async function Home({ params }: ReviewPageParams) {
 						<div className={`
 							//General Styling
 							//Mobile Styling
-							//Desktop Styling
-						`}>
+							//Desktop Styling `}>
 							<div className="
 								//General Styling
 								flex justify-center items-center gap-8
@@ -89,7 +91,7 @@ export default async function Home({ params }: ReviewPageParams) {
 										<h1 className={`
 											album-title
 											//General Styling
-											text-primaryText text-3xl font-bold font-sans 
+											text-primaryText text-3xl font-bold 
 											//Mobile Styling
 											//Desktop Styling
 										`}>
@@ -98,7 +100,7 @@ export default async function Home({ params }: ReviewPageParams) {
 										<h2 className={`
 											artist-name
 											//General Styling
-											text-accentText text-3xl font-sans
+											text-accentText text-3xl 
 											//Mobile Styling
 											//Desktop Styling
 										`}>
@@ -108,7 +110,7 @@ export default async function Home({ params }: ReviewPageParams) {
 											album-info-container
 											//General Styling
 											flex justify-start items-center gap-2
-											text-secondaryText font-sans
+											text-secondaryText 
 											//Mobile Styling
 											//Desktop Styling
 										`}>
@@ -132,28 +134,37 @@ export default async function Home({ params }: ReviewPageParams) {
 					</section>
 					<section className="
 						review-section
+						p-8
+						bg-secondaryBackground
+						rounded-lg
 					">
 						<div
 							className={`
 								reviewer-user-info
-								flex justify-start items-center gap-2
+								flex justify-start items-center gap-4
 								pb-2
-								
 							`}
 						>
 							<div
 								className={`
 									user-profile-icon-container
-									w-8 h-8
+									w-9 h-9
 									rounded-full
 									bg-white
+									flex justify-center items-center
 								`}
 							>	
+								<UserCircleIcon
+									className={`
+										w-9 h-9
+										text-accentText
+									`}
+								/>
 							</div>
 							<div
 								className={`
 									w-full
-									flex justify-between items-center
+									flex flex-col justify-between items-start
 								`}
 							>
 								<p
@@ -170,18 +181,96 @@ export default async function Home({ params }: ReviewPageParams) {
 								>
 									written {date_reviewed.releaseMonth} {date_reviewed.releaseDateInfo[2]}, {date_reviewed.releaseDateInfo[0]}
 								</p>
+
 							</div>
 						</div>
 						<div
 							className={`
-								mt-4
-								font-serif
+								mt-4	
 								text-secondaryText
 								whitespace-pre-line
 							`}
 						>
 							{review_data.review.review_text}
 						</div>
+					</section>
+					<section
+						className={`
+							comment-section
+							p-8 mt-8
+							bg-secondaryBackground
+							rounded-lg
+						`}
+					>
+						<div
+							className={`
+								flex justify-start items-center gap-4
+							`}
+						>
+							<ChatBubbleOvalLeftIcon 
+								className={`
+									w-8 h-8
+									text-accentText
+								`}
+							/>
+							<div
+								className={`
+									flex justify-start items-center gap-2
+								`}
+							>
+								<h3
+									className={`
+										font-bold
+										text-xl
+									`}
+								>
+									Comments
+								</h3>
+								<p
+									className={`
+										text-secondaryText
+									`}
+								>
+									(3)
+								</p>
+							</div>
+						</div>
+						<form>
+							<div
+								className={`
+									w-full h-fit mt-4 p-4
+									bg-tertiaryBackground
+									rounded-sm
+								`}
+							>
+								<input
+									placeholder={`Share your thoughts on this review...`}
+									className={`
+										w-full h-fit
+										focus:outline-none
+									`}
+								/>
+							</div>
+							<div
+								className={`
+									w-full mt-2
+									flex justify-end items-center
+								`}
+							>
+								<button
+									className={`
+										px-6 py-2
+										bg-primaryButton
+										rounded-sm
+										hover:bg-primaryButtonHover
+										hover:text-primaryTextHover
+										cursor-pointer
+									`}
+								>
+									Submit
+								</button>
+							</div>
+						</form>
 					</section>
 				</div>
             </main>
