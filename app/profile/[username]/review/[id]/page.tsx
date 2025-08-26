@@ -6,7 +6,7 @@ import getSelectedReview from "@/lib/supabase/getSelectedReview";
 import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import DisplayAlbumStats from "@/components/DisplayAlbumStats";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
+import CommentSection from "@/components/CommentSection";
 
 export default async function Home({ params }: ReviewPageParams) {
 
@@ -172,7 +172,7 @@ export default async function Home({ params }: ReviewPageParams) {
 										text-secondaryText
 									`}
 								>
-									Review by @{params.username}
+									Review by @{urlParams.username}
 								</p>
 								<p
 									className={`
@@ -194,84 +194,7 @@ export default async function Home({ params }: ReviewPageParams) {
 							{review_data.review.review_text}
 						</div>
 					</section>
-					<section
-						className={`
-							comment-section
-							p-8 mt-8
-							bg-secondaryBackground
-							rounded-lg
-						`}
-					>
-						<div
-							className={`
-								flex justify-start items-center gap-4
-							`}
-						>
-							<ChatBubbleOvalLeftIcon 
-								className={`
-									w-8 h-8
-									text-accentText
-								`}
-							/>
-							<div
-								className={`
-									flex justify-start items-center gap-2
-								`}
-							>
-								<h3
-									className={`
-										font-bold
-										text-xl
-									`}
-								>
-									Comments
-								</h3>
-								<p
-									className={`
-										text-secondaryText
-									`}
-								>
-									(3)
-								</p>
-							</div>
-						</div>
-						<form>
-							<div
-								className={`
-									w-full h-fit mt-4 p-4
-									bg-tertiaryBackground
-									rounded-sm
-								`}
-							>
-								<input
-									placeholder={`Share your thoughts on this review...`}
-									className={`
-										w-full h-fit
-										focus:outline-none
-									`}
-								/>
-							</div>
-							<div
-								className={`
-									w-full mt-2
-									flex justify-end items-center
-								`}
-							>
-								<button
-									className={`
-										px-6 py-2
-										bg-primaryButton
-										rounded-sm
-										hover:bg-primaryButtonHover
-										hover:text-primaryTextHover
-										cursor-pointer
-									`}
-								>
-									Submit
-								</button>
-							</div>
-						</form>
-					</section>
+					<CommentSection albumId={review_data.review.album_review_id} userId={user.id} />
 				</div>
             </main>
             <footer>
