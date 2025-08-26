@@ -7,6 +7,17 @@ import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import DisplayAlbumStats from "@/components/DisplayAlbumStats";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import CommentSection from "@/components/CommentSection";
+import getReviewId from "@/lib/supabase/getReviewId";
+import getInitialComments from "@/lib/supabase/getInitialComments";
+
+type CommentType = {
+	comment_text: string,
+	created_at: string,
+	id: string,
+	review_id: string,
+	updated_at: string,
+	user_id: string
+}[]
 
 export default async function Home({ params }: ReviewPageParams) {
 
@@ -18,8 +29,13 @@ export default async function Home({ params }: ReviewPageParams) {
 
     //fetch reviews
 	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
+	const reviewId = await getReviewId(review_data.review.album_review_id);
+	const initialCommentData = await getInitialComments(reviewId);
+	
 	console.log("Review Data: ", review_data.review);
 	console.log("Spotify Data: ", review_data.spotify);
+	console.log("Review Id: ", reviewId);
+	console.log("Initial Comment Data: ", initialCommentData);
 
 	const release_date = getReleaseDate(review_data.spotify.release_date);
 
@@ -32,10 +48,6 @@ export default async function Home({ params }: ReviewPageParams) {
 	}
 
 	const date_reviewed = format_date(review_data.review.date_review_written);
-
-	console.log("Date review written: ", date_reviewed);   
-    //sort reviews
-    //display reviews
 
     return (
         <div
@@ -194,7 +206,8 @@ export default async function Home({ params }: ReviewPageParams) {
 							{review_data.review.review_text}
 						</div>
 					</section>
-					<CommentSection albumId={review_data.review.album_review_id} userId={user.id} />
+ 
+					<CommentSection reviewId={reviewId} userId={user.id} commentData={initialCommentData} />
 				</div>
             </main>
             <footer>
