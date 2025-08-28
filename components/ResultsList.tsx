@@ -15,9 +15,10 @@ interface Results {
     artistMatchScore: number | undefined
 }
 
-export default function ResultsList ({ results, sk }: { results: any, sk: string }) {
+export default function ResultsList ({ results, userResults, searchType, sk }: { results: any, userResults?: any[], searchType?: string, sk: string }) {
 
-    const [loading, setLoading] = useState(Array(results.albums?.length || 0).fill(false));
+    const [loading, setLoading] = useState(Array(results?.albums?.length || 0).fill(false));
+    const [userLoading, setUserLoading] = useState(Array(userResults?.length || 0).fill(false));
     const router = useRouter();
 
     const slug = sk.replace(/-/g, ' ');
@@ -26,6 +27,13 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
         const newLoading = [...loading];
         newLoading[index] = true;
         setLoading(newLoading);
+        router.push(href);
+    };
+
+    const handleUserClick = (index: number, href: string) => {
+        const newUserLoading = [...userLoading];
+        newUserLoading[index] = true;
+        setUserLoading(newUserLoading);
         router.push(href);
     };
 
@@ -53,10 +61,82 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                         Search results for "{slug}"
                     </h2>
                 </div>
-                <ul className={`
-                    w-full h-fit
-                `}>
-                    {results.albums?.map((album: any, index: number) => {
+
+                {/* User Results Section */}
+                {userResults && userResults.length > 0 && (
+                    <div className={`w-full h-fit mt-6`}>
+                        <h3 className={`text-primaryText text-xl font-semibold mb-4`}>
+                            Users
+                        </h3>
+                        <ul className={`w-full h-fit`}>
+                            {userResults.map((user: any, index: number) => (
+                                <div key={`user-${index}`} onClick={() => handleUserClick(index, `/profile/${user.username}`)} className="relative cursor-pointer">
+                                    <li>
+                                        <div className={`
+                                            w-full h-fit p-4 my-4
+                                            flex justify-start items-center gap-4
+                                            bg-secondaryBackground
+                                            rounded-lg
+                                            transition-transform duration-200 ease-in-out
+                                            hover:scale-105
+                                            ${userLoading[index] ? 'filter brightness-50' : ''}
+                                        `}>
+                                            <div className="relative">
+                                                <div className={`
+                                                    w-24 h-24 rounded-full
+                                                    bg-accentText
+                                                    flex items-center justify-center
+                                                    text-3xl font-bold text-white
+                                                    ${userLoading[index] ? 'filter brightness-50' : ''}
+                                                `}>
+                                                    {user.username?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                                {userLoading[index] && (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="loader"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className={`
+                                                item-info
+                                                flex flex-col justify-center items-start
+                                                w-full h-full
+                                            `}>
+                                                <h3 className={`
+                                                    text-2xl
+                                                    hover:text-accentText
+                                                `}>
+                                                    @{user.username}
+                                                </h3>
+                                                {user.display_name && (
+                                                    <h4 className={`
+                                                        text-lg text-accentText
+                                                    `}>
+                                                        {user.display_name}
+                                                    </h4>
+                                                )}
+                                                {user.bio && (
+                                                    <p>
+                                                        {user.bio}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </li>
+                                </div>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* Albums Section */}
+                {results?.albums && results.albums.length > 0 && (
+                    <div className={`w-full h-fit mt-6`}>
+                        <h3 className={`text-primaryText text-xl font-semibold mb-4`}>
+                            Albums
+                        </h3>
+                        <ul className={`w-full h-fit`}>
+                            {results.albums.map((album: any, index: number) => {
                         const releaseDate = getReleaseDate(album.release_date);
 
                         return (
@@ -114,7 +194,9 @@ export default function ResultsList ({ results, sk }: { results: any, sk: string
                             </div>
                         )
                     })}                    
-                </ul>
+                        </ul>
+                    </div>
+                )}
             </div>
         </>
     )

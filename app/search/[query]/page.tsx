@@ -2,7 +2,7 @@ import NavBar from "@/components/NavBar";
 import getAccessToken from "@/lib/spotify/getAccessToken";
 import { createClient } from "@/lib/supabase/server";
 import { SearchPageParams } from "@/types/spotify";
-import { searchSpotify } from '@/lib/spotify/search'
+import { universalSearch } from '@/lib/spotify/search'
 import arrangeSearch from "@/lib/spotify/arrangeSearch";
 import ResultsList from "@/components/ResultsList";
 import Footer from "@/components/Footer";
@@ -13,16 +13,19 @@ export default async function Home({ params }: SearchPageParams) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    const token = await getAccessToken();
     const searchParams = await params;
-    const slug = encodeURIComponent(searchParams.query.replace(/-/g, ' '));
+    const slug = decodeURIComponent(searchParams.query.replace(/-/g, ' '));
 
-	// If searchParams begins with @ (%40) search for user
-    // Make api call to search spotify
-    const searchResults = await searchSpotify(slug)
-    // console.log('Search Results: ', searchResults);
-    const arrangedResults = await arrangeSearch(slug, searchResults);
-    console.log('Album list from arranged results: ', arrangedResults)
+    // Use universal search to handle both Spotify and user searches
+    const searchResults = await universalSearch(slug);
+    console.log('Universal Search Results: ', searchResults);
+    
+    // Only arrange Spotify results if they exist
+    let arrangedResults = null;
+    if (searchResults.spotify) {
+        arrangedResults = await arrangeSearch(slug, searchResults.spotify);
+        console.log('Album list from arranged results: ', arrangedResults);
+    }
 
     return (
         <div className={`
@@ -38,7 +41,12 @@ export default async function Home({ params }: SearchPageParams) {
                     flex justify-center items-start
                     mb-16
                 `}>
-                    <ResultsList results={arrangedResults} sk={searchParams.query} />
+                    <ResultsList 
+                        results={arrangedResults} 
+                        userResults={searchResults.users} 
+                        searchType={searchResults.type}
+                        sk={searchParams.query} 
+                    />
                 </div>
             </main>
             <footer>
