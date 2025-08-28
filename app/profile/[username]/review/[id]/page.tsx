@@ -9,6 +9,8 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 import CommentSection from "@/components/CommentSection";
 import getReviewId from "@/lib/supabase/getReviewId";
 import getInitialComments from "@/lib/supabase/getInitialComments";
+import ReviewRating from "@/components/ReviewRating";
+import Link from "next/link";
 
 type CommentType = {
 	comment_text: string,
@@ -40,7 +42,8 @@ export default async function Home({ params }: ReviewPageParams) {
 	const release_date = getReleaseDate(review_data.spotify.release_date);
 
 	const format_date = function(date)	{
-		let numerical_date: string[] = [date.getFullYear(), date.getMonth(), date.getDay()]
+		let numerical_date: string[] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
+		console.log("Numerical date: ", numerical_date);
 		const string_date: string = numerical_date.join("-");
 
 		const date_reviewed = getReleaseDate(string_date);
@@ -48,6 +51,10 @@ export default async function Home({ params }: ReviewPageParams) {
 	}
 
 	const date_reviewed = format_date(review_data.review.date_review_written);
+	console.log("Date reviewed: ", review_data.review.date_review_written);
+	console.log("Date reviewed formated: ", date_reviewed);
+
+	const activeUser = user ? true : false;
 
     return (
         <div
@@ -179,23 +186,52 @@ export default async function Home({ params }: ReviewPageParams) {
 									flex flex-col justify-between items-start
 								`}
 							>
-								<p
+								<div
 									className={`
-										text-secondaryText
+										w-full
+										flex justify-between items-start
 									`}
 								>
-									Review by @{urlParams.username}
-								</p>
-								<p
-									className={`
-										text-secondaryText
-									`}
-								>
-									written {date_reviewed.releaseMonth} {date_reviewed.releaseDateInfo[2]}, {date_reviewed.releaseDateInfo[0]}
-								</p>
+									<div
+										className={`
+											flex flex-col gap-1
+										`}
+									>
+										<div
+											className={`
+												flex justify-start items-center gap-2
+											`}
+										>
+											<p
+												className={`
+													text-secondaryText
+												`}
+											>
+												Review by
+											</p>
+											<Link
+												href={`/profile/${urlParams.username}`}
+												className={`
+													text-secondaryText
+													hover:text-accentText
+												`}
+											>
+												@{urlParams.username}
+											</Link>
+										</div>
+										<ReviewRating rating={review_data.review.album_rating} />
+									</div>
+									<p
+										className={`
+											text-secondaryText
+										`}
+									>
+										{date_reviewed.releaseMonth} {date_reviewed.releaseDateInfo[2]}, {date_reviewed.releaseDateInfo[0]}
+									</p>
+								</div>
 
 							</div>
-						</div>
+						</div> 
 						<div
 							className={`
 								mt-4	
@@ -207,7 +243,7 @@ export default async function Home({ params }: ReviewPageParams) {
 						</div>
 					</section>
  
-					<CommentSection reviewId={reviewId} userId={user.id} commentData={initialCommentData} />
+					<CommentSection reviewId={reviewId} userId={user ? user.id : null} commentData={initialCommentData} activeUser={activeUser}/>
 				</div>
             </main>
             <footer>

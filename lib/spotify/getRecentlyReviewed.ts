@@ -9,103 +9,82 @@ export default async function recentlyReviewed(reviewTotal: number) {
 
     try {
 
-        const { data, error } = await supabase
+        const { data: reviews, error } = await supabase
             .from('user_albums')
             .select('*')
             .not('review_text', 'is', null)
             .order('created_at', { ascending: false })
-            .limit(10)
+            .limit(reviewTotal || 10)
 
-        if (!data) {
+        if (error) {
             console.error('Error fetching reviews: ', error);
-        } else {
-            const reviews = data;
-
-            try {
-
-                let albums: any[]
-                let users: any[]
-                let likes: any[];
-
-                albums = await Promise.all(
-                    reviews.map(async (review) => {
-                        const { data, error } = await supabase
-                            .from('albums')
-                            .select('*')
-                            .eq('id', review.album_id)
-                            .single()
-
-                        if (error) {
-                            console.error(`Couldn't fetch album data: `, error);
-                            return null
-                        }
-
-                        if (!data) {
-                            console.log(`No album data found`);
-                            return null
-                        }
-
-                        const albumData = data;
-                        return albumData;
-                    })
-                )
-
-                users = await Promise.all(
-                    reviews.map(async (review) => {
-                        const { data, error } = await supabase
-                            .from('users')
-                            .select('*')
-                            .eq('id', review.user_id)
-                            .single()
-
-                        if (error) {
-                            console.error(`Couldn't fetch user data: `, error);
-                            return null
-                        }
-
-                        if (!data) {
-                            console.log(`No user data found`);
-                            return null
-                        }
-
-                        const userData = data;
-                        return userData;
-                    })
-                )
-
-                likes = await Promise.all(
-                    reviews.map(async (review) => {
-                        const { data, error } = await supabase
-                            .from('review_likes')
-                            .select('*')
-                            .eq('review_id', review.id)
-
-                        if (error) {
-                            console.error(`Couldn't fetch like data: `, error)
-                            return null
-                        }
-
-                        if (!data) {
-                            console.log(`No likes found`);
-                            return null
-                        }
-
-                        const likeData = data;
-                        return likeData;
-                    })
-                )
-
-                return {reviews, albums, users, likes}
-                
-            } catch (error) {
-                console.error('Error fetching album data: ', error);
-                return null    
-            } 
-
+            return null;
         }
+
+        if (!reviews || reviews.length === 0) {
+            console.log('No reviews found');
+            return { reviews: [], albums: [], users: [], likes: [] };
+        }
+
+        // Extract unique IDs for batch queries
+        const albumIds = [...new Set(reviews.map(review => review.album_id))];
+        const userIds = [...new Set(reviews.map(review => review.user_id))];
+        const reviewIds = reviews.map(review => review.id);
+
+        // Batch fetch all data in parallel
+        const [albumsResult, usersResult, likesResult] = await Promise.all([
+            supabase
+                .from('albums')
+                .select('*')
+                .in('id', albumIds),
+            supabase
+                .from('users')
+                .select('*')
+                .in('id', userIds),
+            supabase
+                .from('review_likes')
+                .select('*')
+                .in('review_id', reviewIds)
+        ]);
+
+        if (albumsResult.error) {
+            console.error('Error fetching albums: ', albumsResult.error);
+            return null;
+        }
+
+        if (usersResult.error) {
+            console.error('Error fetching users: ', usersResult.error);
+            return null;
+        }
+
+        if (likesResult.error) {
+            console.error('Error fetching likes: ', likesResult.error);
+            return null;
+        }
+
+        // Create lookup maps for O(1) access
+        const albumsMap = new Map(albumsResult.data?.map(album => [album.id, album]) || []);
+        const usersMap = new Map(usersResult.data?.map(user => [user.id, user]) || []);
+        
+        // Group likes by review_id for easy lookup
+        const likesMap = new Map();
+        likesResult.data?.forEach(like => {
+            if (!likesMap.has(like.review_id)) {
+                likesMap.set(like.review_id, []);
+            }
+            likesMap.get(like.review_id).push(like);
+        });
+
+        // Build arrays in the same order as reviews
+        const albums = reviews.map(review => albumsMap.get(review.album_id) || null);
+        const users = reviews.map(review => usersMap.get(review.user_id) || null);
+        const likes = reviews.map(review => likesMap.get(review.id) || []);
+
+        return { reviews, albums, users, likes };
+                
     } catch (error) {
-        console.log('Error fetching data: ', error);
-        return null
+        console.error('Error fetching data: ', error);
+        return null;
     }
 
 }

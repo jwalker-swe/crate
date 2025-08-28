@@ -82,52 +82,49 @@ export default async function Home() {
         console.error(`Error fetching reviews: `, reviewError);
         return null
       } 
-      if (!reviewData) {
+      if (!reviewData || reviewData.length === 0) {
         console.log(`No reviews found`);
         return null
       }
       
-      const reviewUserData = await Promise.all(
-        reviewData.map(async (review) => {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', review.user_id)
-            .single()
+      // Extract unique user and album IDs
+      const userIds = [...new Set(reviewData.map(review => review.user_id))];
+      const albumIds = [...new Set(reviewData.map(review => review.album_id))];
+      
+      // Fetch all users and albums in parallel with batch queries
+      const [usersResult, albumsResult] = await Promise.all([
+        supabase
+          .from('users')
+          .select('*')
+          .in('id', userIds),
+        supabase
+          .from('albums')
+          .select('*')
+          .in('id', albumIds)
+      ]);
 
-          const { data: albumData, error: albumError } = await supabase
-            .from('albums')
-            .select('*')
-            .eq('id', review.album_id)
-            .single()
+      if (usersResult.error) {
+        console.error(`Error fetching users: `, usersResult.error);
+      }
+      if (albumsResult.error) {
+        console.error(`Error fetching albums: `, albumsResult.error);
+      }
 
-          if (userError) {
-            console.error(`Error fetching user data from review: `, userError);
-            return {...review, user: null};
-          }
+      // Create lookup maps for O(1) access
+      const usersMap = new Map(usersResult.data?.map(user => [user.id, user]) || []);
+      const albumsMap = new Map(albumsResult.data?.map(album => [album.id, album]) || []);
 
-          if (albumError) {
-            console.error('Error fetching album data from review: ', albumError);
-          }
+      // Combine the data
+      const reviewUserData = reviewData.map(review => ({
+        ...review,
+        user: usersMap.get(review.user_id) || null,
+        album: albumsMap.get(review.album_id) || null
+      }));
 
-          if (userData && !albumData) {
-            return {...review, user: userData, album: null}
-          }
-
-          if (albumData && !userData) {
-            return {...review, user: null, album: albumData}
-          }
-
-          if (userData && albumData) {
-            return {...review, user: userData, album: albumData}
-          }
-          // return {...review, user: userData}
-        })
-      );
-
-      return reviewUserData;
+      return reviewUserData
     } catch (err) {
       console.error(`An unexpected error occurred while fetching recent reviews: `, err)
+      return null
     }
   }
 
@@ -414,3 +411,4 @@ export default async function Home() {
     </div>
   )
 }
+

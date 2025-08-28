@@ -8,45 +8,42 @@ export default async function getInitialComments(reviewId: string) {
 			.from("review_comments")
 			.select("*")
 			.eq("review_id", reviewId)
-			.order("created_at", { ascending: true });
+			.order("created_at", { ascending: false });
 
 		if (error) {
 			console.error("Error fetching comments: ", error);
+			return null;
 		}
 
-		if (!data) {
+		if (!data || data.length === 0) {
 			console.log("No comments found");
+			return { data: [], usernames: [] };
 		}
 
-		try {
-			let usernames = [];
-			
-			for (const element of data) {
-				const currentId = element.user_id;
+		// Extract unique user IDs from comments
+		const userIds = [...new Set(data.map(comment => comment.user_id))];
+		
+		// Batch fetch all usernames in a single query
+		const { data: usersData, error: usernameError } = await supabase
+			.from("users")
+			.select("id, username")
+			.in("id", userIds);
 
-				const { data: usernameData, error: usernameError } = await supabase
-					.from("users")
-					.select("username")
-					.eq("id", currentId)
-					.single()
-
-				if (error) {
-					return null;
-				}
-
-				if (!data) {
-					return null;
-				}
-
-				usernames.push(usernameData);
-			}
-
-			return { data, usernames };
-		} catch (error) {
-			 console.error("Error fetching comment username: ", error);
+		if (usernameError) {
+			console.error("Error fetching usernames: ", usernameError);
+			return null;
 		}
+
+		// Create a lookup map for O(1) access
+		const usersMap = new Map(usersData?.map(user => [user.id, user]) || []);
+		
+		// Build usernames array in the same order as comments
+		const usernames = data.map(comment => usersMap.get(comment.user_id) || null);
+
+		return { data, usernames };
 
 	} catch (error) {
 		console.error("Error fetching comment data: ", error);
+		return null;
 	}
 }

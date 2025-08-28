@@ -18,7 +18,7 @@ export async function searchSpotify(query: string) {
             throw new Error ('No results found')
         }
 
-        const searchData = response.json();
+        const searchData = await response.json();
         return searchData
     } catch (error) {
         console.error(`Error fetching data from Spotify: `, error)
