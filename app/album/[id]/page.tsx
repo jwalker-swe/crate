@@ -215,7 +215,7 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Desktop Styling
                     `}>
                         <SectionTitle title="Activity From Friends" />
-                        <ViewAll />
+                        <ViewAll pageLink="activity" />
                     </div>
                     <div className={`
                         //General Styling
@@ -240,7 +240,7 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Desktop Styling
                     `}>
                         <SectionTitle title="Popular Reviews" />
-                        <ViewAll />
+                        <ViewAll pageLink="reviews" />
                     </div>
                     <div className={`
                         //General Styling
@@ -283,7 +283,7 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Desktop Styling
                     `}>
                         <SectionTitle title="Popular Lists" />
-                        <ViewAll />
+                        <ViewAll pageLink="lists" />
                     </div>
                     <div className={`
                         //General Styling
