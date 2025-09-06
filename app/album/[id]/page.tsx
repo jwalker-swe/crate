@@ -19,6 +19,8 @@ import UserActivityIcon from "@/components/UserActivityIcon";
 import AlbumPageInfo from '@/components/AlbumPageInfo';
 import LogOptions from "@/components/LogOptions";
 import { createClient } from "@/lib/supabase/server";
+import PopularReviewPreview from "@/components/PopularReviewPreview";
+import getAlbumIdBySpotifyId from "@/lib/supabase/getAlbumIdBySpotifyId";
 
 
 type StateType = string;
@@ -30,12 +32,15 @@ export default async function Home({ params }: AlbumPageParams) {
     const { data: { user } }: any = await supabase.auth.getUser();  
 
     // Retrieve album id from url params
-    const { id } = await params;
+    const urlParams = await params;
+    const spotifyId = urlParams.id;
+    const albumId = await getAlbumIdBySpotifyId(spotifyId);
+
     const url = process.env.BASE_URL;
 
     //Determine if album is present in Crate database if not fetch data from Spotify Web API
     //Done by making an internal API call
-    const res = await fetch(`${url}/api/getAlbumData/${id}`);
+    const res = await fetch(`${url}/api/getAlbumData/${spotifyId}`);
 
     if (!res.ok) {
         console.error('Error fetching album data: ', res.status)
@@ -48,8 +53,8 @@ export default async function Home({ params }: AlbumPageParams) {
     const albumInfo = await res.json();
 
     // Fetch latest data from Spotify to ensure database is up to date
-    const spotifyAlbumInfo = await getAlbumById(id);
-    console.log(`Spotify album info: `, spotifyAlbumInfo);
+    const spotifyAlbumInfo = await getAlbumById(spotifyId);
+
     // List of fileds to check if up to date
     const fieldsToCompare = {
         title: albumInfo.title !== spotifyAlbumInfo.name,
@@ -63,7 +68,7 @@ export default async function Home({ params }: AlbumPageParams) {
     const isOutdated = Object.values(fieldsToCompare).some(isFieldOutdated => isFieldOutdated);
 
     if (isOutdated) {
-        console.log(`Album data for ${id} is outdated. Updating...`);
+        console.log(`Album data for ${spotifyId} is outdated. Updating...`);
         const { error } = await supabase
             .from('albums')
             .update({
@@ -73,7 +78,7 @@ export default async function Home({ params }: AlbumPageParams) {
                 artists: spotifyAlbumInfo.artists,
                 tracks: spotifyAlbumInfo.tracks,
             })
-            .eq('spotify_id', id);
+            .eq('spotify_id', spotifyId);
 
         if (error) {
             console.error('Error updating album data: ', error);
@@ -86,11 +91,10 @@ export default async function Home({ params }: AlbumPageParams) {
             albumInfo.artists = spotifyAlbumInfo.artists,
             albumInfo.tracks = spotifyAlbumInfo.tracks
 
-            console.log(`Successfully updated album data for ${id}`);
+            console.log(`Successfully updated album data for ${spotifyId}`);
         }
     }
 
-    console.log('Album Info: ', albumInfo);
     
     // Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
@@ -186,7 +190,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                         </span>
                                     </div>
                                 </div>
-                                <DisplayAlbumStats id={id} rating={albumInfo.rating} />
+                                <DisplayAlbumStats id={spotifyId} rating={albumInfo.rating} />
                                 <LogOptions album={albumInfo} session={user ? true : false} />
                             </div>
                         </div>
@@ -244,13 +248,11 @@ export default async function Home({ params }: AlbumPageParams) {
                     </div>
                     <div className={`
                         //General Styling
-                        grid grid-cols-1 grid-rows-2 gap-4
                         mb-16
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <AlbumPageReview />
-                        <AlbumPageReview />
+                       <PopularReviewPreview albumId={albumId} nReviewsToDisplay={2}/> 
                     </div>
                     {/* <div className={`
                         //General Styling
