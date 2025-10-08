@@ -3,6 +3,7 @@ import getAccessToken from "@/lib/spotify/getAccessToken";
 export default async function getTopAlbums() {
 
     const token = await getAccessToken();
+    console.log('Spotify token:', token ? 'Found' : 'Not found');
 
     if (!token) {
         console.error('Unable to retrieve Spotify access token');

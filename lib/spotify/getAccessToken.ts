@@ -11,8 +11,8 @@ export default async function getAccessToken() {
         const clientID = process.env.SPOTIFY_API_CLIENT_ID;
         const clientSecret = process.env.SPOTIFY_API_CLIENT_SECRET;
 
-        // console.log('Client ID: ', clientID);
-        // console.log('Client Secret: ', clientSecret);
+        console.log('Client ID exists:', !!clientID);
+        console.log('Client Secret exists:', !!clientSecret);
 
         if (!clientID || !clientSecret) {
             console.error('Missing SPOTIFY_API_CLIENT_ID or SPOTIFY_API_CLIENT_SECRET');

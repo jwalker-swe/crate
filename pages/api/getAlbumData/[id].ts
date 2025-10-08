@@ -48,6 +48,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Get Access Token for Spotify Web Api
                 const token = await getAccessToken()
 
+                if (!token) {
+                    return res.status(500).json({
+                        message: 'Unable to authenticate with Spotify API'
+                    })
+                }
+
                 // Fetch album data from Spotify Web Api
                 const spotifyRes = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
                     headers: {
@@ -56,7 +62,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 })  
 
                 if (!spotifyRes.ok) {
-                    throw new Error('Failed to fetch album from Spotify');
+                    if (spotifyRes.status === 404) {
+                        return res.status(404).json({
+                            message: 'Album not found'
+                        })
+                    }
+                    throw new Error(`Spotify API error: ${spotifyRes.status}`);
                 } else {
                     const data = await spotifyRes.json()  
                     const spotifyAlbumData: AlbumDataProps = {
@@ -76,6 +87,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             } catch (err) {
                 console.error('An unexpected error occurred while fetching data from Spotify: ', err)
+                return res.status(500).json({
+                    message: 'Failed to fetch album data from Spotify'
+                })
             }
         } else {
 

@@ -44,6 +44,7 @@ export default async function Home({ params }: AlbumPageParams) {
 
     if (!res.ok) {
         console.error('Error fetching album data: ', res.status)
+        throw new Error(`Failed to fetch album data: ${res.status}`);
     }
 
     if (res.ok) {
