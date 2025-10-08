@@ -78,7 +78,7 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
             }
         }
 
-        checkIfViewingOwnProfile({userId, profile})
+        checkIfViewingOwnProfile({userId, profile: profile.profile})
     }, [userId, profile])
 
 
@@ -103,12 +103,14 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
 			}
 		}
 		
-		checkIfFollowing({profile, userId})
+		if (userId) {
+			checkIfFollowing({profile: profile.profile, userId})
+		}
 	}, [userId, profile])
 
 
 const followUser = async function({profile, userId}: {profile: string, userId: string}) {
-	const { data: { user } } = await supabase
+	const { data: { user }, error } = await supabase
 		.from('users')
 		.select('*')
 		.eq('username', profile)
@@ -120,14 +122,14 @@ const followUser = async function({profile, userId}: {profile: string, userId: s
 
 	const profileId = await user.id;
 
-	const { error } = await supabase
+	const { error: followError } = await supabase
 		.from('follows')
 		.insert({ 
 					following_id: profile,
 					follower_id: userId		
 				})
 	
-	if (error) {
+	if (followError) {
 		console.error('Error following user: ', profile)
 	}
 
@@ -142,7 +144,7 @@ const followUser = async function({profile, userId}: {profile: string, userId: s
 		if (!following) {
 			return (
 				<button onClick={() => {
-					followUser({profile, userId})	
+					followUser({profile: profile.profile, userId})	
 				}} className={`
 					w-[78px] h-8
 					rounded-lg

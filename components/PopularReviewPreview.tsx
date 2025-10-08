@@ -3,6 +3,7 @@ import Link from "next/link";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ReviewRating from "./ReviewRating";
 import LikeButton from "./LikeButton";
+import { createClient } from "@/lib/supabase/server";
 
 
 export default async function PopularReviewPreview({albumId, nReviewsToDisplay}: {albumId: string, nReviewsToDisplay: number}) {
@@ -18,13 +19,33 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
         )
     }
 
+    const supabase = await createClient();
+    const { data: { user } }: any = await supabase.auth.getUser();
+
+    let likedReviewIds = new Set<string>();
+    if (user) {
+        const reviewIds = reviewData.reviews.map((r: any) => r.id);
+        const { data: likedRows, error: likedError }: any = await supabase
+            .from('review_likes')
+            .select('review_id')
+            .eq('user_id', user.id)
+            .in('review_id', reviewIds);
+
+        if (!likedError && likedRows) {
+            likedReviewIds = new Set(likedRows.map((row: any) => row.review_id));
+        }
+    }
+
     return (
         <div
             className={`
                 flex flex-col gap-4
             `}
         >
-            {reviewData.reviews.map((review: any, index: number) => (
+            {reviewData.reviews.map((review: any, index: number) => {
+                const liked = likedReviewIds.has(review.id);
+                const likeTotal = review.review_likes?.[0]?.count || 0;
+                return (
                 <div key={index} className={`
                     //General Styling
                     flex justify-start items-start gap-4
@@ -85,7 +106,7 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                                 </span>
                             </Link>
                         </div>
-                        <Link href='#'>
+                        <Link href={`#`}>
                             <div className={`
                                 //General Styling
                                 flex flex-col justify-start items-start
@@ -125,13 +146,13 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                             //Desktop Styling
                         `}>
                             <div className={`
-                                rating-container
                                 //General Styling
-                                flex justify-center *:items-center 
+                                flex justify-center items-center gap-4
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 <ReviewRating rating={review.rating} />
+                                <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={likeTotal} user={user ? true : false} />
                             </div>
                             <Link href={`/profile/${reviewData.usernames[index]}/review/${reviewData.albums[index].spotify_id}`}>
                                 <p
@@ -147,7 +168,8 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                         </div>
                     </div>
                 </div>        
-            ))}
+                )
+            })}
         </div>
     )
 

@@ -11,7 +11,6 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        custom: ['montreal', 'sans-serif'],
         'open-sans': ['Open Sans', 'sans-serif'],
         system: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
       },

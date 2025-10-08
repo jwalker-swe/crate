@@ -12,9 +12,9 @@ import RecentlyListened from "@/components/RecentlyListened";
 // import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 type ProfileProps = {
-    params: {
+    params: Promise<{
         username: string
-    }
+    }>
 }
 
 export default async function Profile({ params }: ProfileProps) {
@@ -25,7 +25,7 @@ export default async function Profile({ params }: ProfileProps) {
     const { data: { user }, error } = await supabase.auth.getUser()
 
 	async function checkIfFollowing(userId: string, username: string) {
-		const { data: { user }, error } = await supabase
+		const { data, error } = await supabase
 			.from('users')
 			.select('*')
 			.eq('username', username)
@@ -45,7 +45,7 @@ export default async function Profile({ params }: ProfileProps) {
 		}
 	}
 
-	const following = checkIfFollowing(user?.id, username);
+	const following = user?.id ? checkIfFollowing(user.id, username) : Promise.resolve(false);
 
     return (
         <div className={`
@@ -92,7 +92,7 @@ export default async function Profile({ params }: ProfileProps) {
                                     {/* <DisplayName /> */}
                                     Jordan Walker
                                 </h1>
-                                <FollowButton profile={username} activeUser={user?.id} following={following}/>
+                                <FollowButton profile={{profile: username}} user={user?.id || null}/>
                             </div>
                             <h2 className={`
                                 username
@@ -172,7 +172,7 @@ export default async function Profile({ params }: ProfileProps) {
                                 flex justify-between items-center
                             `}>
                                 <SectionTitle title={'Recently Reviewed'} />
-                                <ViewAll />
+                                <ViewAll pageLink="reviews" />
                             </div>
                             <RecentlyListened username={username} />
                             {/* Component to feth favorite albums based on username */}

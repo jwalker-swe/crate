@@ -1,7 +1,6 @@
 import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
 import { createClient } from "@/lib/supabase/server";
-import { ReviewPageParams } from "@/types/spotify";
 import getSelectedReview from "@/lib/supabase/getSelectedReview";
 import getReleaseDate from "@/lib/spotify/getReleaseDate";
 import DisplayAlbumStats from "@/components/DisplayAlbumStats";
@@ -21,7 +20,7 @@ type CommentType = {
 	user_id: string
 }[]
 
-export default async function Home({ params }: ReviewPageParams) {
+export default async function Home({ params }: { params: Promise<{ id: string; username: string }> }) {
 
     const urlParams = await params;
 	console.log('Params: ', urlParams);
@@ -31,17 +30,17 @@ export default async function Home({ params }: ReviewPageParams) {
 
     //fetch reviews
 	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
-	const reviewId = await getReviewId(review_data.review.album_review_id);
+	const reviewId = await getReviewId(review_data?.review.album_review_id);
 	const initialCommentData = await getInitialComments(reviewId);
 	
-	console.log("Review Data: ", review_data.review);
-	console.log("Spotify Data: ", review_data.spotify);
+	console.log("Review Data: ", review_data?.review);
+	console.log("Spotify Data: ", review_data?.spotify);
 	console.log("Review Id: ", reviewId);
 	console.log("Initial Comment Data: ", initialCommentData);
 
-	const release_date = getReleaseDate(review_data.spotify.release_date);
+	const release_date = getReleaseDate(review_data?.spotify.release_date);
 
-	const format_date = function(date)	{
+	const format_date = function(date: any)	{
 		let numerical_date: string[] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
 		console.log("Numerical date: ", numerical_date);
 		const string_date: string = numerical_date.join("-");
@@ -50,8 +49,8 @@ export default async function Home({ params }: ReviewPageParams) {
 		return date_reviewed;
 	}
 
-	const date_reviewed = format_date(review_data.review.date_review_written);
-	console.log("Date reviewed: ", review_data.review.date_review_written);
+	const date_reviewed = format_date(review_data?.review.date_review_written);
+	console.log("Date reviewed: ", review_data?.review.date_review_written);
 	console.log("Date reviewed formated: ", date_reviewed);
 
 	const activeUser = user ? true : false;
@@ -85,7 +84,7 @@ export default async function Home({ params }: ReviewPageParams) {
 								//Mobile Styling
 								//Desktop Styling
 							">
-								<img src={review_data.review.album_cover_art} width={320} height={320} alt={`album cover for ${review_data.spotify.name}`} 
+								<img src={review_data?.review.album_cover_art} width={320} height={320} alt={`album cover for ${review_data?.spotify.name}`} 
 									className={`
 										//General Styling
 										rounded-lg
@@ -114,7 +113,7 @@ export default async function Home({ params }: ReviewPageParams) {
 											//Mobile Styling
 											//Desktop Styling
 										`}>
-											{review_data.spotify.name}
+											{review_data?.spotify.name}
 										</h1>
 										<h2 className={`
 											artist-name
@@ -123,7 +122,7 @@ export default async function Home({ params }: ReviewPageParams) {
 											//Mobile Styling
 											//Desktop Styling
 										`}>
-											{review_data.spotify.artists[0].name}
+											{review_data?.spotify.artists[0].name}
 										</h2>
 										<div className={`
 											album-info-container
@@ -143,7 +142,7 @@ export default async function Home({ params }: ReviewPageParams) {
 											`}>
 											</div>
 											<span className={`total-tracks`}>
-												{`${review_data.spotify.total_tracks} Songs`}
+												{`${review_data?.spotify.total_tracks} Songs`}
 											</span>
 										</div>
 									</div>
@@ -219,7 +218,7 @@ export default async function Home({ params }: ReviewPageParams) {
 												@{urlParams.username}
 											</Link>
 										</div>
-										<ReviewRating rating={review_data.review.album_rating} />
+										<ReviewRating rating={review_data?.review.album_rating} />
 									</div>
 									<p
 										className={`
@@ -239,11 +238,10 @@ export default async function Home({ params }: ReviewPageParams) {
 								whitespace-pre-line
 							`}
 						>
-							{review_data.review.review_text}
+							{review_data?.review.review_text}
 						</div>
 					</section>
- 
-					<CommentSection reviewId={reviewId} userId={user ? user.id : null} commentData={initialCommentData} activeUser={activeUser}/>
+					<CommentSection reviewId={reviewId} userId={user ? user.id : null} commentData={initialCommentData ?? { data: [], usernames: [] }} activeUser={activeUser}/>
 				</div>
             </main>
             <footer>

@@ -20,11 +20,16 @@ export default async function TopAlbumsSection() {
       //Mobile Styling
       //Desktop Styling
     `}>
-      <AlbumPreview coverHeight={224} id={albums[0].id} name={albums[0].title} artist={albums[0].artist} imageUrl={albums[0].images} />
-      <AlbumPreview coverHeight={224} id={albums[1].id} name={albums[1].title} artist={albums[1].artist} imageUrl={albums[1].images} />
-      <AlbumPreview coverHeight={224} id={albums[2].id} name={albums[2].title} artist={albums[2].artist} imageUrl={albums[2].images} />
-      <AlbumPreview coverHeight={224} id={albums[3].id} name={albums[3].title} artist={albums[3].artist} imageUrl={albums[3].images} />
-      <AlbumPreview coverHeight={224} id={albums[4].id} name={albums[4].title} artist={albums[4].artist} imageUrl={albums[4].images} />
+      {albums.slice(0, 5).map((album: any, index: number) => (
+        <AlbumPreview
+          key={album.id || index}
+          coverHeight={224}
+          id={album.id}
+          name={album.title}
+          artist={album.artist}
+          imageUrl={album.images}
+        />
+      ))}
     </ul>
   );
 }

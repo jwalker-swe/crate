@@ -6,12 +6,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
-type CommentType = {
-	comment: string,
-	user: string,
-	date_posted: string,
-	total_likes: number
-}[]
+type CommentsPayload = { data: any[], usernames: any[] }
 
 
 const postComment = async function(reviewId: string, userId: string | null, comment: string) {
@@ -43,7 +38,7 @@ const postComment = async function(reviewId: string, userId: string | null, comm
 	}
 }
 
-export default function CommentSection ({reviewId, userId, commentData, activeUser}: {reviewId: string, userId: string, commentData: CommentType, activeUser: boolean }) {
+export default function CommentSection ({reviewId, userId, commentData, activeUser}: {reviewId: string, userId: string | null, commentData: CommentsPayload, activeUser: boolean }) {
 
 	const [ commentText, setCommentText ] = useState<string>('');
 	const [ comments, setComments ] = useState(commentData);

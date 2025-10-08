@@ -32,7 +32,11 @@ function getReleaseMonthName(numericalMonth: string): any {
 
 }
 
-export default function getReleaseDate(releaseDate: string) {
+export default function getReleaseDate(releaseDate?: string) {
+
+    if (!releaseDate || typeof releaseDate !== 'string') {
+        return { releaseDateInfo: [], releaseMonth: null };
+    }
 
     releaseDateInfo = releaseDate.split('-', 3);
     releaseMonth = getReleaseMonthName(releaseDateInfo[1]);

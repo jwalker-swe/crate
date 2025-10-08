@@ -12,7 +12,7 @@ export default async function getTopAlbums() {
     try {
         const currentYear = new Date().getFullYear();
         const oneMonthAgo = new Date();
-        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 60);
 
         const searchQuery = `year:${currentYear}`;
         const encodedQuery = encodeURIComponent(searchQuery);

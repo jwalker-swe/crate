@@ -66,9 +66,9 @@ export type AlbumType = {
 }
 
 export interface AlbumPageParams {
-    params: {
+    params: Promise<{
         id: string;
-    }
+    }>
 }
 
 export interface AlbumInfo {
@@ -97,13 +97,13 @@ export type AlbumPageInfoProps = {
 }
 
 export interface SearchPageParams {
-    params: {
+    params: Promise<{
         query: string;
-    }
+    }>
 }
 
 export interface ReviewPageParams {
-    params: {
+    params: Promise<{
         sortMethod: string
-    }
+    }>
 }

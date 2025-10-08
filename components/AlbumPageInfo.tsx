@@ -103,7 +103,7 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                 }}>
                     Performed By
                 </li>
-                <li className={`
+                {/* <li className={`
                     //General Styling
                     mr-4
                     ${infoState === 'Producers' ? 'text-accentText border-accentText': 'border-secondaryText'}
@@ -117,7 +117,7 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     }
                 }}>
                     Producers
-                </li>
+                </li> */}
             </ul>
             <div className={`
                 //General Styling

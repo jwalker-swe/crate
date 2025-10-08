@@ -22,3 +22,51 @@
   font-display: swap;
   src: url(/fonts/open-sans/open-sans-bold.woff2) format('woff2');
 }
+
+@font-face {
+  font-family: 'montreal';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-thin-webfont.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'montreal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-book-webfont.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'montreal';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-medium-webfont.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'montreal';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-semibolditalic-webfont.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'montreal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-bold-webfont.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'montreal';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/pp-neue-montreal/ppneuemontreal-italic-webfont.woff2) format('woff2');
+}

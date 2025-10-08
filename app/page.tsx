@@ -11,7 +11,6 @@ import { Suspense } from "react";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
-import getTopAlbums from '@/lib/spotify/getTopAlbums';
 import { createClient } from "@/lib/supabase/client";
 import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
@@ -29,7 +28,6 @@ export default async function Home() {
 
 
   //Get Album Data
-  const recentTopAlbums: any = await getTopAlbums();
 
   interface AlbumProps {
     title: string[],
@@ -43,13 +41,6 @@ export default async function Home() {
   let albumID: string[] = [];
   let albumImage: string[] = [];
 
-  recentTopAlbums.forEach((item: any) => {
-    albumTitle.push(item.album.name);
-    albumArtist.push(item.album.artists[0].name)
-    albumID.push(item.album.id);
-    albumImage.push(item.album.images[0].url)
-
-  })
 
   let albums: AlbumProps = {
     title: albumTitle,
@@ -287,7 +278,7 @@ export default async function Home() {
           //Desktop Styling
         `}>
           <SectionTitle title="Recent Reviews" />
-          <ViewAll />
+          <ViewAll pageLink="reviews" />
         </div>
         <HomePageReviewPreview recentReviewData={recentReviews} />
       </section>
@@ -335,7 +326,7 @@ export default async function Home() {
           //Desktop Styling
         `}>
           <SectionTitle title={'Latest News'} />
-          <ViewAll />
+          <ViewAll pageLink="news" />
         </div>
         <div className={`
           //General Styling
