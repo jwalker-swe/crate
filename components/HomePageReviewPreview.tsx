@@ -19,7 +19,7 @@ const getFillPercent = function(rating: number, index: number) {
 
 export default function HomePageReviewPreview({ recentReviewData }: { recentReviewData: any }) {
 
-    const [loading, setLoading] = useState(Array(recentReviewData.length).fill(false));
+    const [loading, setLoading] = useState(Array((recentReviewData || []).length).fill(false));
     const router = useRouter();
 
     const handleClick = (index: number, href: string) => {
@@ -30,6 +30,22 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
     };
 
     console.log(recentReviewData);
+
+    // Handle case where recentReviewData is null or undefined
+    if (!recentReviewData || recentReviewData.length === 0) {
+        return (
+            <div className={`
+                //General Styling
+                flex justify-center items-center
+                text-secondaryText
+                py-8
+                //Mobile Styling
+                //Desktop Styling
+            `}>
+                No recent reviews found.
+            </div>
+        );
+    }
 
     return (
         <div className={`

@@ -36,7 +36,7 @@ export default async function Home({ params }: AlbumPageParams) {
     const spotifyId = urlParams.id;
     const albumId = await getAlbumIdBySpotifyId(spotifyId);
 
-    const url = process.env.BASE_URL;
+    const url = process.env.BASE_URL || 'http://localhost:3000';
 
     //Determine if album is present in Crate database if not fetch data from Spotify Web API
     //Done by making an internal API call
