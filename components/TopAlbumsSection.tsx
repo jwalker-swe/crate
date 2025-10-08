@@ -4,6 +4,23 @@ import AlbumPreview from './AlbumPreview';
 export default async function TopAlbumsSection() {
   const recentTopAlbums: any = await getTopAlbums();
 
+  // Handle case where getTopAlbums returns null or undefined
+  if (!recentTopAlbums || !Array.isArray(recentTopAlbums)) {
+    return (
+      <div className={`
+        //General Styling
+        w-[1200px]
+        flex justify-center items-center
+        text-secondaryText
+        py-8
+        //Mobile Styling
+        //Desktop Styling
+      `}>
+        No albums available at the moment.
+      </div>
+    );
+  }
+
   let albums = recentTopAlbums.map((item: any) => ({
     title: item.album.name,
     artist: item.album.artists[0].name,

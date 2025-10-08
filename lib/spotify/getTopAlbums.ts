@@ -6,7 +6,7 @@ export default async function getTopAlbums() {
 
     if (!token) {
         console.error('Unable to retrieve Spotify access token');
-        return;
+        return [];
     }
 
     try {
@@ -63,5 +63,6 @@ export default async function getTopAlbums() {
 
     } catch (err) {
         console.error('Error fetching top albums: ', err);
+        return [];
     }
 }
