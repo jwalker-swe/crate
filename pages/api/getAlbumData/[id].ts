@@ -24,6 +24,7 @@ type AlbumDataProps = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const { id } = req.query
+    console.log('API called with album ID:', id)
 
     // Determine by id if album is present in Crate database
     // return album info to populate page if it is
@@ -41,32 +42,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.error('Error fetching data from Crate: ', albumError)
         }
 
-        if (!albumData) {
+        if (!albumData || albumError) {
+            console.log('Album not found in database, fetching from Spotify...')
 
             try {
 
                 // Get Access Token for Spotify Web Api
                 const token = await getAccessToken()
+                console.log('Spotify token obtained:', !!token)
 
                 if (!token) {
+                    console.error('No Spotify token available')
                     return res.status(500).json({
                         message: 'Unable to authenticate with Spotify API'
                     })
                 }
 
                 // Fetch album data from Spotify Web Api
+                console.log('Fetching album from Spotify:', id)
                 const spotifyRes = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     },
                 })  
 
+                console.log('Spotify API response status:', spotifyRes.status)
+
                 if (!spotifyRes.ok) {
                     if (spotifyRes.status === 404) {
+                        console.error('Album not found on Spotify:', id)
                         return res.status(404).json({
                             message: 'Album not found'
                         })
                     }
+                    console.error('Spotify API error:', spotifyRes.status)
                     throw new Error(`Spotify API error: ${spotifyRes.status}`);
                 } else {
                     const data = await spotifyRes.json()  
