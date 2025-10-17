@@ -120,12 +120,12 @@ const followUser = async function({profile, userId}: {profile: string, userId: s
 		console.error('Error fetching profile data: ', profile)
 	}
 
-	const profileId = await user.id;
+	const followingId = await user.id;
 
 	const { error: followError } = await supabase
 		.from('follows')
 		.insert({ 
-					following_id: profile,
+					following_id: followingId,
 					follower_id: userId		
 				})
 	
