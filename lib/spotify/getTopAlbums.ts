@@ -25,7 +25,7 @@ export default async function getTopAlbums() {
                 Authorization: `Bearer ${token}`,
             },
             next: {
-                revalidate: 604800 // Revalidate every week
+                revalidate: 86400 // Revalidate every week
             }
         });
 
@@ -59,6 +59,8 @@ export default async function getTopAlbums() {
             .map((album: any) => ({ album, popularity: album.popularity }))
             .filter((item: any) => item.popularity >= 75)
             .sort((a: any, b: any) => b.popularity - a.popularity);
+
+        console.log('Popular Albums: ', popularAlbums);
 
         return popularAlbums;
 
