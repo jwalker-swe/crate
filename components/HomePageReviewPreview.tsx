@@ -91,7 +91,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                         </div>
                         <div className={`
                             //General Styling
-                            flex flex-col items-start justify-center gap-2
+                            flex flex-col items-start justify-start gap-2 h-[140]
                             flex-grow
                             //Mobile Styling
                             //Desktop Styling
@@ -158,7 +158,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                             </Link>
                             <p className={`
                                 //General Styling
-                                text-xs text-primaryText line-clamp-3
+                                text-xs text-primaryText line-clamp-3 flex-grow
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
@@ -178,7 +178,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                 <div className={`
                                     rating-container
                                     //General Styling
-                                    flex justify-center items-center
+                                    flex justify-center items-center 
                                     //Mobile Styling
                                     //Desktop Styling
                                 `}>
