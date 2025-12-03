@@ -5,18 +5,18 @@ export default function Footer() {
     return (
         <div className={`
             //General Styling
-            w-full h-60
-            py-12
+            w-full h-auto min-h-[400px]
+            py-8 px-4
             border-t-[1px] border-primaryBorder
-            //Mobile Styling
-            //Desktop Styling
+            md:py-12 md:px-8
+            lg:h-60 lg:px-12
         `}>
             <div className={`
                 //General Styling
-                grid grid-cols-4 gap-8
-                mx-auto
-                //Mobile Styling
-                //Desktop Styling
+                grid grid-cols-1 gap-8
+                mx-auto max-w-[1200px]
+                sm:grid-cols-2
+                lg:grid-cols-4
             `}>
                 <div className={`
                     //General Styling

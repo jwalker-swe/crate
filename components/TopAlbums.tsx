@@ -22,15 +22,19 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
         <>
             <div
                 className={`
-                    w-[1200px] h-fit mt-16
+                    w-full max-w-[1200px] h-fit mt-8 px-4
+                    lg:w-[1200px] lg:mt-16 lg:px-0
                 `}
             >
                 <SectionTitle title="Popular this week"/>
             </div>
             <div
                 className={`
-                    w-[1200px] h-fit mt-4
-                    grid grid-cols-${columns} grid-rows-1 gap-${gap}
+                    w-full max-w-[1200px] h-fit mt-4 px-4
+                    grid grid-cols-1 gap-4
+                    sm:grid-cols-2
+                    md:grid-cols-3
+                    lg:w-[1200px] lg:grid-cols-${columns} lg:gap-${gap} lg:px-0
                 `}
             >
                 {albums.map((album, index) => {

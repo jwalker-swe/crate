@@ -49,41 +49,51 @@ export default async function Profile({ params }: ProfileProps) {
 
     return (
         <div className={`
-            w-[1200px] h-fit
-            mx-auto py-4
+            w-full max-w-[1200px] h-fit
+            mx-auto py-4 px-4
+            lg:w-[1200px] lg:px-0
         `}>
             <NavBar session={user ? true : false} />
             <div className={`
                 profile-body
-                w-[896px]
+                w-full max-w-[896px]
                 mx-auto
                 pb-18
+                lg:w-[896px]
             `}>
                 <div className={`
                     profile-header
                     w-full
-                    mt-16
-                    flex justify-between items-start
+                    mt-8
+                    flex flex-col gap-4
+                    md:flex-row md:justify-between md:items-start md:mt-16
                 `}>
                     <div className={`
                         user-profile-info
-                        flex justify-start items-center gap-4
+                        flex flex-col items-center gap-4
+                        md:flex-row md:items-start
                     `}>
                         <div className={`
                             user-avatar-container
-                            w-24 h-24
+                            w-20 h-20
+                            md:w-24 md:h-24
                             rounded-full
                             bg-white
+                            flex-shrink-0
                         `}>
-                            <UserCircleIcon width={96} height={96} className={`text-accentText`} />
+                            <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
                         </div>
                         <div className={`
                             user-info-container
-                            w-96
-                            flex flex-col items-start justify-center
+                            w-full
+                            md:w-96
+                            flex flex-col items-center justify-center
+                            md:items-start
                         `}>
                             <div className={`
-                                flex justify-between items-center gap-8
+                                flex flex-col items-center gap-2
+                                md:flex-row md:justify-between md:items-center md:gap-8
+                                w-full
                             `}>
                                 <h1 className={`
                                     text-2xl

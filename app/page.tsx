@@ -125,8 +125,9 @@ export default async function Home() {
   return (
     <div className={`
       content-container
-      w-[1200px] h-fit
-      mx-auto py-4
+      w-full max-w-[1200px] h-fit
+      mx-auto py-4 px-4
+      lg:w-[1200px] lg:px-0
     `}>
       {/*NavBar*/}
       <NavBar session={user ? true : false} />
@@ -134,19 +135,27 @@ export default async function Home() {
       <section className={`
         hero-section
         //General Styling
-        w-full h-96
-        mt-16 mb-8
+        w-full h-auto min-h-[300px]
+        mt-8 mb-8
         font-sans
         flex flex-col items-center justify-center
-        //Mobile Styling
-        //Desktop Styling
+        px-4
+        md:min-h-[400px] md:mt-12 md:mb-8
+        lg:h-96 lg:mt-16 lg:px-0
       `}>
         <h1 className={`
           //General Styling
-          text-6xl text-center
+          text-xl text-center
           font-sans font-bold 
-          //Mobile Styling
-          Desktop Styling
+          leading-tight
+          line-clamp-2
+          overflow-hidden
+          px-2
+          sm:text-2xl
+          md:text-3xl
+          lg:text-4xl
+          xl:text-5xl
+          2xl:text-6xl
         `}>
           Track, rate, and share
           <br></br>
@@ -154,11 +163,11 @@ export default async function Home() {
         </h1>
         <p className={`
           //General Styling
-          w-2xl
-          text-2xl text-secondaryText text-center
-          my-4
-          //Mobile Styling
-          //Desktop Styling
+          w-full max-w-2xl
+          text-base text-secondaryText text-center
+          my-4 px-4
+          md:text-lg
+          lg:text-2xl lg:px-0
         `}>
           Join the community of music enthusiasts. Log your listening, rate albums, and discover new music based on your taste.
         </p>
@@ -169,15 +178,14 @@ export default async function Home() {
         //General Styling
         flex flex-col items-center justify-center gap-8
         mt-8 mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
+        w-full px-4
+        lg:px-0
       `}>
         <div className={`
           //General Styling
-          w-[1200px]
+          w-full max-w-[1200px]
           flex items-center justify-between
-          //Mobile Styling
-          //Desktop Styling
+          lg:w-[1200px]
         `}>
           {/* <SectionTitle title={'Albums from all your favorite artist'} />
           <ViewAll /> */}
@@ -192,23 +200,23 @@ export default async function Home() {
         w-full
         flex flex-col justify-center items-center
         mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
       `}>
         <h2 className={`
           //General Styling
-          text-4xl text-primaryText
+          text-2xl text-primaryText
           font-sans font-bold mb-4
-          //Mobile Styling
-          //Desktop Styling
+          text-center px-4
+          md:text-3xl
+          lg:text-4xl lg:px-0
         `}>
           Discover Your Music Journey
         </h2>
         <p className={`
           //General Styling
-          text-xl text-secondaryText
-          //Mobile Styling
-          //Desktop Styling
+          text-sm text-secondaryText
+          text-center px-4
+          md:text-base
+          lg:text-xl lg:px-0
         `}>
           Track your habits, connect with fellow music lovers, and explore new sounds like never before
         </p>
@@ -217,16 +225,15 @@ export default async function Home() {
       <section className={`
         features-section
         //General Styling
-        w-[1200px] mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
+        w-full max-w-[1200px] mb-16 pb-8 px-4
+        lg:w-[1200px] lg:px-0
       `}>
         <div className={`
           feature-container
           //General Styling
-          grid grid-cols-3 grid-rows-2 gap-4
-          //Mobile Styling
-          //Desktop Styling
+          grid grid-cols-1 gap-4
+          md:grid-cols-2
+          lg:grid-cols-3 lg:grid-rows-2
         `}>
           <FeatureDescription featureName="track" />
           <FeatureDescription featureName="connect" />
@@ -242,23 +249,23 @@ export default async function Home() {
         w-full
         flex flex-col justify-center items-center
         mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
       `}>
         <h2 className={`
           //General Styling
-          text-4xl text-primaryText
+          text-2xl text-primaryText
           font-sans font-bold mb-4
-          //Mobile Styling
-          //Desktop Styling
+          text-center px-4
+          md:text-3xl
+          lg:text-4xl lg:px-0
         `}>
           Hear Every Opinion
         </h2>
         <p className={`
           //General Styling
-          text-xl text-secondaryText
-          //Mobile Styling
-          //Desktop Styling
+          text-sm text-secondaryText
+          text-center px-4
+          md:text-base
+          lg:text-xl lg:px-0
         `}>
           See what the crowd hears-browse fellow listeners' reviews and join the conversation
         </p>
@@ -266,9 +273,8 @@ export default async function Home() {
       {/* Recent Reviews Section */}
       <section className={`
         //General Styling
-        w-[1200px] h-[488px] mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
+        w-full max-w-[1200px] h-auto mb-16 pb-8 px-4
+        lg:w-[1200px] lg:h-[488px] lg:px-0
       `}>
         <div className={`
           //General Styling
@@ -288,23 +294,23 @@ export default async function Home() {
         w-full
         flex flex-col justify-center items-center
         mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
       `}>
         <h2 className={`
           //General Styling
-          text-4xl text-primaryText
+          text-2xl text-primaryText
           font-sans font-bold mb-4
-          //Mobile Styling
-          //Desktop Styling
+          text-center px-4
+          md:text-3xl
+          lg:text-4xl lg:px-0
         `}>
           From the Crate
         </h2>
         <p className={`
           //General Styling
-          text-xl text-secondaryText
-          //Mobile Styling
-          //Desktop Styling
+          text-sm text-secondaryText
+          text-center px-4
+          md:text-base
+          lg:text-xl lg:px-0
         `}>
           Catch the latest drops, headlines, and stories shaping the world of music.
         </p>
@@ -314,27 +320,26 @@ export default async function Home() {
         //General Styling
         flex flex-col items-center justify-center
         mt-16 mb-16 pb-8
-        //Mobile Styling
-        //Desktop Styling
+        w-full px-4
+        lg:px-0
       `}>
         <div className={`
           //General Styling
-          w-[1200px]
+          w-full max-w-[1200px]
           flex items-center justify-between
           mb-4
-          //Mobile Styling
-          //Desktop Styling
+          lg:w-[1200px]
         `}>
           <SectionTitle title={'Latest News'} />
           <ViewAll pageLink="news" />
         </div>
         <div className={`
           //General Styling
-          w-[1200px]
-          grid grid-cols-3 grid-rows-1 gap-4 justify-center
-          mb-14 mx-auto 
-          //Mobile Styling
-          //Desktop Styling
+          w-full max-w-[1200px]
+          grid grid-cols-1 gap-4 justify-center
+          mb-14 mx-auto
+          md:grid-cols-2
+          lg:w-[1200px] lg:grid-cols-3 lg:grid-rows-1
         `}>
           <ArticlePreview />
           <ArticlePreview />
@@ -344,29 +349,30 @@ export default async function Home() {
       {/* Call to Action Section */}
       <section className={`
         //General Styling
-        w-[1200px]
+        w-full max-w-[1200px]
         flex flex-col justify-center items-center
-        mt-16 mb-16 p-16
+        mt-16 mb-16 p-8
         text-center
         bg-secondaryBackground
         rounded-lg
-        //Mobile Styling
-        //Desktop Styling
+        mx-4
+        md:p-12
+        lg:w-[1200px] lg:p-16 lg:mx-0
       `}>
         <h3 className={`
           //General Styling
-          text-3xl text-primaryText font-bold
-          //Mobile Styling
-          //Desktop Styling
+          text-xl text-primaryText font-bold
+          md:text-2xl
+          lg:text-3xl
         `}>
           Join the Crate community
         </h3>
         <p className={`
           //General Styling
-          w-lg
-          text-secondaryText font-sans
-          //Mobile Styling
-          //Desktop Styling
+          w-full max-w-lg
+          text-sm text-secondaryText font-sans
+          md:text-base
+          lg:text-base
         `}>
           Track your music journey, discover new albums, and connect with music lovers from around the world.
         </p>

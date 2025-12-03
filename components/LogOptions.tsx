@@ -245,11 +245,14 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                 `}>
                     <div className={`
                         modal-container
-                        w-[942px] h-fit
-                        p-8
+                        w-full max-w-[942px] h-fit
+                        mx-4
+                        p-4
                         bg-secondaryBackground
                         rounded-lg
                         drop-shadow-
+                        sm:p-6
+                        md:p-8 md:mx-auto
                     `}>
                         <div className={`
                             header-container
@@ -271,19 +274,27 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                         <section className={`
                             body-container
                             w-full h-fit mt-4
-                            flex justify-between items-start gap-8
+                            flex flex-col items-start gap-4
+                            md:flex-row md:justify-between md:gap-8
                         `}>
                             <div className={`
                                 cover-container
+                                w-full
+                                flex justify-center
+                                md:w-auto
                             `}>
                                 <img src={album.cover_image_url} width={334} height={334} className={`
                                     rounded-sm
+                                    w-full max-w-[200px]
+                                    sm:max-w-[250px]
+                                    md:max-w-[334px] md:w-[334px]
                                 `}/>
                             </div>
                             <div className={`
                                 form-container
                                 flex flex-col justify-start items-start flex-grow
-                                w-[512px]
+                                w-full
+                                md:w-[512px]
                             `}>
                                 <h2 className={`
                                     text-3xl font-bold
@@ -417,7 +428,8 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                                     />
                                     <div className={`
                                         flex justify-end items-center
-                                        w-[462px]
+                                        w-full
+                                        md:w-[462px]
                                     `}>
                                         <button 
                                             type='submit' 

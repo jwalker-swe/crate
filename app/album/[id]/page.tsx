@@ -143,16 +143,16 @@ export default async function Home({ params }: AlbumPageParams) {
         <div className={`
             //General Styling
             content-container
-            w-[1200px] h-fit
-            mx-auto py-4
-            //Mobile Styling
-            //Desktop Styling
+            w-full max-w-[1200px] h-fit
+            mx-auto py-4 px-4
+            lg:w-[1200px] lg:px-0
         `}>
             <NavBar session={user ? true : false} />
             <div className={`
-                w-[896px]
+                w-full max-w-[896px]
                 mx-auto
-                pb-18
+                pb-18 px-4
+                lg:w-[896px] lg:px-0
             `}>
                 {/* Album Hero Section */}
                 <section>
@@ -163,48 +163,51 @@ export default async function Home({ params }: AlbumPageParams) {
                     `}>
                         <div className="
                             //General Styling
-                            flex justify-center items-center gap-8
-                            pt-16 pb-8
-                            //Mobile Styling
-                            //Desktop Styling
+                            flex flex-row items-center gap-4
+                            pt-8 pb-8
+                            lg:justify-center lg:gap-8 lg:pt-16
                         ">
                             <img src={albumInfo.cover_image_url} width={320} height={320} alt={`album cover for ${albumInfo.name}`} 
                                 className={`
                                     //General Styling
                                     rounded-lg
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    w-24 h-24
+                                    flex-shrink-0
+                                    sm:w-32 sm:h-32
+                                    md:w-40 md:h-40
+                                    lg:w-[320px] lg:h-[320px]
                             `} />
                             <div className={`
                                 //General Styling
-                                h-[320px]
+                                h-auto
                                 flex flex-col justify-center
-                                //Mobile Styling
-                                //Desktop Styling
+                                flex-grow min-w-0
                             `}>
                                 <div className={`
                                     album-info-container
                                     //General Styling
-                                    w-136
-                                    flex flex-col justify-center items-left
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    w-full
+                                    flex flex-col justify-center items-start
                                 `}>
                                     <h1 className={`
                                         album-title
                                         //General Styling
-                                        text-primaryText text-3xl font-bold font-sans 
-                                        //Mobile Styling
-                                        //Desktop Styling
+                                        text-primaryText text-lg font-bold font-sans 
+                                        line-clamp-2
+                                        sm:text-xl
+                                        md:text-2xl
+                                        lg:text-3xl
                                     `}>
                                         {albumInfo.title}
                                     </h1>
                                     <h2 className={`
                                         artist-name
                                         //General Styling
-                                        text-accentText text-3xl font-sans
-                                        //Mobile Styling
-                                        //Desktop Styling
+                                        text-accentText text-base font-sans
+                                        line-clamp-1
+                                        sm:text-lg
+                                        md:text-xl
+                                        lg:text-3xl
                                     `}>
                                         {albumInfo.artists[0].name}
                                     </h2>
@@ -212,9 +215,8 @@ export default async function Home({ params }: AlbumPageParams) {
                                         album-info-container
                                         //General Styling
                                         flex justify-start items-center gap-2
-                                        text-secondaryText font-sans
-                                        //Mobile Styling
-                                        //Desktop Styling
+                                        text-secondaryText font-sans text-xs
+                                        sm:text-sm
                                     `}>
                                         <span className={`year-of-release`}>
                                             {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
@@ -329,9 +331,8 @@ export default async function Home({ params }: AlbumPageParams) {
                     </div>
                     <div className={`
                         //General Styling
-                        grid grid-cols-2 grid-rows-2 gap-4
-                        //Mobile Styling
-                        //Desktop Styling
+                        grid grid-cols-1 gap-4
+                        md:grid-cols-2
                     `}>
                         <AlbumPageList />
                         <AlbumPageList />

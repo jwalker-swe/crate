@@ -50,9 +50,9 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
     return (
         <div className={`
             //General Styling
-            grid grid-cols-2 grid-rows-2 justify-center gap-6
-            //Mobile Styling
-            //Desktop Styling
+            grid grid-cols-1 justify-center gap-6
+            md:grid-cols-2
+            lg:grid-rows-2
         `}>
             {recentReviewData.map((review: any, i: number) => {
                 return (

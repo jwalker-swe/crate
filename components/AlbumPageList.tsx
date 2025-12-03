@@ -4,12 +4,12 @@ export default function AlbumPageList() {
     return (
         <div className={`
             //General Styling
-            flex justify-start items-center gap-4
-            p-4
+            flex justify-start items-center gap-3
+            p-3
             bg-secondaryBackground
             rounded-xl
-            //Mobile Styling
-            //Desktop Styling
+            w-full
+            sm:gap-4 sm:p-4
         `}>
             <div className={`
                 list-thumbnail-container
@@ -24,7 +24,8 @@ export default function AlbumPageList() {
             <div className={`
                 list-info-container
                 //General Styling
-                flex-grow-1
+                flex-1
+                min-w-0
                 h-full
                 flex flex-col justify-start items-start
                 //Mobile Styling
@@ -104,9 +105,10 @@ export default function AlbumPageList() {
                 <p className={`
                     list-description
                     //General Styling
-                    max-w-64
+                    w-full
                     line-clamp-2
                     text-xs text-secondaryText
+                    overflow-hidden
                     //Mobile Styling
                     //Desktop Styling
                 `}>

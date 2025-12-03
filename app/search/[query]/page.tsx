@@ -30,8 +30,9 @@ export default async function Home({ params }: SearchPageParams) {
     return (
         <div className={`
             page-container
-            w-[1200px] h-fit
-            mx-auto py-4
+            w-full max-w-[1200px] h-fit
+            mx-auto py-4 px-4
+            lg:w-[1200px] lg:px-0
         `}>
             <header>
                 <NavBar session={user ? true : false} />

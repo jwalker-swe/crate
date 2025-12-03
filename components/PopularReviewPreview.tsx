@@ -48,12 +48,12 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                 return (
                 <div key={index} className={`
                     //General Styling
-                    flex justify-start items-start gap-4
-                    p-6
+                    flex justify-start items-start gap-3
+                    p-4
                     bg-secondaryBackground
                     rounded-xl
-                    //Mobile Styling
-                    //Desktop Styling
+                    w-full
+                    sm:gap-4 sm:p-6
                 `}>
                     <div className={`
                         //General Styling

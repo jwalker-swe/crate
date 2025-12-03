@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client';
-import { MagnifyingGlassIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 export default function NavBar({ session }: {session: boolean}) {
@@ -14,8 +14,8 @@ export default function NavBar({ session }: {session: boolean}) {
     const [user, setUser]: any = useState(session)
     const [userId, setUserId]: any = useState('')
     const [username, setUsername]: any = useState('')
-    const [searchInput, setSearchInput] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [modalSearchInput, setModalSearchInput] = useState('')
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
     const router = useRouter();
 
@@ -61,109 +61,111 @@ export default function NavBar({ session }: {session: boolean}) {
 
     }, [])
 
-    const handleSearchSubmit = function(e: React.FocusEvent<HTMLFormElement>) {
+    const handleModalSearchSubmit = function(e: React.FocusEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (!searchInput.trim()) {
+        if (!modalSearchInput.trim()) {
             return
         }
 
-        setLoading(true);
-
-        const slug = encodeURIComponent(searchInput.trim().toLowerCase().replace(/\s+/g, '-'));
-
-        console.log('Original Input: ', searchInput);
-        console.log('Encode Input: ', slug);
-
+        const slug = encodeURIComponent(modalSearchInput.trim().toLowerCase().replace(/\s+/g, '-'));
+        setIsSearchModalOpen(false);
+        setModalSearchInput('');
         router.push(`/search/${slug}`);
     };
+
+    const openSearchModal = () => {
+        setIsSearchModalOpen(true);
+    };
+
+    const closeSearchModal = () => {
+        setIsSearchModalOpen(false);
+        setModalSearchInput('');
+    };
+
+    useEffect(() => {
+        if (isSearchModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isSearchModalOpen]);
 
     return (
         <div className={`
             //General Styling
-            w-[100%]
-            flex justify-between items-center
-            py-4 px-2 mx-auto mb-4
+            w-full
+            flex flex-col gap-3
+            py-4 px-4 mx-auto mb-4
             border-b-[1px]
             border-primaryBorder
-            //Mobile Styling
-            //Desktop Styling
+            md:flex-row md:justify-between md:items-center md:gap-0 md:px-2
         `}>
-            <Link href='/'>
+            {/* Logo - centered on mobile, left-aligned on desktop */}
+            <Link href='/' className="flex-shrink-0 flex justify-center md:justify-start">
                 <Image src={'/images/crate-logo-cropped.png'} alt='crate logo'
                     width={148} height={25}
+                    className="w-auto h-6 md:h-auto"
                 />
             </Link>
+             {/* Navigation items - single row on mobile, horizontal on desktop */}
              <div className={`
                 //General Styling
-                flex items-center gap-16
-                //Mobile Styling
-                //Desktop Styling
+                flex items-center justify-between gap-2
+                w-full
+                md:w-auto md:gap-16
              `}>
-                <div className={`flex items-center gap-4`}>
-                    <div className={`flex items-center`}>
-                        <form className={`
-                                relative w-full max-w-md
-                            `}
-                            onSubmit={handleSearchSubmit}
-                        >
-                            <div className="relative w-full max-w-md">
-                                {loading ? (
-                                    <div className="pl-4 pr-8 py-2 text-sm text-end text-secondaryText bg-secondaryBackground rounded-lg">
-                                        Searching...
-                                    </div>
-                                ) : (
-                                    <input placeholder='Search' 
-                                        className={`
-                                            //General Styling
-                                            pl-4 pr-8 py-2 
-                                            text-sm text-end
-                                            bg-secondaryBackground
-                                            rounded-lg
-                                            focus:outline-0
-                                            //Mobile Styling
-                                            //Desktop Styling
-                                        `}
-                                        value={searchInput}
-                                        onChange={(e) => setSearchInput(e.target.value)}
-                                    />
-                                )}
-                                <button
-                                    type='submit'
-                                    className={`
-                                        absolute 
-                                        top-[9px] right-2 
-                                        cursor-pointer
-                                    `}
-                                >
-                                    <MagnifyingGlassIcon className={`
-                                            w-4 h-4
-                                            text-secondaryText
-                                            hover:text-accentText
-                                        `} 
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                <div className={`flex items-center gap-2 md:gap-4`}>
+                    {/* Search button - icon only on small, icon + text on larger screens */}
+                    <button
+                        onClick={openSearchModal}
+                        className={`
+                            flex items-center gap-2
+                            p-2
+                            rounded-lg
+                            hover:bg-secondaryBackground
+                            transition-colors
+                            cursor-pointer
+                            md:px-3 md:py-2
+                        `}
+                    >
+                        <MagnifyingGlassIcon className={`
+                            w-5 h-5
+                            text-secondaryText
+                            hover:text-accentText
+                            md:w-4 md:h-4
+                        `} />
+                        <span className={`
+                            hidden
+                            md:inline-block
+                            text-sm
+                            text-secondaryText
+                            hover:text-accentText
+                        `}>
+                            Search
+                        </span>
+                    </button>
                     <ul className={`
                         //General Styling
-                        flex items-center gap-4
-                        //Mobile Styling
-                        //Desktop Styling
+                        flex items-center gap-2
+                        flex-shrink-0
+                        md:gap-4
                     `}>
                         <Link href='/albums'>
-                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
+                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
                                 Albums
                             </li>
                         </Link>
                         <Link href='#'>
-                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
+                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
                                 Lists
                             </li>
                         </Link>
                         <Link href='#'>
-                            <li className={`text-secondaryText text-sm hover:text-primaryText`}>
+                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
                                 News
                             </li>
                         </Link>
@@ -172,19 +174,18 @@ export default function NavBar({ session }: {session: boolean}) {
                 <div className={`
                     login-container
                     //General Styling
-                    flex items-center gap-4
-                    h-12
-                    //Mobile Styling
-                    //Desktop Styling
+                    flex items-center gap-2
+                    h-auto
+                    flex-shrink-0
+                    md:gap-4 md:h-12
                 `}>
                     {!user && (
                         <>
                             <Link href='/auth/sign-in'>                    
                                 <div className={`
                                     //General Styling
-                                    text-secondaryText text-sm hover:text-primaryText
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    text-secondaryText text-xs hover:text-primaryText whitespace-nowrap
+                                    md:text-sm
                                 `}>
                                     Log in
                                 </div>
@@ -192,17 +193,17 @@ export default function NavBar({ session }: {session: boolean}) {
                             <Link href='/auth/sign-up'>
                                 <div className={`
                                     //General Styling
-                                    text-primaryText text-sm
+                                    text-primaryText text-xs
                                     bg-primaryButton
-                                    px-4 py-2
+                                    px-2 py-1
                                     rounded-lg
                                     transition-colors
                                     ease-in-out
                                     duration-200
                                     hover:text-primaryTextHover
                                     hover:bg-primaryButtonHover
-                                    //Mobile Styling
-                                    //Desktop Styling
+                                    whitespace-nowrap
+                                    md:text-sm md:px-4 md:py-2
                                 `}>
                                     Sign up
                                 </div>
@@ -343,6 +344,94 @@ export default function NavBar({ session }: {session: boolean}) {
                     )}
                 </div>
              </div>
+             {/* Search Modal */}
+             {isSearchModalOpen && (
+                <div 
+                    className={`
+                        fixed
+                        inset-0
+                        bg-black/50
+                        backdrop-blur-sm
+                        z-50
+                        flex items-center justify-center
+                        p-4
+                    `}
+                    onClick={closeSearchModal}
+                >
+                    <div 
+                        className={`
+                            w-full max-w-md
+                            bg-secondaryBackground
+                            rounded-lg
+                            p-6
+                            shadow-lg
+                        `}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={`
+                            flex justify-between items-center
+                            mb-4
+                        `}>
+                            <h2 className={`
+                                text-xl font-bold text-primaryText
+                            `}>
+                                Search
+                            </h2>
+                            <button
+                                onClick={closeSearchModal}
+                                className={`
+                                    p-1
+                                    rounded-lg
+                                    hover:bg-primaryBackground
+                                    transition-colors
+                                    cursor-pointer
+                                `}
+                            >
+                                <XMarkIcon className={`
+                                    w-6 h-6
+                                    text-secondaryText
+                                    hover:text-primaryText
+                                `} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleModalSearchSubmit}>
+                            <div className="relative">
+                                <input 
+                                    placeholder='Search albums, artists, users...' 
+                                    className={`
+                                        w-full
+                                        pl-4 pr-12 py-3
+                                        text-sm
+                                        bg-primaryBackground
+                                        rounded-lg
+                                        focus:outline-0
+                                        focus:ring-2 focus:ring-accentText
+                                        text-primaryText
+                                    `}
+                                    value={modalSearchInput}
+                                    onChange={(e) => setModalSearchInput(e.target.value)}
+                                    autoFocus
+                                />
+                                <button
+                                    type='submit'
+                                    className={`
+                                        absolute 
+                                        top-[12px] right-3
+                                        cursor-pointer
+                                    `}
+                                >
+                                    <MagnifyingGlassIcon className={`
+                                        w-5 h-5
+                                        text-secondaryText
+                                        hover:text-accentText
+                                    `} 
+                                    />
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+             )}
         </div>
     )
 }

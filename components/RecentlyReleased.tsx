@@ -23,14 +23,18 @@ export default function RecentlyReleased({albums, columns, gap }: { albums: any[
         <>
                     <div
                         className={`
-                            w-[1200px] h-fit mt-16
+                            w-full max-w-[1200px] h-fit mt-8 px-4
+                            lg:w-[1200px] lg:mt-16 lg:px-0
                         `}
                     >
                         <SectionTitle title="Recent Releases" />
                         <div
                             className={`
                                 mt-4
-                                grid grid-cols-7 grid-rows-1 gap-${gap}
+                                grid grid-cols-2 gap-4
+                                sm:grid-cols-3
+                                md:grid-cols-4
+                                lg:grid-cols-7 lg:gap-${gap}
                             `}
                         >
                             {albums.map((album, index) => {

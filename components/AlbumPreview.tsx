@@ -39,20 +39,26 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
             transition-transform duration-200 ease-in-out
             cursor-pointer
             relative
+            w-full
             //Mobile Styling
             // Desktop Styling
         `} >
             <li className={`
                 //General Styling
+                w-full
+                flex flex-col
                 //Mobile Styling
                 //Desktop Styling
             `}>
-                <div className="relative">
+                <div className="relative w-full">
                     <img src={imageUrl}
                         width={coverHeight} height={coverHeight} alt="album cover"
                         className={`
+                            w-full
+                            h-auto
+                            aspect-square
+                            object-cover
                             rounded-ss-lg rounded-se-lg
-                            mx-auto
                             ${loading ? 'filter brightness-50' : ''}
                     `}/>
                     {loading && (
@@ -62,21 +68,25 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
                     )}
                 </div>
                 <div className={`
-                    w-[${coverWidthString}px]
+                    w-full
                     flex flex-col
                     text-start font-sans
                     bg-secondaryBackground
-                    p-4
+                    p-3
                     rounded-es-lg rounded-ee-lg
+                    md:p-4
                 `}>
                     <span className={`
                         text-primaryText
                         line-clamp-1
+                        overflow-hidden
                     `}>
                         {name}
                     </span>
                     <span className={`
                         text-sm text-secondaryText
+                        line-clamp-1
+                        overflow-hidden
                     `}>
                         {artist}
                     </span>

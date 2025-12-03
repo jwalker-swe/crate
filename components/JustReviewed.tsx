@@ -86,7 +86,8 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
         return (
                 <div
                     className={`
-                        w-[1200px] h-fit mt-16
+                        w-full max-w-[1200px] h-fit mt-8 px-4
+                        lg:w-[1200px] lg:mt-16 lg:px-0
                     `}
                 >
                     <div
@@ -100,7 +101,9 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                     <div
                         className={`
                             mt-4
-                            grid grid-cols-${columns} grid-rows-${rows} gap-${gap} justify-center
+                            grid grid-cols-1 gap-4 justify-center
+                            md:grid-cols-2
+                            lg:grid-cols-${columns} lg:grid-rows-${rows} lg:gap-${gap}
                         `}  
                     >
                         {reviews.map((review: any, index: number) => {
@@ -150,7 +153,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                     </div>
                                     <div
                                         className={`
-                                            flex flex-col justify-start items-start gap-2 flex-grow
+                                            flex flex-col justify-start items-start gap-2 flex-grow h-[144]
                                         `}
                                     >
                                         <Link href={`/profile/${users[index].username}`}>
@@ -187,7 +190,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                         </div>
                                         <p
                                             className={`
-                                                text-xs line-clamp-3
+                                                text-xs line-clamp-3 flex-grow
                                             `}
                                         >
                                             {reviews[index].review_text}

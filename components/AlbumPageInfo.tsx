@@ -69,9 +69,10 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
             <ul className={`
                 //General Styling
                 flex justify-start items-center
-                text-xl text-secondaryText
-                //Mobile Styling
-                //Desktop Styling
+                text-sm text-secondaryText
+                sm:text-base
+                md:text-lg
+                lg:text-xl
             `}>
                 <li className={`
                     //General Styling
@@ -123,12 +124,12 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                 //General Styling
                 w-full
                 ${infoState !== 'Track List' ? 'hidden' : ''}
-                grid grid-cols-${gridColumnTotal}
-                mt-4 p-4
+                grid grid-cols-1
+                mt-4 p-3
                 bg-secondaryBackground
                 rounded-lg
-                //Mobile Styling
-                //Desktop Styling
+                sm:p-4
+                md:grid-cols-2
             `}>
                 {trackChunks.map((chunk: any, columnIndex: number) => (
                     <div key={columnIndex} className={`
@@ -156,12 +157,12 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                 //General Styling
                 w-full
                 ${infoState !== 'Performed By' ? 'hidden' : ''}
-                grid grid-cols-${gridColumnTotal}
-                mt-4 p-4
+                grid grid-cols-1
+                mt-4 p-3
                 bg-secondaryBackground
                 rounded-lg
-                //Mobile Styling
-                //Desktop Styling
+                sm:p-4
+                md:grid-cols-2
             `}>
                 {artistChunks.map((chunk: any, columnIndex: any) => (
                     <div key={columnIndex} className={`
