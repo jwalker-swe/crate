@@ -215,129 +215,112 @@ export default function NavBar({ session }: {session: boolean}) {
                             <div 
 								className={`
 									group 
-									relative 
-									hover:bg-secondaryBackground 
-									hover:rounded-ss-lg 
-									hover:rounded-se-lg
+									relative
 								`}>
                                 <div className={`
                                     profile-nav-container
                                     flex justify-start items-center
                                     p-2
-                                    hover:rounded-ss-lg hover:rounded-se-lg
+                                    rounded-lg
+                                    transition-colors
                                 `}>
                                     <UserCircleIcon className={`
                                         w-8 h-8 
                                         text-secondaryText
+                                        group-hover:text-accentText
+                                        transition-colors
                                     `}/>
                                 </div>
                                 <div className={`
                                     profile-nav-menu
                                     absolute
-                                    flex flex-col justify-end items-end
+                                    right-0
+                                    top-full
+                                    mt-2
+                                    flex flex-col
                                     invisible
-                                    -translate-x-24
+                                    opacity-0
                                     bg-secondaryBackground
-                                    rounded-ss-lg rounded-es-lg rounded-ee-lg
-                                    group-hover:visible 
+                                    rounded-lg
+                                    shadow-lg
+                                    min-w-[144px]
+                                    overflow-hidden
+                                    group-hover:visible
+                                    group-hover:opacity-100
+                                    transition-all duration-200
                                     z-50
                                 `}>
-                                    <div className={`
-                                        w-36
-                                        p-2 
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-t-1 border-b-1 border-primaryBackground
-                                        rounded-ss-lg
+                                    <Link href={`/profile/${username}`} className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
                                     `}>
-                                        <Link href={`/profile/${username}`} className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            mr-1
-                                        `}>
-                                            Profile
-                                        </Link>
-                                    </div>
-                                    <div className={`
-                                        w-36
-                                        p-2
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-b-1 border-primaryBackground
+                                        Profile
+                                    </Link>
+                                    <Link href='#' className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
                                     `}>
-                                        <Link href='#' className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            mr-1
-                                        `}>
-                                            Albums
-                                        </Link>
-                                    </div>
-                                    <div className={`
-                                        w-36
-                                        p-2
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-b-1 border-primaryBackground
+                                        Albums
+                                    </Link>
+                                    <Link href='#' className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
                                     `}>
-                                        <Link href='#' className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            mr-1
-                                        `}>
-                                            Reviews
-                                        </Link>
-                                    </div>
-                                    <div className={`
-                                        w-36
-                                        p-2
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-b-1 border-primaryBackground
+                                        Reviews
+                                    </Link>
+                                    <Link href='#' className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
                                     `}>
-                                        <Link href='#' className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            mr-1
-                                        `}>
-                                            Lists
-                                        </Link>
-                                    </div>
-                                    <div className={`
-                                        w-36
-                                        p-2
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-b-1 border-primaryBackground
+                                        Lists
+                                    </Link>
+                                    <Link href='#' className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
                                     `}>
-                                        <Link href='#' className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            mr-1
-                                        `}>
-                                            Likes
-                                        </Link>
-                                    </div>
-                                    <div className={`
-                                        w-36
-                                        p-2
-                                        flex items-center justify-end
-                                        bg-secondaryBackground
-                                        border-b-1 border-primaryBackground
-                                        rounded-es-lg rounded-ee-lg
+                                        Likes
+                                    </Link>
+                                    <button onClick={() => {
+                                        supabase.auth.signOut();
+                                        router.push('/')
+                                    }} className={`
+                                        w-full
+                                        px-4 py-2
+                                        flex items-center
+                                        text-left
+                                        text-secondaryText
+                                        hover:text-accentText
+                                        hover:bg-primaryBackground
+                                        transition-colors
+                                        cursor-pointer
                                     `}>
-                                        <button onClick={() => {
-                                            supabase.auth.signOut();
-                                            router.push('/')
-                                        }} className={`
-                                            text-secondaryText
-                                            hover:text-accentText
-                                            hover:cursor-pointer
-                                            mr-1
-                                        `}>
-                                            Sign Out
-                                        </button>
-                                    </div>
+                                        Sign Out
+                                    </button>
                                 </div>
                             </div>
                         </>
