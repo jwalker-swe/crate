@@ -223,9 +223,9 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
                     w-[78px] h-8
                     rounded-lg
                     text-primaryText
-                    bg-accentText
+                    bg-tertiaryBackground
                     cursor-pointer
-                    hover:bg-primaryButtonHover
+                    hover:bg-secondaryBackground
                     hover:text-primaryTextHover
                     disabled:opacity-50 disabled:cursor-not-allowed
                 `}
