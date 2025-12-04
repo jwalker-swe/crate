@@ -7,7 +7,6 @@ import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/lib/supabase/server";
-import { supabase } from "@/lib/supabase/supabase";
 import RecentlyListened from "@/components/RecentlyListened";
 // import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -23,29 +22,6 @@ export default async function Profile({ params }: ProfileProps) {
 
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
-
-	async function checkIfFollowing(userId: string, username: string) {
-		const { data, error } = await supabase
-			.from('users')
-			.select('*')
-			.eq('username', username)
-			.single()
-
-		if (error) {
-			console.error('Error determining if following: ', username);
-			return false;
-		}
-		if (!data) {
-			console.log('Not following user: ', username);
-			return false;
-		}
-		if (data) {
-			console.log('Already following user: ', username);
-			return true;
-		}
-	}
-
-	const following = user?.id ? checkIfFollowing(user.id, username) : Promise.resolve(false);
 
     return (
         <div className={`
