@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import FavoriteAlbumsSelector from './FavoriteAlbumsSelector';
 
 type Album = {
-    id: string;
+    id?: string; // Optional - only present if already in database
     spotify_id: string;
     name: string;
     artist: string;
