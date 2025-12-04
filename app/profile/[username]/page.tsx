@@ -53,7 +53,7 @@ export default async function Profile({ params }: ProfileProps) {
                     userId: profileUserData.id
                 });
             } else if (userAlbumsData && userAlbumsData.length > 0) {
-                // Get the album IDs
+                // Get the album IDs in order
                 const albumIds = userAlbumsData.map(ua => ua.album_id);
                 
                 // Fetch the albums
@@ -70,11 +70,20 @@ export default async function Profile({ params }: ProfileProps) {
                         hint: albumsError.hint
                     });
                 } else if (albumsData) {
-                    // Combine the data in the expected format
-                    favoriteAlbumsData = albumsData.map(album => ({
-                        album_id: album.id,
-                        albums: album
-                    }));
+                    // Create a map for quick lookup
+                    const albumMap = new Map(albumsData.map(album => [album.id, album]));
+                    
+                    // Combine the data in the expected format, preserving the order from userAlbumsData
+                    favoriteAlbumsData = userAlbumsData
+                        .map(ua => {
+                            const album = albumMap.get(ua.album_id);
+                            if (!album) return null;
+                            return {
+                                album_id: album.id,
+                                albums: album
+                            };
+                        })
+                        .filter(Boolean) as any[];
                 }
             }
         } catch (err: any) {
@@ -202,6 +211,7 @@ export default async function Profile({ params }: ProfileProps) {
                                     user-bio
                                     text-secondaryText text-sm
                                     line-clamp-2
+                                    whitespace-pre-wrap
                                 `}>
                                     {profileUserData.bio}
                                 </p>

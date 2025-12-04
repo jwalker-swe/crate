@@ -51,7 +51,7 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
             .limit(5);
 
         if (userAlbumsData && userAlbumsData.length > 0) {
-            // Get the album IDs
+            // Get the album IDs in order
             const albumIds = userAlbumsData.map(ua => ua.album_id);
             
             // Fetch the albums
@@ -61,29 +61,37 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
                 .in('id', albumIds);
 
             if (albumsData) {
-                // Map to the format expected by FavoriteAlbumsSelector
-                initialFavorites = albumsData.map((album: any) => {
-                    // Handle artists field - could be array, string, or object
-                    let artistName = 'Unknown Artist';
-                    if (album.artists) {
-                        if (Array.isArray(album.artists)) {
-                            // If it's an array, get the first artist's name
-                            artistName = album.artists[0]?.name || album.artists[0] || 'Unknown Artist';
-                        } else if (typeof album.artists === 'string') {
-                            artistName = album.artists;
-                        } else if (album.artists.name) {
-                            artistName = album.artists.name;
+                // Create a map for quick lookup
+                const albumMap = new Map(albumsData.map((album: any) => [album.id, album]));
+                
+                // Map to the format expected by FavoriteAlbumsSelector, preserving the order from userAlbumsData
+                initialFavorites = userAlbumsData
+                    .map(ua => {
+                        const album = albumMap.get(ua.album_id);
+                        if (!album) return null;
+                        
+                        // Handle artists field - could be array, string, or object
+                        let artistName = 'Unknown Artist';
+                        if (album.artists) {
+                            if (Array.isArray(album.artists)) {
+                                // If it's an array, get the first artist's name
+                                artistName = album.artists[0]?.name || album.artists[0] || 'Unknown Artist';
+                            } else if (typeof album.artists === 'string') {
+                                artistName = album.artists;
+                            } else if (album.artists.name) {
+                                artistName = album.artists.name;
+                            }
                         }
-                    }
-                    
-                    return {
-                        id: album.id,
-                        spotify_id: album.spotify_id,
-                        name: album.title,
-                        artist: artistName,
-                        imageUrl: album.cover_image_url || '/images/album-covers/test-album-cover.png'
-                    };
-                });
+                        
+                        return {
+                            id: album.id,
+                            spotify_id: album.spotify_id,
+                            name: album.title,
+                            artist: artistName,
+                            imageUrl: album.cover_image_url || '/images/album-covers/test-album-cover.png'
+                        };
+                    })
+                    .filter(Boolean) as any[];
             }
         }
     } catch (error) {

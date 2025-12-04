@@ -84,8 +84,30 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 }
             }
 
-            // Add new favorites
-            for (const album of albums) {
+            // To preserve order, we need to delete and recreate favorites in the new order
+            // First, mark all existing favorites as not favorite (we'll recreate them in order)
+            const existingSpotifyIds = Array.from(newSpotifyIds);
+            if (existingSpotifyIds.length > 0) {
+                const { data: existingAlbums } = await supabase
+                    .from('albums')
+                    .select('id')
+                    .in('spotify_id', existingSpotifyIds);
+
+                if (existingAlbums && existingAlbums.length > 0) {
+                    const existingAlbumIds = existingAlbums.map(a => a.id);
+                    // Mark as not favorite temporarily so we can recreate in order
+                    await supabase
+                        .from('user_albums')
+                        .update({ is_favorite: false })
+                        .eq('user_id', userId)
+                        .in('album_id', existingAlbumIds);
+                }
+            }
+
+            // Now add favorites in the correct order (order matters for created_at timestamps)
+            // Process albums sequentially with a small delay to ensure proper ordering
+            for (let i = 0; i < albums.length; i++) {
+                const album = albums[i];
                 // Validate album data
                 if (!album.spotify_id || !album.name || !album.artist) {
                     console.error('Invalid album data:', album);
@@ -179,7 +201,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                     albumId = newAlbum.id;
                 }
 
-                // Check if user_album relationship exists
+                // Check if user_album relationship exists (it might have been marked as not favorite above)
                 const { data: existingUserAlbum, error: userAlbumCheckError } = await supabase
                     .from('user_albums')
                     .select('id')
@@ -193,7 +215,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 }
 
                 if (!existingUserAlbum) {
-                    // Create user_album relationship
+                    // Create new user_album relationship (this will have a new created_at timestamp)
                     const { error: insertError } = await supabase
                         .from('user_albums')
                         .insert({
@@ -211,16 +233,35 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                         continue;
                     }
                 } else {
-                    // Update existing relationship to mark as favorite
-                    const { error: updateError } = await supabase
+                    // Recreate the relationship to get a new created_at timestamp for proper ordering
+                    // First delete the old one
+                    await supabase
                         .from('user_albums')
-                        .update({ is_favorite: true })
+                        .delete()
                         .eq('id', existingUserAlbum.id);
+                    
+                    // Then create a new one (this ensures proper ordering)
+                    const { error: insertError } = await supabase
+                        .from('user_albums')
+                        .insert({
+                            user_id: userId,
+                            album_id: albumId,
+                            is_favorite: true
+                        });
 
-                    if (updateError) {
-                        console.error('Error updating user_album relationship:', updateError);
+                    if (insertError) {
+                        console.error('Error recreating user_album relationship:', {
+                            error: insertError,
+                            userId,
+                            albumId
+                        });
                         continue;
                     }
+                }
+                
+                // Small delay to ensure created_at timestamps are in order
+                if (i < albums.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 10));
                 }
             }
         } catch (err) {
@@ -402,15 +443,42 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 <div className={`
                     flex flex-col gap-2
                 `}>
-                    <label htmlFor="bio" className={`
-                        text-sm font-medium text-primaryText
+                    <div className={`
+                        flex justify-between items-center
                     `}>
-                        Bio
-                    </label>
+                        <label htmlFor="bio" className={`
+                            text-sm font-medium text-primaryText
+                        `}>
+                            Bio
+                        </label>
+                        <span className={`
+                            text-xs text-secondaryText
+                            ${formData.bio.length > 200 ? 'text-red-400' : ''}
+                        `}>
+                            {formData.bio.length}/200
+                        </span>
+                    </div>
                     <textarea
                         id="bio"
                         value={formData.bio}
-                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            // Count newlines in the current value
+                            const newlineCount = (value.match(/\n/g) || []).length;
+                            
+                            // Limit to 200 characters total and maximum 1 newline (2 lines total)
+                            if (value.length <= 200 && newlineCount <= 1) {
+                                setFormData({ ...formData, bio: value });
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            // Prevent Enter if we're at the limit or already have 1 newline
+                            const newlineCount = (formData.bio.match(/\n/g) || []).length;
+                            if (e.key === 'Enter' && (formData.bio.length >= 200 || newlineCount >= 1)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        maxLength={200}
                         rows={4}
                         className={`
                             w-full
@@ -424,6 +492,11 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                             resize-none
                         `}
                     />
+                    <p className={`
+                        text-xs text-secondaryText
+                    `}>
+                        Maximum 200 characters and 2 lines
+                    </p>
                 </div>
 
                 {/* Favorite Albums Section */}

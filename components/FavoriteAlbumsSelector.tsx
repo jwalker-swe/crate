@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, Bars3Icon } from '@heroicons/react/24/solid';
 
 type Album = {
     id?: string; // Optional - only present if already in database
@@ -22,6 +22,8 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
     // Update favorites when initialFavorites changes (e.g., when component remounts with new data)
     useEffect(() => {
@@ -112,6 +114,48 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
         setFavorites(favorites.filter(fav => fav.spotify_id !== spotifyId));
     };
 
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        setDragOverIndex(index);
+    };
+
+    const handleDragLeave = () => {
+        setDragOverIndex(null);
+    };
+
+    const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+
+        // Reorder the favorites array
+        const newFavorites = [...favorites];
+        const draggedItem = newFavorites[draggedIndex];
+        
+        // Remove the dragged item
+        newFavorites.splice(draggedIndex, 1);
+        
+        // Insert it at the new position
+        newFavorites.splice(dropIndex, 0, draggedItem);
+        
+        setFavorites(newFavorites);
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
     return (
         <div className={`
             flex flex-col gap-4
@@ -195,9 +239,19 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
                     {favorites.map((album, index) => (
                         <div
                             key={album.spotify_id || index}
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            onDragEnd={handleDragEnd}
                             className={`
                                 relative
                                 group
+                                cursor-move
+                                transition-opacity
+                                ${draggedIndex === index ? 'opacity-50' : ''}
+                                ${dragOverIndex === index && draggedIndex !== index ? 'opacity-70 scale-105' : ''}
                             `}
                         >
                             <div className={`
@@ -212,6 +266,20 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
                                     alt={album.name}
                                     className="w-full h-full object-cover"
                                 />
+                                {/* Drag handle */}
+                                <div className={`
+                                    absolute top-2 left-2
+                                    w-6 h-6
+                                    rounded
+                                    bg-black/50
+                                    flex items-center justify-center
+                                    opacity-0 group-hover:opacity-100
+                                    transition-opacity
+                                    cursor-move
+                                    backdrop-blur-sm
+                                `}>
+                                    <Bars3Icon className="w-4 h-4 text-white" />
+                                </div>
                                 <button
                                     type="button"
                                     onClick={() => removeFavorite(album.spotify_id)}
