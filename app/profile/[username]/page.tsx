@@ -22,6 +22,20 @@ export default async function Profile({ params }: ProfileProps) {
 
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
+    
+    // Get current user's username to check if viewing own profile
+    let currentUserUsername: string | null = null;
+    if (user) {
+        const { data: userData } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', user.id)
+            .single();
+        currentUserUsername = userData?.username || null;
+    }
+    
+    // Check if viewing own profile
+    const isOwnProfile = currentUserUsername === username;
 
     return (
         <div className={`
@@ -78,7 +92,9 @@ export default async function Profile({ params }: ProfileProps) {
                                     {/* <DisplayName /> */}
                                     Jordan Walker
                                 </h1>
-                                <FollowButton profile={{profile: username}} user={user?.id || null}/>
+                                {!isOwnProfile && (
+                                    <FollowButton profile={{profile: username}} user={user?.id || null}/>
+                                )}
                             </div>
                             <h2 className={`
                                 username
