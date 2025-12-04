@@ -42,7 +42,7 @@ export default async function Home({ params }: AlbumPageParams) {
     let existingAlbum;
     let dbError;
     let spotifyId: string;
-    let albumId: string | null;
+    let albumId: string | null = null;
     
     if (isUUID) {
         // It's a database ID, fetch directly
@@ -73,6 +73,11 @@ export default async function Home({ params }: AlbumPageParams) {
         if (data?.id) {
             albumId = data.id;
         }
+    }
+    
+    // Ensure we have a valid albumId - if not, the album doesn't exist
+    if (!albumId) {
+        notFound();
     }
 
     let albumInfo;
@@ -123,7 +128,7 @@ export default async function Home({ params }: AlbumPageParams) {
                 const { error } = await supabase
                     .from('albums')
                     .update(updateData)
-                    .eq('id', albumId);
+                    .eq('id', albumId!);
 
                 if (error) {
                     console.error('Error updating album data: ', error);
@@ -165,7 +170,7 @@ export default async function Home({ params }: AlbumPageParams) {
 
         // Add album to database
         console.log(`Adding new album to database: ${spotifyAlbumInfo.name}`);
-        const { error: insertError } = await supabase
+        const { data: insertedAlbum, error: insertError } = await supabase
             .from('albums')
             .insert({
                 spotify_id: spotifyId,
@@ -176,13 +181,25 @@ export default async function Home({ params }: AlbumPageParams) {
                 tracks: spotifyAlbumInfo.tracks,
                 total_tracks: spotifyAlbumInfo.total_tracks,
                 rating: null
-            });
+            })
+            .select('id')
+            .single();
 
         if (insertError) {
             console.error('Error adding album to database: ', insertError);
+            throw new Error('Failed to add album to database');
         } else {
             console.log(`Successfully added album to database: ${spotifyAlbumInfo.name}`);
+            // Set albumId from the inserted album
+            if (insertedAlbum?.id) {
+                albumId = insertedAlbum.id;
+            }
         }
+    }
+    
+    // Ensure we have a valid albumId - if not, the album doesn't exist
+    if (!albumId) {
+        notFound();
     }
 
     
@@ -344,7 +361,7 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                       <PopularReviewPreview albumId={albumId} nReviewsToDisplay={2}/> 
+                       <PopularReviewPreview albumId={albumId!} nReviewsToDisplay={2}/> 
                     </div>
                     {/* <div className={`
                         //General Styling
