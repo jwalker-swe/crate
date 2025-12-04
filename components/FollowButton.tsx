@@ -205,7 +205,9 @@ export default function FollowButton({profile, user, initialFollowing}: {profile
                 onClick={() => followUser({profile: profile.profile, userId})}
                 disabled={loading}
                 className={`
-                    w-[78px] h-8
+                    w-auto h-8
+                    min-w-[100px]
+                    px-4
                     rounded-lg
                     text-primaryText
                     bg-accentText
@@ -224,7 +226,9 @@ export default function FollowButton({profile, user, initialFollowing}: {profile
                 onClick={() => unfollowUser({profile: profile.profile, userId})}
                 disabled={loading}
                 className={`
-                    w-[78px] h-8
+                    w-auto h-8
+                    min-w-[100px]
+                    px-4
                     rounded-lg
                     text-primaryText
                     bg-tertiaryBackground

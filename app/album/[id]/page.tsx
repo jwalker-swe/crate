@@ -33,16 +33,47 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Retrieve album id from url params
     const urlParams = await params;
-    const spotifyId = urlParams.id;
-    const albumId = await getAlbumIdBySpotifyId(spotifyId);
-
-
-    // First, try to get album data from our database
-    const { data: existingAlbum, error: dbError } = await supabase
-        .from('albums')
-        .select('*')
-        .eq('spotify_id', spotifyId)
-        .single();
+    const urlId = urlParams.id;
+    
+    // Check if the ID is a UUID (database ID) or a Spotify ID
+    // UUIDs are 36 characters with dashes: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(urlId);
+    
+    let existingAlbum;
+    let dbError;
+    let spotifyId: string;
+    let albumId: string | null;
+    
+    if (isUUID) {
+        // It's a database ID, fetch directly
+        const { data, error } = await supabase
+            .from('albums')
+            .select('*')
+            .eq('id', urlId)
+            .single();
+        
+        existingAlbum = data;
+        dbError = error;
+        albumId = urlId;
+        spotifyId = data?.spotify_id || urlId; // Fallback to urlId if spotify_id is missing
+    } else {
+        // It's a Spotify ID, fetch by spotify_id
+        spotifyId = urlId;
+        albumId = await getAlbumIdBySpotifyId(spotifyId);
+        
+        const { data, error } = await supabase
+            .from('albums')
+            .select('*')
+            .eq('spotify_id', spotifyId)
+            .single();
+        
+        existingAlbum = data;
+        dbError = error;
+        // If we found the album, use its database ID
+        if (data?.id) {
+            albumId = data.id;
+        }
+    }
 
     let albumInfo;
     let spotifyAlbumInfo;
@@ -52,33 +83,47 @@ export default async function Home({ params }: AlbumPageParams) {
         console.log('Album found in database');
         albumInfo = existingAlbum;
         
+        // Check if track list or total_tracks is missing
+        const needsTrackData = !albumInfo.tracks || !albumInfo.total_tracks;
+        
         // Fetch latest data from Spotify to ensure database is up to date
         spotifyAlbumInfo = await getAlbumById(spotifyId);
         
         if (spotifyAlbumInfo) {
-            // Check if data is outdated and update if necessary
+            // Check if data is outdated or missing track information
             const fieldsToCompare = {
                 title: albumInfo.title !== spotifyAlbumInfo.name,
                 release_date: albumInfo.release_date !== spotifyAlbumInfo.release_date,
                 cover_image_url: albumInfo.cover_image_url !== spotifyAlbumInfo.images[0].url,
                 artists: JSON.stringify(albumInfo.artists) !== JSON.stringify(spotifyAlbumInfo.artists),
-                tracks: JSON.stringify(albumInfo.tracks) !== JSON.stringify(spotifyAlbumInfo.tracks)
+                tracks: JSON.stringify(albumInfo.tracks) !== JSON.stringify(spotifyAlbumInfo.tracks),
+                total_tracks: albumInfo.total_tracks !== spotifyAlbumInfo.total_tracks
             };
 
             const isOutdated = Object.values(fieldsToCompare).some(isFieldOutdated => isFieldOutdated);
+            const needsUpdate = isOutdated || needsTrackData;
 
-            if (isOutdated) {
-                console.log(`Album data for ${spotifyId} is outdated. Updating...`);
+            if (needsUpdate) {
+                console.log(`Album data for ${spotifyId} needs update. Updating...`);
+                const updateData: any = {
+                    title: spotifyAlbumInfo.name,
+                    release_date: spotifyAlbumInfo.release_date,
+                    cover_image_url: spotifyAlbumInfo.images[0].url,
+                    artists: spotifyAlbumInfo.artists,
+                };
+                
+                // Always update tracks and total_tracks if missing or outdated
+                if (needsTrackData || fieldsToCompare.tracks) {
+                    updateData.tracks = spotifyAlbumInfo.tracks;
+                }
+                if (needsTrackData || fieldsToCompare.total_tracks) {
+                    updateData.total_tracks = spotifyAlbumInfo.total_tracks;
+                }
+                
                 const { error } = await supabase
                     .from('albums')
-                    .update({
-                        title: spotifyAlbumInfo.name,
-                        release_date: spotifyAlbumInfo.release_date,
-                        cover_image_url: spotifyAlbumInfo.images[0].url,
-                        artists: spotifyAlbumInfo.artists,
-                        tracks: spotifyAlbumInfo.tracks,
-                    })
-                    .eq('spotify_id', spotifyId);
+                    .update(updateData)
+                    .eq('id', albumId);
 
                 if (error) {
                     console.error('Error updating album data: ', error);
@@ -88,7 +133,12 @@ export default async function Home({ params }: AlbumPageParams) {
                     albumInfo.release_date = spotifyAlbumInfo.release_date;
                     albumInfo.cover_image_url = spotifyAlbumInfo.images[0].url;
                     albumInfo.artists = spotifyAlbumInfo.artists;
-                    albumInfo.tracks = spotifyAlbumInfo.tracks;
+                    if (needsTrackData || fieldsToCompare.tracks) {
+                        albumInfo.tracks = spotifyAlbumInfo.tracks;
+                    }
+                    if (needsTrackData || fieldsToCompare.total_tracks) {
+                        albumInfo.total_tracks = spotifyAlbumInfo.total_tracks;
+                    }
                     console.log(`Successfully updated album data for ${spotifyId}`);
                 }
             }

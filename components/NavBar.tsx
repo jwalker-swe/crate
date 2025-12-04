@@ -123,6 +123,7 @@ export default function NavBar({ session }: {session: boolean}) {
                     <button
                         onClick={openSearchModal}
                         className={`
+                            group
                             flex items-center gap-2
                             p-2
                             rounded-lg
@@ -135,7 +136,8 @@ export default function NavBar({ session }: {session: boolean}) {
                         <MagnifyingGlassIcon className={`
                             w-5 h-5
                             text-secondaryText
-                            hover:text-accentText
+                            group-hover:text-accentText
+                            transition-colors
                             md:w-4 md:h-4
                         `} />
                         <span className={`
@@ -143,7 +145,8 @@ export default function NavBar({ session }: {session: boolean}) {
                             md:inline-block
                             text-sm
                             text-secondaryText
-                            hover:text-accentText
+                            group-hover:text-accentText
+                            transition-colors
                         `}>
                             Search
                         </span>

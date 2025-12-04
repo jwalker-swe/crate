@@ -62,13 +62,13 @@ export default async function TopAlbumsSection() {
             key={album.id || index}
             className={hideClasses}
           >
-            <AlbumPreview
-              coverHeight={224}
-              id={album.id}
-              name={album.title}
-              artist={album.artist}
-              imageUrl={album.images}
-            />
+        <AlbumPreview
+          coverHeight={224}
+          id={album.id}
+          name={album.title}
+          artist={album.artist}
+          imageUrl={album.images}
+        />
           </li>
         );
       })}

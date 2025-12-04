@@ -337,7 +337,7 @@ export default async function Home() {
           //General Styling
           w-full max-w-[1200px]
           grid grid-cols-1 gap-4 justify-center
-          mb-14 mx-auto
+          mb-14 mx-auto 
           md:grid-cols-2
           lg:w-[1200px] lg:grid-cols-3 lg:grid-rows-1
         `}>

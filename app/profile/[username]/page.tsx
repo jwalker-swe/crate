@@ -8,6 +8,7 @@ import ViewAll from "@/components/ViewAll";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/lib/supabase/server";
 import RecentlyListened from "@/components/RecentlyListened";
+import Link from "next/link";
 // import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 type ProfileProps = {
@@ -23,6 +24,64 @@ export default async function Profile({ params }: ProfileProps) {
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
     
+    // Get profile user's data
+    const { data: profileUserData } = await supabase
+        .from('users')
+        .select('id, username, display_name, bio')
+        .eq('username', username)
+        .single();
+
+    // Get favorite albums for the profile user
+    let favoriteAlbumsData: any[] = [];
+    if (profileUserData?.id) {
+        try {
+            // First, get the user_albums entries that are favorites
+            const { data: userAlbumsData, error: userAlbumsError } = await supabase
+                .from('user_albums')
+                .select('album_id, created_at')
+                .eq('user_id', profileUserData.id)
+                .eq('is_favorite', true)
+                .order('created_at', { ascending: true })
+                .limit(5);
+
+            if (userAlbumsError) {
+                console.error('Error fetching user_albums:', {
+                    message: userAlbumsError.message,
+                    code: userAlbumsError.code,
+                    details: userAlbumsError.details,
+                    hint: userAlbumsError.hint,
+                    userId: profileUserData.id
+                });
+            } else if (userAlbumsData && userAlbumsData.length > 0) {
+                // Get the album IDs
+                const albumIds = userAlbumsData.map(ua => ua.album_id);
+                
+                // Fetch the albums
+                const { data: albumsData, error: albumsError } = await supabase
+                    .from('albums')
+                    .select('id, spotify_id, title, artists, cover_image_url')
+                    .in('id', albumIds);
+
+                if (albumsError) {
+                    console.error('Error fetching albums:', {
+                        message: albumsError.message,
+                        code: albumsError.code,
+                        details: albumsError.details,
+                        hint: albumsError.hint
+                    });
+                } else if (albumsData) {
+                    // Combine the data in the expected format
+                    favoriteAlbumsData = albumsData.map(album => ({
+                        album_id: album.id,
+                        albums: album
+                    }));
+                }
+            }
+        } catch (err: any) {
+            console.error('Unexpected error fetching favorite albums:', err);
+        }
+    }
+    
     // Get current user's username to check if viewing own profile
     let currentUserUsername: string | null = null;
     let isFollowing: boolean = false;
@@ -36,25 +95,16 @@ export default async function Profile({ params }: ProfileProps) {
         currentUserUsername = userData?.username || null;
         
         // Check if current user is following the profile user
-        if (currentUserUsername !== username) {
-            // Get the profile user's id
-            const { data: profileUserData } = await supabase
-                .from('users')
+        if (currentUserUsername !== username && profileUserData) {
+            // Check if follow relationship exists
+            const { data: followData } = await supabase
+                .from('follows')
                 .select('id')
-                .eq('username', username)
+                .eq('follower_id', user.id)
+                .eq('following_id', profileUserData.id)
                 .single();
             
-            if (profileUserData) {
-                // Check if follow relationship exists
-                const { data: followData } = await supabase
-                    .from('follows')
-                    .select('id')
-                    .eq('follower_id', user.id)
-                    .eq('following_id', profileUserData.id)
-                    .single();
-                
-                isFollowing = !!followData;
-            }
+            isFollowing = !!followData;
         }
     }
     
@@ -113,10 +163,27 @@ export default async function Profile({ params }: ProfileProps) {
                                     text-2xl
                                     line-clamp-1
                                 `}>
-                                    {/* <DisplayName /> */}
-                                    Jordan Walker
+                                    {profileUserData?.display_name || profileUserData?.username || 'User'}
                                 </h1>
-                                {!isOwnProfile && (
+                                {isOwnProfile ? (
+                                    <Link href={`/profile/${username}/edit`}>
+                                        <button className={`
+                                            w-auto
+                                            min-w-[100px]
+                                            h-8
+                                            px-4
+                                            rounded-lg
+                                            text-primaryText
+                                            bg-tertiaryBackground
+                                            hover:cursor-pointer
+                                            hover:bg-secondaryBackground
+                                            hover:text-primaryTextHover
+                                            transition-colors
+                                        `}>
+                                            Edit Profile
+                                        </button>
+                                    </Link>
+                                ) : (
                                     <FollowButton 
                                         profile={{profile: username}} 
                                         user={user?.id || null}
@@ -130,21 +197,15 @@ export default async function Profile({ params }: ProfileProps) {
                             `}>
                                 @{username}
                             </h2>
-                            <p className={`
-                                user-bio
-                                text-secondaryText text-sm
-                                line-clamp-2
-                            `}>
-                                {/* Replace with data from users table bio column */}
-                                Lorem ipsum dolor sit amet consectetur adipiscing elit. 
-                                Quisque faucibus ex sapien vitae pellentesque sem placerat. 
-                                In id cursus mi pretium tellus duis convallis. Tempus leo 
-                                eu aenean sed diam urna tempor. Pulvinar vivamus fringilla 
-                                lacus nec metus bibendum egestas. Iaculis massa nisl malesuada 
-                                lacinia integer nunc posuere. Ut hendrerit semper vel class 
-                                aptent taciti sociosqu. Ad litora torquent per conubia nostra 
-                                inceptos himenaeos.
-                            </p>
+                            {profileUserData?.bio && (
+                                <p className={`
+                                    user-bio
+                                    text-secondaryText text-sm
+                                    line-clamp-2
+                                `}>
+                                    {profileUserData.bio}
+                                </p>
+                            )}
                         </div>
                     </div>
                     <div className={`
@@ -173,21 +234,57 @@ export default async function Profile({ params }: ProfileProps) {
                             `}>
                                 <SectionTitle title={'Favorite Albums'} />
                             </div>
-                            {/* Component to feth favorite albums based on username */}
                             <div className={`
                                 flex justify-center mt-4
                             `}>
-                                <ul className={`
-                                    grid-container
-                                    mx-auto
-                                    grid grid-cols-5 grid-rows-1 gap-5
-                                `}>
-                                    <AlbumPreview id="#" coverHeight={160} name="NEVER ENOUGH" artist="Turnstile" imageUrl="/images/album-covers/test-album-cover.png" />
-                                    <AlbumPreview id="#" coverHeight={160} name="NEVER ENOUGH" artist="Turnstile" imageUrl="/images/album-covers/test-album-cover.png" />
-                                    <AlbumPreview id="#" coverHeight={160} name="NEVER ENOUGH" artist="Turnstile" imageUrl="/images/album-covers/test-album-cover.png" />
-                                    <AlbumPreview id="#" coverHeight={160} name="NEVER ENOUGH" artist="Turnstile" imageUrl="/images/album-covers/test-album-cover.png" />
-                                    <AlbumPreview id="#" coverHeight={160} name="NEVER ENOUGH" artist="Turnstile" imageUrl="/images/album-covers/test-album-cover.png" />
-                                </ul>
+                                {favoriteAlbumsData && favoriteAlbumsData.length > 0 ? (
+                                    <ul className={`
+                                        grid-container
+                                        mx-auto
+                                        grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5
+                                        w-full
+                                    `}>
+                                        {favoriteAlbumsData.map((item: any, index: number) => {
+                                            // Handle both array and object formats for albums relationship
+                                            const album = Array.isArray(item.albums) ? item.albums[0] : item.albums;
+                                            if (!album || !album.id) {
+                                                console.warn('Invalid album data:', item);
+                                                return null;
+                                            }
+                                            
+                                            // Handle artists field - could be array, string, or object
+                                            let artistName = 'Unknown Artist';
+                                            if (album.artists) {
+                                                if (Array.isArray(album.artists)) {
+                                                    // If it's an array, get the first artist's name
+                                                    artistName = album.artists[0]?.name || album.artists[0] || 'Unknown Artist';
+                                                } else if (typeof album.artists === 'string') {
+                                                    artistName = album.artists;
+                                                } else if (album.artists.name) {
+                                                    artistName = album.artists.name;
+                                                }
+                                            }
+                                            
+                                            return (
+                                                <AlbumPreview
+                                                    key={album.id || `album-${index}`}
+                                                    id={album.id}
+                                                    coverHeight={160}
+                                                    name={album.title || 'Unknown Album'}
+                                                    artist={artistName}
+                                                    imageUrl={album.cover_image_url || '/images/album-covers/test-album-cover.png'}
+                                                />
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <p className={`
+                                        text-secondaryText text-sm
+                                        py-8
+                                    `}>
+                                        No favorite albums yet
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </section>
