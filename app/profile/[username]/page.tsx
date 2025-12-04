@@ -229,9 +229,11 @@ export default async function Profile({ params }: ProfileProps) {
                 </div>
                 <div className={`
                     main-container
-                    w-[896px]
+                    w-full max-w-[896px]
                     mx-auto mt-18
                     pb-18
+                    px-4
+                    lg:w-[896px] lg:px-0
                 `}>
                     <section className={`
                         favorite-albums
@@ -246,13 +248,17 @@ export default async function Profile({ params }: ProfileProps) {
                             </div>
                             <div className={`
                                 flex justify-center mt-4
+                                w-full
                             `}>
                                 {favoriteAlbumsData && favoriteAlbumsData.length > 0 ? (
                                     <ul className={`
                                         grid-container
                                         mx-auto
-                                        grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5
+                                        grid grid-cols-2 gap-4
+                                        sm:grid-cols-6 sm:gap-4
+                                        lg:grid-cols-5 lg:gap-5
                                         w-full
+                                        max-w-full
                                     `}>
                                         {favoriteAlbumsData.map((item: any, index: number) => {
                                             // Handle both array and object formats for albums relationship
@@ -275,15 +281,38 @@ export default async function Profile({ params }: ProfileProps) {
                                                 }
                                             }
                                             
+                                            // Layout logic:
+                                            // Mobile: First album full width (col-span-2), larger size
+                                            // sm: Row 1 - 2 equal columns (col-span-3 each), Row 2 - 3 equal columns (col-span-2 each)
+                                            // lg: All albums col-span-1 (5 columns in one row)
+                                            const isFirstAlbum = index === 0;
+                                            const isSecondAlbum = index === 1;
+                                            const isThirdToFifthAlbum = index >= 2 && index <= 4;
+                                            
+                                            let colSpanClass = '';
+                                            if (isFirstAlbum) {
+                                                colSpanClass = 'col-span-2 sm:col-span-3 lg:col-span-1';
+                                            } else if (isSecondAlbum) {
+                                                colSpanClass = 'sm:col-span-3 lg:col-span-1';
+                                            } else if (isThirdToFifthAlbum) {
+                                                colSpanClass = 'sm:col-span-2 lg:col-span-1';
+                                            } else {
+                                                colSpanClass = 'sm:col-span-2 lg:col-span-1';
+                                            }
+                                            
                                             return (
-                                                <AlbumPreview
+                                                <li
                                                     key={album.id || `album-${index}`}
-                                                    id={album.id}
-                                                    coverHeight={160}
-                                                    name={album.title || 'Unknown Album'}
-                                                    artist={artistName}
-                                                    imageUrl={album.cover_image_url || '/images/album-covers/test-album-cover.png'}
-                                                />
+                                                    className={colSpanClass}
+                                                >
+                                                    <AlbumPreview
+                                                        id={album.id}
+                                                        coverHeight={isFirstAlbum ? 200 : 160}
+                                                        name={album.title || 'Unknown Album'}
+                                                        artist={artistName}
+                                                        imageUrl={album.cover_image_url || '/images/album-covers/test-album-cover.png'}
+                                                    />
+                                                </li>
                                             );
                                         })}
                                     </ul>

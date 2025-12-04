@@ -234,7 +234,11 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
             {/* Selected Favorites */}
             {favorites.length > 0 && (
                 <div className={`
-                    grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4
+                    grid grid-cols-2 gap-4
+                    sm:grid-cols-3 sm:gap-4
+                    md:grid-cols-4 md:gap-4
+                    lg:grid-cols-5 lg:gap-5
+                    w-full
                 `}>
                     {favorites.map((album, index) => (
                         <div
