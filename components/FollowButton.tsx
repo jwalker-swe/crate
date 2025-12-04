@@ -73,9 +73,8 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
                 return
             }
 
-            if (data?.username === profile) {
-                setSameUser(true)
-            }
+            // Explicitly set sameUser based on comparison
+            setSameUser(data?.username === profile)
         }
 
         checkIfViewingOwnProfile({userId, profile: profile.profile})
@@ -113,9 +112,8 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
                 return
             }
 
-            if (followData) {
-                setFollowing(true)
-            }
+            // Explicitly set following state based on whether relationship exists
+            setFollowing(!!followData)
         }
         
         if (userId) {
