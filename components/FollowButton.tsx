@@ -12,13 +12,13 @@ type ViewingOwnProfileProps = {
     profile: string
 }
 
-export default function FollowButton({profile, user}: {profile: FollowButtonProps, user: string | null}) {
+export default function FollowButton({profile, user, initialFollowing}: {profile: FollowButtonProps, user: string | null, initialFollowing?: boolean}) {
 
     const supabase = createClient()
 
     const [userId, setUserId] = useState<string | null>(user)
     const [sameUser, setSameUser] = useState<boolean>(false)
-    const [following, setFollowing] = useState<boolean>(false)
+    const [following, setFollowing] = useState<boolean>(initialFollowing || false)
     const [loading, setLoading] = useState<boolean>(false)
      
     useEffect(() => {
@@ -82,6 +82,10 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
 
 
     useEffect(() => {
+        // Only check if initialFollowing wasn't provided (fallback for edge cases)
+        if (initialFollowing !== undefined) {
+            return; // Skip client-side check if server already provided the value
+        }
     
         async function checkIfFollowing({profile, userId}: {profile: string, userId: string}) {
             // First get the profile user's id from username
@@ -119,7 +123,7 @@ export default function FollowButton({profile, user}: {profile: FollowButtonProp
         if (userId) {
             checkIfFollowing({profile: profile.profile, userId})
         }
-    }, [userId, profile])
+    }, [userId, profile, initialFollowing])
 
 
     const followUser = async function({profile, userId}: {profile: string, userId: string}) {

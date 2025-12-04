@@ -25,6 +25,8 @@ export default async function Profile({ params }: ProfileProps) {
     
     // Get current user's username to check if viewing own profile
     let currentUserUsername: string | null = null;
+    let isFollowing: boolean = false;
+    
     if (user) {
         const { data: userData } = await supabase
             .from('users')
@@ -32,6 +34,28 @@ export default async function Profile({ params }: ProfileProps) {
             .eq('id', user.id)
             .single();
         currentUserUsername = userData?.username || null;
+        
+        // Check if current user is following the profile user
+        if (currentUserUsername !== username) {
+            // Get the profile user's id
+            const { data: profileUserData } = await supabase
+                .from('users')
+                .select('id')
+                .eq('username', username)
+                .single();
+            
+            if (profileUserData) {
+                // Check if follow relationship exists
+                const { data: followData } = await supabase
+                    .from('follows')
+                    .select('id')
+                    .eq('follower_id', user.id)
+                    .eq('following_id', profileUserData.id)
+                    .single();
+                
+                isFollowing = !!followData;
+            }
+        }
     }
     
     // Check if viewing own profile
@@ -93,7 +117,11 @@ export default async function Profile({ params }: ProfileProps) {
                                     Jordan Walker
                                 </h1>
                                 {!isOwnProfile && (
-                                    <FollowButton profile={{profile: username}} user={user?.id || null}/>
+                                    <FollowButton 
+                                        profile={{profile: username}} 
+                                        user={user?.id || null}
+                                        initialFollowing={isFollowing}
+                                    />
                                 )}
                             </div>
                             <h2 className={`
