@@ -122,18 +122,18 @@ export default function NavBar({ session }: {session: boolean}) {
                     {/* Search button - icon only on small, icon + text on larger screens */}
                     <button
                         onClick={openSearchModal}
-                        className={`
+                                        className={`
                             group
                             flex items-center gap-2
                             p-2
-                            rounded-lg
+                                            rounded-lg
                             hover:bg-secondaryBackground
                             transition-colors
-                            cursor-pointer
+                                        cursor-pointer
                             md:px-3 md:py-2
-                        `}
-                    >
-                        <MagnifyingGlassIcon className={`
+                                    `}
+                                >
+                                    <MagnifyingGlassIcon className={`
                             w-5 h-5
                             text-secondaryText
                             group-hover:text-accentText
@@ -144,13 +144,13 @@ export default function NavBar({ session }: {session: boolean}) {
                             hidden
                             md:inline-block
                             text-sm
-                            text-secondaryText
+                                            text-secondaryText
                             group-hover:text-accentText
                             transition-colors
                         `}>
                             Search
                         </span>
-                    </button>
+                                </button>
                     <ul className={`
                         //General Styling
                         flex items-center gap-2
@@ -218,7 +218,7 @@ export default function NavBar({ session }: {session: boolean}) {
                             <div 
 								className={`
 									group 
-									relative
+									relative 
 								`}>
                                 <div className={`
                                     profile-nav-container
@@ -248,82 +248,82 @@ export default function NavBar({ session }: {session: boolean}) {
                                     shadow-lg
                                     min-w-[144px]
                                     overflow-hidden
-                                    group-hover:visible
+                                    group-hover:visible 
                                     group-hover:opacity-100
                                     transition-all duration-200
                                     z-50
-                                `}>
-                                    <Link href={`/profile/${username}`} className={`
+                                    `}>
+                                        <Link href={`/profile/${username}`} className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
-                                    `}>
-                                        Profile
-                                    </Link>
-                                    <Link href='#' className={`
+                                        `}>
+                                            Profile
+                                        </Link>
+                                        <Link href='#' className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
-                                    `}>
-                                        Albums
-                                    </Link>
-                                    <Link href='#' className={`
+                                        `}>
+                                            Albums
+                                        </Link>
+                                        <Link href='#' className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
-                                    `}>
-                                        Reviews
-                                    </Link>
-                                    <Link href='#' className={`
+                                        `}>
+                                            Reviews
+                                        </Link>
+                                        <Link href='#' className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
-                                    `}>
-                                        Lists
-                                    </Link>
-                                    <Link href='#' className={`
+                                        `}>
+                                            Lists
+                                        </Link>
+                                        <Link href='#' className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
-                                    `}>
-                                        Likes
-                                    </Link>
-                                    <button onClick={() => {
-                                        supabase.auth.signOut();
-                                        router.push('/')
-                                    }} className={`
+                                        `}>
+                                            Likes
+                                        </Link>
+                                        <button onClick={() => {
+                                            supabase.auth.signOut();
+                                            router.push('/')
+                                        }} className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
                                         text-left
-                                        text-secondaryText
-                                        hover:text-accentText
+                                            text-secondaryText
+                                            hover:text-accentText
                                         hover:bg-primaryBackground
                                         transition-colors
                                         cursor-pointer
-                                    `}>
-                                        Sign Out
-                                    </button>
+                                        `}>
+                                            Sign Out
+                                        </button>
                                 </div>
                             </div>
                         </>

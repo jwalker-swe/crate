@@ -27,7 +27,7 @@ export default async function Profile({ params }: ProfileProps) {
     // Get profile user's data
     const { data: profileUserData } = await supabase
         .from('users')
-        .select('id, username, display_name, bio')
+        .select('id, username, display_name, bio, avatar_url')
         .eq('username', username)
         .single();
 
@@ -151,10 +151,20 @@ export default async function Profile({ params }: ProfileProps) {
                             w-20 h-20
                             md:w-24 md:h-24
                             rounded-full
-                            bg-white
+                            bg-secondaryBackground
                             flex-shrink-0
+                            overflow-hidden
+                            flex items-center justify-center
                         `}>
-                            <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
+                            {profileUserData?.avatar_url ? (
+                                <img 
+                                    src={profileUserData.avatar_url} 
+                                    alt={`${profileUserData.display_name || profileUserData.username}'s profile`}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
+                            )}
                         </div>
                         <div className={`
                             user-info-container

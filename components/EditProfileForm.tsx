@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import FavoriteAlbumsSelector from './FavoriteAlbumsSelector';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
 
 type Album = {
     id?: string; // Optional - only present if already in database
@@ -20,6 +22,7 @@ type EditProfileFormProps = {
         bio: string | null;
         email: string;
         userId: string;
+        avatar_url: string | null;
         initialFavorites?: Album[];
     };
 }
@@ -39,6 +42,318 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    
+    // Profile picture states
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData.avatar_url || null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [imageError, setImageError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [removedAvatar, setRemovedAvatar] = useState(false);
+    
+    // Cropping modal states
+    const [showCropModal, setShowCropModal] = useState(false);
+    const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+    const [zoom, setZoom] = useState(1);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const imageContainerRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLImageElement>(null);
+    const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number; displayWidth: number; displayHeight: number } | null>(null);
+
+    // Image processing function with crop data
+    const processImage = (imageSrc: string, zoom: number, position: { x: number; y: number }, containerSize: number = 500): Promise<Blob> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    reject(new Error('Could not get canvas context'));
+                    return;
+                }
+
+                // Set canvas size to 400x400
+                const outputSize = 400;
+                canvas.width = outputSize;
+                canvas.height = outputSize;
+
+                // Calculate how the image is displayed in the container
+                const imgAspect = img.width / img.height;
+                const containerAspect = 1; // Square container
+                
+                let displayWidth: number;
+                let displayHeight: number;
+                
+                if (imgAspect > containerAspect) {
+                    // Image is wider - fit to container height
+                    displayHeight = containerSize;
+                    displayWidth = displayHeight * imgAspect;
+                } else {
+                    // Image is taller - fit to container width
+                    displayWidth = containerSize;
+                    displayHeight = displayWidth / imgAspect;
+                }
+                
+                // Apply zoom to displayed dimensions
+                const zoomedDisplayWidth = displayWidth * zoom;
+                const zoomedDisplayHeight = displayHeight * zoom;
+                
+                // Calculate scale from displayed size to original image size
+                const scaleToOriginal = img.width / zoomedDisplayWidth;
+                
+                // The crop area is a square in the center of the container
+                // Position offset is in pixels relative to container center
+                // Convert to original image coordinates
+                const cropSizeInOriginal = containerSize * scaleToOriginal;
+                const offsetXInOriginal = -position.x * scaleToOriginal;
+                const offsetYInOriginal = -position.y * scaleToOriginal;
+                
+                // Calculate source crop area (centered on image, then offset)
+                const imgCenterX = img.width / 2;
+                const imgCenterY = img.height / 2;
+                
+                const sourceX = imgCenterX - (cropSizeInOriginal / 2) + offsetXInOriginal;
+                const sourceY = imgCenterY - (cropSizeInOriginal / 2) + offsetYInOriginal;
+                
+                // Clamp to image bounds
+                const clampedX = Math.max(0, Math.min(sourceX, img.width - cropSizeInOriginal));
+                const clampedY = Math.max(0, Math.min(sourceY, img.height - cropSizeInOriginal));
+                const clampedSize = Math.min(cropSizeInOriginal, img.width - clampedX, img.height - clampedY);
+
+                // Draw cropped image
+                ctx.drawImage(
+                    img,
+                    clampedX, clampedY, clampedSize, clampedSize,
+                    0, 0, outputSize, outputSize
+                );
+
+                // Convert to WebP blob
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to process image'));
+                        }
+                    },
+                    'image/webp',
+                    0.9 // Quality (0.9 = 90%)
+                );
+            };
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = imageSrc;
+        });
+    };
+
+    // Upload image to Supabase Storage
+    const uploadImage = async (imageSrc: string, zoom: number, position: { x: number; y: number }, userId: string, containerSize: number = 500): Promise<string> => {
+        try {
+            // Process the image first with crop data
+            const processedBlob = await processImage(imageSrc, zoom, position, containerSize);
+            
+            if (!processedBlob) {
+                throw new Error('Failed to process image - no blob generated');
+            }
+            
+            // Generate unique filename
+            const timestamp = Date.now();
+            const filePath = `${userId}/${timestamp}.webp`;
+
+            // Upload to Supabase Storage
+            const { data, error } = await supabase.storage
+                .from('profile-pictures')
+                .upload(filePath, processedBlob, {
+                    contentType: 'image/webp',
+                    upsert: false
+                });
+
+            if (error) {
+                console.error('Supabase storage upload error:', {
+                    message: error.message,
+                    error: error
+                });
+                
+                // Provide user-friendly error messages
+                if (error.message?.includes('Bucket not found') || error.message?.includes('does not exist')) {
+                    throw new Error('Storage bucket not configured. Please create a "profile-pictures" bucket in Supabase Storage.');
+                } else if (error.message?.includes('new row violates row-level security')) {
+                    throw new Error('Permission denied. Please check your Supabase Storage bucket policies.');
+                } else {
+                    throw new Error(error.message || 'Failed to upload image to storage');
+                }
+            }
+
+            if (!data) {
+                throw new Error('Upload succeeded but no data returned');
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+                .from('profile-pictures')
+                .getPublicUrl(filePath);
+
+            if (!urlData?.publicUrl) {
+                throw new Error('Failed to get public URL for uploaded image');
+            }
+
+            return urlData.publicUrl;
+        } catch (err: any) {
+            console.error('Error uploading image:', {
+                message: err?.message,
+                error: err,
+                stack: err?.stack
+            });
+            throw err;
+        }
+    };
+
+    // Handle file selection
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setImageError(null);
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            setImageError('Please select a JPG, PNG, or WebP image');
+            return;
+        }
+
+        // Validate file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+            setImageError('Image must be less than 2MB');
+            return;
+        }
+
+        // Store file for upload
+        setSelectedFile(file);
+        setRemovedAvatar(false);
+
+        // Create preview and open crop modal
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageSrc = e.target?.result as string;
+            setCropImageSrc(imageSrc);
+            setZoom(1);
+            setPosition({ x: 0, y: 0 });
+            setImageDimensions(null); // Will be set when image loads
+            setShowCropModal(true);
+        };
+        reader.readAsDataURL(file);
+    };
+    
+    // Calculate position bounds based on image size and zoom
+    const calculatePositionBounds = () => {
+        if (!imageDimensions || !imageContainerRef.current) {
+            return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+        }
+
+        const container = imageContainerRef.current;
+        const containerSize = container.clientWidth;
+        
+        // Calculate displayed image size after zoom
+        const zoomedWidth = imageDimensions.displayWidth * zoom;
+        const zoomedHeight = imageDimensions.displayHeight * zoom;
+        
+        // Calculate maximum allowed offset
+        // The image center can move, but the crop area (container) must always show image content
+        const maxOffsetX = Math.max(0, (zoomedWidth - containerSize) / 2);
+        const maxOffsetY = Math.max(0, (zoomedHeight - containerSize) / 2);
+        
+        return {
+            minX: -maxOffsetX,
+            maxX: maxOffsetX,
+            minY: -maxOffsetY,
+            maxY: maxOffsetY
+        };
+    };
+
+    // Handle mouse down for dragging
+    const handleMouseDown = (e: React.MouseEvent) => {
+        setIsDragging(true);
+        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    };
+    
+    // Handle mouse move for dragging
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging) return;
+        
+        const newX = e.clientX - dragStart.x;
+        const newY = e.clientY - dragStart.y;
+        
+        // Constrain position to bounds
+        const bounds = calculatePositionBounds();
+        const constrainedX = Math.max(bounds.minX, Math.min(bounds.maxX, newX));
+        const constrainedY = Math.max(bounds.minY, Math.min(bounds.maxY, newY));
+        
+        setPosition({
+            x: constrainedX,
+            y: constrainedY
+        });
+    };
+    
+    // Handle mouse up
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+    
+    // Handle zoom change and constrain position
+    const handleZoomChange = (newZoom: number) => {
+        setZoom(newZoom);
+        // Recalculate position bounds after zoom changes and constrain position
+        setTimeout(() => {
+            const bounds = calculatePositionBounds();
+            setPosition(prev => ({
+                x: Math.max(bounds.minX, Math.min(bounds.maxX, prev.x)),
+                y: Math.max(bounds.minY, Math.min(bounds.maxY, prev.y))
+            }));
+        }, 0);
+    };
+    
+    // Handle crop confirmation
+    const handleCropConfirm = async () => {
+        if (!cropImageSrc) return;
+        
+        // Create preview of cropped image
+        try {
+            const containerSize = imageContainerRef.current?.clientWidth || 500;
+            const blob = await processImage(cropImageSrc, zoom, position, containerSize);
+            const previewUrl = URL.createObjectURL(blob);
+            setPreviewUrl(previewUrl);
+            setShowCropModal(false);
+        } catch (err: any) {
+            setImageError(err.message || 'Failed to process image');
+        }
+    };
+    
+    // Handle crop cancel
+    const handleCropCancel = () => {
+        setShowCropModal(false);
+        setCropImageSrc(null);
+        setPreviewUrl(null);
+        setSelectedFile(null);
+        setZoom(1);
+        setPosition({ x: 0, y: 0 });
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    // Handle remove avatar
+    const handleRemoveAvatar = () => {
+        setAvatarUrl(null);
+        setPreviewUrl(null);
+        setSelectedFile(null);
+        setRemovedAvatar(true);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
     // Function to save favorite albums to database
     const saveFavoriteAlbums = async (userId: string, albums: Album[]) => {
@@ -275,6 +590,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
         setLoading(true);
         setError(null);
         setSuccess(false);
+        setImageError(null);
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -285,6 +601,59 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 return;
             }
 
+            // Handle profile picture upload/removal
+            let newAvatarUrl: string | null = avatarUrl;
+            
+            if (removedAvatar) {
+                // User wants to remove avatar
+                if (initialData.avatar_url) {
+                    // Extract file path from URL to delete old file
+                    try {
+                        const urlParts = initialData.avatar_url.split('/');
+                        const filePath = urlParts.slice(-2).join('/'); // Get {user_id}/{filename}
+                        await supabase.storage
+                            .from('profile-pictures')
+                            .remove([filePath]);
+                    } catch (err) {
+                        console.error('Error deleting old avatar:', err);
+                        // Continue even if deletion fails
+                    }
+                }
+                newAvatarUrl = null;
+            } else if (selectedFile && cropImageSrc) {
+                // User selected a new image and cropped it
+                setUploading(true);
+                try {
+                    // Delete old avatar if it exists
+                    if (initialData.avatar_url) {
+                        try {
+                            const urlParts = initialData.avatar_url.split('/');
+                            const filePath = urlParts.slice(-2).join('/');
+                            await supabase.storage
+                                .from('profile-pictures')
+                                .remove([filePath]);
+                        } catch (err) {
+                            console.error('Error deleting old avatar:', err);
+                            // Continue even if deletion fails
+                        }
+                    }
+
+                    // Upload new image with crop data
+                    const containerSize = imageContainerRef.current?.clientWidth || 500;
+                    newAvatarUrl = await uploadImage(cropImageSrc, zoom, position, user.id, containerSize);
+                    setAvatarUrl(newAvatarUrl);
+                    setPreviewUrl(null);
+                    setSelectedFile(null);
+                    setCropImageSrc(null);
+                } catch (err: any) {
+                    setImageError(err.message || 'Failed to upload image');
+                    setUploading(false);
+                    setLoading(false);
+                    return;
+                }
+                setUploading(false);
+            }
+
             // Update users table
             const { error: updateError } = await supabase
                 .from('users')
@@ -292,6 +661,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                     username: formData.username,
                     display_name: formData.display_name || null,
                     bio: formData.bio || null,
+                    avatar_url: newAvatarUrl,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', user.id);
@@ -356,6 +726,112 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 w-full
                 flex flex-col gap-6
             `}>
+                {/* Profile Picture Section */}
+                <div className={`
+                    flex flex-col gap-4
+                    items-center
+                    pb-6
+                    border-b border-primaryBorder
+                `}>
+                    <label className={`
+                        text-sm font-medium text-primaryText
+                    `}>
+                        Profile Picture
+                    </label>
+                    <div className={`
+                        flex flex-col items-center gap-4
+                    `}>
+                        {/* Avatar Preview */}
+                        <div className={`
+                            w-32 h-32
+                            rounded-full
+                            bg-secondaryBackground
+                            flex items-center justify-center
+                            overflow-hidden
+                            flex-shrink-0
+                        `}>
+                            {previewUrl ? (
+                                <img 
+                                    src={previewUrl} 
+                                    alt="Preview" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : avatarUrl && !removedAvatar ? (
+                                <img 
+                                    src={avatarUrl} 
+                                    alt="Profile" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <UserCircleIcon className="w-full h-full text-accentText" />
+                            )}
+                        </div>
+                        
+                        {/* File Input */}
+                        <div className={`
+                            flex flex-col items-center gap-2
+                        `}>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                                id="avatar-upload"
+                                disabled={uploading}
+                            />
+                            <label
+                                htmlFor="avatar-upload"
+                                className={`
+                                    px-4 py-2
+                                    rounded-lg
+                                    text-primaryText
+                                    bg-secondaryBackground
+                                    hover:bg-primaryBackground
+                                    cursor-pointer
+                                    transition-colors
+                                    ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
+                                `}
+                            >
+                                {uploading ? 'Processing...' : 'Choose Image'}
+                            </label>
+                            <p className={`
+                                text-xs text-secondaryText
+                            `}>
+                                JPG, PNG, or WebP. Max 2MB.
+                            </p>
+                        </div>
+
+                        {/* Remove Button */}
+                        {(avatarUrl && !removedAvatar) && (
+                            <button
+                                type="button"
+                                onClick={handleRemoveAvatar}
+                                className={`
+                                    px-4 py-2
+                                    rounded-lg
+                                    text-red-400
+                                    bg-red-500/20
+                                    hover:bg-red-500/30
+                                    transition-colors
+                                    text-sm
+                                `}
+                            >
+                                Remove Picture
+                            </button>
+                        )}
+
+                        {/* Image Error */}
+                        {imageError && (
+                            <p className={`
+                                text-sm text-red-400
+                            `}>
+                                {imageError}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
                 {/* Username Field */}
                 <div className={`
                     flex flex-col gap-2
@@ -558,7 +1034,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                     </button>
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || uploading}
                         className={`
                             px-6 py-2
                             rounded-lg
@@ -570,10 +1046,289 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                             disabled:opacity-50 disabled:cursor-not-allowed
                         `}
                     >
-                        {loading ? 'Saving...' : 'Save Changes'}
+                        {loading || uploading ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>
+            
+            {/* Crop Modal */}
+            {showCropModal && cropImageSrc && (
+                <div 
+                    className={`
+                        fixed
+                        inset-0
+                        bg-black/70
+                        backdrop-blur-sm
+                        z-50
+                        flex items-center justify-center
+                        p-4
+                    `}
+                    onClick={handleCropCancel}
+                >
+                    <div 
+                        className={`
+                            w-full max-w-2xl
+                            bg-secondaryBackground
+                            rounded-lg
+                            p-6
+                            shadow-lg
+                        `}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={`
+                            flex justify-between items-center
+                            mb-4
+                        `}>
+                            <h2 className={`
+                                text-xl font-bold text-primaryText
+                            `}>
+                                Crop Profile Picture
+                            </h2>
+                            <button
+                                onClick={handleCropCancel}
+                                className={`
+                                    p-1
+                                    rounded-lg
+                                    hover:bg-primaryBackground
+                                    transition-colors
+                                    cursor-pointer
+                                `}
+                            >
+                                <XMarkIcon className={`
+                                    w-6 h-6
+                                    text-secondaryText
+                                    hover:text-primaryText
+                                `} />
+                            </button>
+                        </div>
+                        
+                        <div className={`
+                            flex flex-col gap-4
+                        `}>
+                            {/* Crop Area */}
+                            <div 
+                                ref={imageContainerRef}
+                                className={`
+                                    relative
+                                    w-full
+                                    bg-primaryBackground
+                                    rounded-lg
+                                    overflow-hidden
+                                    flex items-center justify-center
+                                `}
+                                style={{
+                                    aspectRatio: '1 / 1',
+                                    maxHeight: '500px',
+                                    maxWidth: '500px',
+                                    margin: '0 auto'
+                                }}
+                            >
+                                <div
+                                    className={`
+                                        w-full h-full
+                                        relative
+                                        cursor-move
+                                    `}
+                                    style={{
+                                        aspectRatio: '1 / 1'
+                                    }}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseUp={handleMouseUp}
+                                    onMouseLeave={handleMouseUp}
+                                >
+                                    <img
+                                        ref={imageRef}
+                                        src={cropImageSrc}
+                                        alt="Crop"
+                                        className={`
+                                            absolute
+                                            top-1/2 left-1/2
+                                            select-none
+                                            pointer-events-none
+                                        `}
+                                        style={{
+                                            transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                                            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                                            maxWidth: 'none',
+                                            maxHeight: 'none',
+                                            width: 'auto',
+                                            height: 'auto',
+                                            objectFit: 'contain'
+                                        }}
+                                        draggable={false}
+                                        onLoad={(e) => {
+                                            const img = e.currentTarget;
+                                            const container = imageContainerRef.current;
+                                            if (container) {
+                                                const containerSize = Math.min(container.clientWidth, container.clientHeight);
+                                                const imgAspect = img.naturalWidth / img.naturalHeight;
+                                                
+                                                let displayWidth: number;
+                                                let displayHeight: number;
+                                                
+                                                if (imgAspect > 1) {
+                                                    // Image is wider - fit to container height
+                                                    displayHeight = containerSize;
+                                                    displayWidth = displayHeight * imgAspect;
+                                                    img.style.width = `${displayWidth}px`;
+                                                    img.style.height = `${displayHeight}px`;
+                                                } else {
+                                                    // Image is taller - fit to container width
+                                                    displayWidth = containerSize;
+                                                    displayHeight = displayWidth / imgAspect;
+                                                    img.style.width = `${displayWidth}px`;
+                                                    img.style.height = `${displayHeight}px`;
+                                                }
+                                                
+                                                // Store image dimensions for position calculations
+                                                setImageDimensions({
+                                                    width: img.naturalWidth,
+                                                    height: img.naturalHeight,
+                                                    displayWidth,
+                                                    displayHeight
+                                                });
+                                                
+                                                // Reset position when image loads
+                                                setPosition({ x: 0, y: 0 });
+                                            }
+                                        }}
+                                    />
+                                    {/* Circular crop overlay - darkened area outside circle */}
+                                    <div 
+                                        className={`
+                                            absolute
+                                            inset-0
+                                            pointer-events-none
+                                        `}
+                                        style={{
+                                            background: 'rgba(0, 0, 0, 0.5)',
+                                            maskImage: 'radial-gradient(circle, transparent 0%, transparent calc(50% - 2px), black calc(50% - 2px))',
+                                            WebkitMaskImage: 'radial-gradient(circle, transparent 0%, transparent calc(50% + 70px), black calc(50% - 2px))'
+                                        }}
+                                    />
+                                    {/* Circular border */}
+                                    <div className={`
+                                        absolute
+                                        pointer-events-none
+                                        rounded-full
+                                        border-4 border-accentText
+                                        shadow-lg
+                                    `}
+                                    style={{
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        width: '100%',
+                                        height: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Zoom Controls */}
+                            <div className={`
+                                flex flex-col items-center gap-2
+                                w-full
+                            `}>
+                                <div className={`
+                                    flex items-center justify-center gap-4
+                                    w-full
+                                `}>
+                                    <MagnifyingGlassMinusIcon className={`
+                                        w-5 h-5
+                                        text-secondaryText
+                                        flex-shrink-0
+                                    `} />
+                                    <input
+                                        type="range"
+                                        min="0.5"
+                                        max="3"
+                                        step="0.1"
+                                        value={zoom}
+                                        onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
+                                        className={`
+                                            flex-1
+                                            h-2
+                                            bg-secondaryBackground
+                                            rounded-lg
+                                            appearance-none
+                                            cursor-pointer
+                                            [&::-webkit-slider-thumb]:appearance-none
+                                            [&::-webkit-slider-thumb]:w-4
+                                            [&::-webkit-slider-thumb]:h-4
+                                            [&::-webkit-slider-thumb]:rounded-full
+                                            [&::-webkit-slider-thumb]:bg-accentText
+                                            [&::-webkit-slider-thumb]:cursor-pointer
+                                            [&::-moz-range-thumb]:w-4
+                                            [&::-moz-range-thumb]:h-4
+                                            [&::-moz-range-thumb]:rounded-full
+                                            [&::-moz-range-thumb]:bg-accentText
+                                            [&::-moz-range-thumb]:border-0
+                                            [&::-moz-range-thumb]:cursor-pointer
+                                        `}
+                                    />
+                                    <MagnifyingGlassPlusIcon className={`
+                                        w-5 h-5
+                                        text-secondaryText
+                                        flex-shrink-0
+                                    `} />
+                                </div>
+                                <span className={`
+                                    text-sm text-secondaryText
+                                `}>
+                                    {Math.round(zoom * 100)}%
+                                </span>
+                            </div>
+                            
+                            {/* Instructions */}
+                            <p className={`
+                                text-xs text-secondaryText
+                                text-center
+                            `}>
+                                Drag to reposition • Use slider to zoom
+                            </p>
+                            
+                            {/* Action Buttons */}
+                            <div className={`
+                                flex justify-end gap-4
+                                mt-2
+                            `}>
+                                <button
+                                    type="button"
+                                    onClick={handleCropCancel}
+                                    className={`
+                                        px-4 py-2
+                                        rounded-lg
+                                        text-primaryText
+                                        bg-secondaryBackground
+                                        hover:bg-primaryBackground
+                                        transition-colors
+                                    `}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleCropConfirm}
+                                    className={`
+                                        px-4 py-2
+                                        rounded-lg
+                                        text-primaryText
+                                        bg-accentText
+                                        hover:bg-primaryButtonHover
+                                        hover:text-primaryTextHover
+                                        transition-colors
+                                    `}
+                                >
+                                    Confirm Crop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -68,10 +68,10 @@ export default async function Home({ params }: AlbumPageParams) {
         spotifyId = urlId;
         
         const { data, error } = await supabase
-            .from('albums')
-            .select('*')
-            .eq('spotify_id', spotifyId)
-            .single();
+        .from('albums')
+        .select('*')
+        .eq('spotify_id', spotifyId)
+        .single();
         
         existingAlbum = data;
         dbError = error;
@@ -141,7 +141,7 @@ export default async function Home({ params }: AlbumPageParams) {
                     albumInfo.cover_image_url = spotifyAlbumInfo.images[0].url;
                     albumInfo.artists = spotifyAlbumInfo.artists;
                     if (needsTrackData || fieldsToCompare.tracks) {
-                        albumInfo.tracks = spotifyAlbumInfo.tracks;
+                    albumInfo.tracks = spotifyAlbumInfo.tracks;
                     }
                     if (needsTrackData || fieldsToCompare.total_tracks) {
                         albumInfo.total_tracks = spotifyAlbumInfo.total_tracks;

@@ -34,7 +34,7 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
     // Fetch user's current profile data
     const { data: profileData } = await supabase
         .from('users')
-        .select('username, display_name, bio')
+        .select('username, display_name, bio, avatar_url')
         .eq('id', user.id)
         .single();
 
@@ -104,6 +104,7 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
         bio: profileData?.bio || null,
         email: user.email || '',
         userId: user.id,
+        avatar_url: profileData?.avatar_url || null,
         initialFavorites
     };
 

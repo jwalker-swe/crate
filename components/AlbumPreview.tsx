@@ -40,58 +40,51 @@ export default function AlbumPreview( {coverWidth, coverHeight, id, name, artist
             cursor-pointer
             relative
             w-full
+            flex flex-col
             //Mobile Styling
             // Desktop Styling
         `} >
-            <li className={`
-                //General Styling
+            <div className="relative w-full">
+                <img src={imageUrl}
+                    width={coverHeight} height={coverHeight} alt="album cover"
+                    className={`
+                        w-full
+                        h-auto
+                        aspect-square
+                        object-cover
+                        rounded-ss-lg rounded-se-lg
+                        ${loading ? 'filter brightness-50' : ''}
+                `}/>
+                {loading && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="loader"></div>
+                    </div>
+                )}
+            </div>
+            <div className={`
                 w-full
                 flex flex-col
-                //Mobile Styling
-                //Desktop Styling
+                text-start font-sans
+                bg-secondaryBackground
+                p-3
+                rounded-es-lg rounded-ee-lg
+                md:p-4
             `}>
-                <div className="relative w-full">
-                    <img src={imageUrl}
-                        width={coverHeight} height={coverHeight} alt="album cover"
-                        className={`
-                            w-full
-                            h-auto
-                            aspect-square
-                            object-cover
-                            rounded-ss-lg rounded-se-lg
-                            ${loading ? 'filter brightness-50' : ''}
-                    `}/>
-                    {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="loader"></div>
-                        </div>
-                    )}
-                </div>
-                <div className={`
-                    w-full
-                    flex flex-col
-                    text-start font-sans
-                    bg-secondaryBackground
-                    p-3
-                    rounded-es-lg rounded-ee-lg
-                    md:p-4
+                <span className={`
+                    text-primaryText
+                    line-clamp-1
+                    overflow-hidden
                 `}>
-                    <span className={`
-                        text-primaryText
-                        line-clamp-1
-                        overflow-hidden
-                    `}>
-                        {name}
-                    </span>
-                    <span className={`
-                        text-sm text-secondaryText
-                        line-clamp-1
-                        overflow-hidden
-                    `}>
-                        {artist}
-                    </span>
-                </div>
-            </li>   
+                    {name}
+                </span>
+                <span className={`
+                    text-sm text-secondaryText
+                    line-clamp-1
+                    overflow-hidden
+                `}>
+                    {artist}
+                </span>
+            </div>
         </div>
     )
 }
