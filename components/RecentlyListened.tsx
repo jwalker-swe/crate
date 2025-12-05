@@ -97,7 +97,8 @@ export default async function RecentlyListened({ username }: { username: string 
 
     return (
         <div className={`
-                grid grid-cols-2 grid-rows-2 gap-4
+                grid grid-cols-1 gap-4
+                sm:grid-cols-2 sm:grid-rows-2
                 mt-4
             `}
         >

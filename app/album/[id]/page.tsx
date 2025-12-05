@@ -1,7 +1,7 @@
 //import page dependencies
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { StarIcon } from "@heroicons/react/24/solid";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -45,21 +45,27 @@ export default async function Home({ params }: AlbumPageParams) {
     let albumId: string | null = null;
     
     if (isUUID) {
-        // It's a database ID, fetch directly
+        // It's a database ID, fetch it and redirect to use spotify_id
         const { data, error } = await supabase
             .from('albums')
             .select('*')
             .eq('id', urlId)
             .single();
         
-        existingAlbum = data;
-        dbError = error;
-        albumId = urlId;
-        spotifyId = data?.spotify_id || urlId; // Fallback to urlId if spotify_id is missing
+        // If album not found by database ID, it doesn't exist
+        if (error || !data) {
+            notFound();
+        }
+        
+        // Redirect to use spotify_id in URL
+        if (data.spotify_id) {
+            redirect(`/album/${data.spotify_id}`);
+        } else {
+            notFound();
+        }
     } else {
-        // It's a Spotify ID, fetch by spotify_id
+        // It's a Spotify ID, always check database first
         spotifyId = urlId;
-        albumId = await getAlbumIdBySpotifyId(spotifyId);
         
         const { data, error } = await supabase
             .from('albums')
@@ -69,15 +75,11 @@ export default async function Home({ params }: AlbumPageParams) {
         
         existingAlbum = data;
         dbError = error;
-        // If we found the album, use its database ID
+        
+        // If we found the album, use its database ID for queries
         if (data?.id) {
             albumId = data.id;
         }
-    }
-    
-    // Ensure we have a valid albumId - if not, the album doesn't exist
-    if (!albumId) {
-        notFound();
     }
 
     let albumInfo;
@@ -154,19 +156,8 @@ export default async function Home({ params }: AlbumPageParams) {
         spotifyAlbumInfo = await getAlbumById(spotifyId);
         
         if (!spotifyAlbumInfo) {
-            throw new Error('Album not found on Spotify');
+            notFound();
         }
-
-        // Create album data object
-        albumInfo = {
-            title: spotifyAlbumInfo.name,
-            release_date: spotifyAlbumInfo.release_date,
-            cover_image_url: spotifyAlbumInfo.images[0].url,
-            artists: spotifyAlbumInfo.artists,
-            tracks: spotifyAlbumInfo.tracks,
-            total_tracks: spotifyAlbumInfo.total_tracks,
-            rating: null
-        };
 
         // Add album to database
         console.log(`Adding new album to database: ${spotifyAlbumInfo.name}`);
@@ -190,9 +181,23 @@ export default async function Home({ params }: AlbumPageParams) {
             throw new Error('Failed to add album to database');
         } else {
             console.log(`Successfully added album to database: ${spotifyAlbumInfo.name}`);
-            // Set albumId from the inserted album
+            // Use the database ID for queries, but keep spotify_id in URL
             if (insertedAlbum?.id) {
                 albumId = insertedAlbum.id;
+                // Set albumInfo from Spotify data (which matches what we just inserted)
+                albumInfo = {
+                    id: insertedAlbum.id,
+                    spotify_id: spotifyId,
+                    title: spotifyAlbumInfo.name,
+                    release_date: spotifyAlbumInfo.release_date,
+                    cover_image_url: spotifyAlbumInfo.images[0].url,
+                    artists: spotifyAlbumInfo.artists,
+                    tracks: spotifyAlbumInfo.tracks,
+                    total_tracks: spotifyAlbumInfo.total_tracks,
+                    rating: null
+                };
+            } else {
+                notFound();
             }
         }
     }
