@@ -14,6 +14,7 @@ export default function NavBar({ session }: {session: boolean}) {
     const [user, setUser]: any = useState(session)
     const [userId, setUserId]: any = useState('')
     const [username, setUsername]: any = useState('')
+    const [avatarUrl, setAvatarUrl]: any = useState<string | null>(null)
     const [modalSearchInput, setModalSearchInput] = useState('')
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
@@ -27,25 +28,26 @@ export default function NavBar({ session }: {session: boolean}) {
             const id = data.user?.id;
 
             if (data.user) {
-                const fetchUsername = async () => {
+                const fetchUserData = async () => {
                     const { data, error } = await supabase
                         .from('users')
-                        .select('username')
+                        .select('username, avatar_url')
                         .eq('id', id)
                         .single()
                     if (error) {
-                        console.error(`Error fetching username: `, error);
+                        console.error(`Error fetching user data: `, error);
                         return null
                     }
                     if (!data) {
-                        console.log('No username found')
+                        console.log('No user data found')
                         return null
                     }
                     if (data) {
                         await setUsername(data.username)
+                        await setAvatarUrl(data.avatar_url)
                     }
                 }
-                fetchUsername();
+                fetchUserData();
             }
         })
 
@@ -227,12 +229,24 @@ export default function NavBar({ session }: {session: boolean}) {
                                     rounded-lg
                                     transition-colors
                                 `}>
-                                    <UserCircleIcon className={`
-                                        w-8 h-8 
-                                        text-secondaryText
-                                        group-hover:text-accentText
-                                        transition-colors
-                                    `}/>
+                                    {avatarUrl ? (
+                                        <img 
+                                            src={avatarUrl} 
+                                            alt="Profile"
+                                            className={`
+                                                w-8 h-8
+                                                rounded-full
+                                                object-cover
+                                            `}
+                                        />
+                                    ) : (
+                                        <UserCircleIcon className={`
+                                            w-8 h-8 
+                                            text-secondaryText
+                                            group-hover:text-accentText
+                                            transition-colors
+                                        `}/>
+                                    )}
                                 </div>
                                 <div className={`
                                     profile-nav-menu
