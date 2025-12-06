@@ -31,10 +31,17 @@ export default async function Home() {
         <div
             className={`
                 page-container
-                w-full max-w-[1200px] h-fit
+                w-full h-fit
                 mx-auto py-4 px-4
-                lg:w-[1200px] lg:px-0
-            `}  
+                sm:px-6
+                md:px-8
+                lg:px-12
+                xl:px-16
+                2xl:px-24
+            `}
+            style={{
+                maxWidth: 'min(100%, 1200px)'
+            }}
         >
             <header>
                 <NavBar 

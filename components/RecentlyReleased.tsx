@@ -23,43 +23,126 @@ export default function RecentlyReleased({albums, columns, gap }: { albums: any[
         <>
                     <div
                         className={`
-                            w-full max-w-[1200px] h-fit mt-8 px-4
-                            lg:w-[1200px] lg:mt-16 lg:px-0
+                            w-full h-fit mt-8
+                            sm:mt-10
+                            md:mt-12
+                            lg:mt-16
                         `}
                     >
                         <SectionTitle title="Recent Releases" />
+                        {/* Single grid for large screens */}
                         <div
                             className={`
                                 mt-4
-                                grid grid-cols-2 gap-4
-                                sm:grid-cols-3
-                                md:grid-cols-4
-                                lg:grid-cols-7 lg:gap-${gap}
+                                hidden
+                                lg:grid lg:grid-cols-7
                             `}
+                            style={{
+                                gap: gap === 2 ? '0.5rem' : gap === 3 ? '0.75rem' : gap === 4 ? '1rem' : `${gap * 0.25}rem`
+                            }}
                         >
-                            {albums.map((album, index) => {
-                                if (index < 7) {
-                                    return (
-                                        <div key={index} className="relative cursor-pointer" onClick={() => handleClick(index, `/album/${album.id}`)}>
-                                            <img 
-                                                src={album.images[0].url}
-                                                width={172} height={172}
-                                                className={`
-                                                    rounded-lg
-                                                    hover:scale-103
-                                                    transition-transform duration-200 ease-in-out
-                                                    ${loading[index] ? 'filter brightness-50' : ''}
-                                                `}
-                                            />
-                                            {loading[index] && (
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="loader"></div>
-                                                </div>
-                                            )}
+                            {albums.slice(0, 7).map((album, index) => (
+                                <div 
+                                    key={index} 
+                                    className="relative cursor-pointer"
+                                    onClick={() => handleClick(index, `/album/${album.id}`)}
+                                >
+                                    <img 
+                                        src={album.images[0].url}
+                                        width={172} height={172}
+                                        className={`
+                                            w-full
+                                            h-auto
+                                            aspect-square
+                                            object-cover
+                                            rounded-lg
+                                            hover:scale-103
+                                            transition-transform duration-200 ease-in-out
+                                            ${loading[index] ? 'filter brightness-50' : ''}
+                                        `}
+                                    />
+                                    {loading[index] && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="loader"></div>
                                         </div>
-                                    )
-                                }
-                            })}
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {/* Two separate grids for smaller screens */}
+                        <div className="mt-4 flex flex-col gap-4 lg:hidden">
+                            {/* First row: 3 columns */}
+                            <div
+                                className={`
+                                    grid gap-2
+                                    grid-cols-3
+                                    md:gap-3
+                                `}
+                            >
+                                {albums.slice(0, 3).map((album, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="relative cursor-pointer"
+                                        onClick={() => handleClick(index, `/album/${album.id}`)}
+                                    >
+                                        <img 
+                                            src={album.images[0].url}
+                                            width={172} height={172}
+                                            className={`
+                                                w-full
+                                                h-auto
+                                                aspect-square
+                                                object-cover
+                                                rounded-lg
+                                                hover:scale-103
+                                                transition-transform duration-200 ease-in-out
+                                                ${loading[index] ? 'filter brightness-50' : ''}
+                                            `}
+                                        />
+                                        {loading[index] && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="loader"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Second row: 4 columns */}
+                            <div
+                                className={`
+                                    grid gap-2
+                                    grid-cols-4
+                                    md:gap-3
+                                `}
+                            >
+                                {albums.slice(3, 7).map((album, index) => (
+                                    <div 
+                                        key={index + 3} 
+                                        className="relative cursor-pointer"
+                                        onClick={() => handleClick(index + 3, `/album/${album.id}`)}
+                                    >
+                                        <img 
+                                            src={album.images[0].url}
+                                            width={172} height={172}
+                                            className={`
+                                                w-full
+                                                h-auto
+                                                aspect-square
+                                                object-cover
+                                                rounded-lg
+                                                hover:scale-103
+                                                transition-transform duration-200 ease-in-out
+                                                ${loading[index + 3] ? 'filter brightness-50' : ''}
+                                            `}
+                                        />
+                                        {loading[index + 3] && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="loader"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </>

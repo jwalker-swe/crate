@@ -199,6 +199,57 @@ export default async function Profile({ params }: ProfileProps) {
                                 `}>
                                     {profileUserData?.display_name || profileUserData?.username || 'User'}
                                 </h1>
+                                {/* Edit/Follow button - hidden on mobile, shown on desktop */}
+                                <div className="hidden md:block">
+                                    {isOwnProfile ? (
+                                        <Link href={`/profile/${username}/edit`}>
+                                            <button className={`
+                                                w-auto
+                                                min-w-[100px]
+                                                h-8
+                                                px-4
+                                                rounded-lg
+                                                text-primaryText
+                                                bg-tertiaryBackground
+                                                hover:cursor-pointer
+                                                hover:bg-secondaryBackground
+                                                hover:text-primaryTextHover
+                                                transition-colors
+                                            `}>
+                                                Edit Profile
+                                            </button>
+                                        </Link>
+                                    ) : (
+                                        <FollowButton 
+                                            profile={{profile: username}} 
+                                            user={user?.id || null}
+                                            initialFollowing={isFollowing}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                            <h2 className={`
+                                username
+                                text-secondaryText text-lg
+                                mb-4
+                            `}>
+                                @{username}
+                            </h2>
+                            {profileUserData?.bio && (
+                                <p className={`
+                                    user-bio
+                                    text-secondaryText text-sm
+                                    line-clamp-2
+                                    whitespace-pre-wrap
+                                    text-center
+                                    md:text-left
+                                    mb-4
+                                `}>
+                                    {profileUserData.bio}
+                                </p>
+                            )}
+                            {/* Edit/Follow button - shown on mobile, hidden on desktop */}
+                            <div className="md:hidden flex justify-center mt-4">
                                 {isOwnProfile ? (
                                     <Link href={`/profile/${username}/edit`}>
                                         <button className={`
@@ -225,22 +276,6 @@ export default async function Profile({ params }: ProfileProps) {
                                     />
                                 )}
                             </div>
-                            <h2 className={`
-                                username
-                                text-secondaryText text-lg
-                            `}>
-                                @{username}
-                            </h2>
-                            {profileUserData?.bio && (
-                                <p className={`
-                                    user-bio
-                                    text-secondaryText text-sm
-                                    line-clamp-2
-                                    whitespace-pre-wrap
-                                `}>
-                                    {profileUserData.bio}
-                                </p>
-                            )}
                         </div>
                     </div>
                     <div className={`

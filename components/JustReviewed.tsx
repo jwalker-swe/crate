@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import recentlyReviewed from "@/lib/spotify/getRecentlyReviewed";
 import ReviewRating from "./ReviewRating";
@@ -62,9 +62,28 @@ interface RecentReviews {
 export default function JustReviewed({ columns, rows, gap, data, user }: { columns: number, rows: number, gap: number, data: any, user: any }) {
 
     const [loading, setLoading] = useState(Array(data?.reviews?.length || 0).fill(false));
+    const [gridStyle, setGridStyle] = useState<React.CSSProperties>({});
     const router = useRouter();
 
 	const totalReviewsToDisplay = rows * columns;
+
+    useEffect(() => {
+        const updateGridStyle = () => {
+            if (window.innerWidth >= 1024) {
+                setGridStyle({
+                    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${rows}, auto)`,
+                    gap: `${gap * 0.25}rem`
+                });
+            } else {
+                setGridStyle({});
+            }
+        };
+
+        updateGridStyle();
+        window.addEventListener('resize', updateGridStyle);
+        return () => window.removeEventListener('resize', updateGridStyle);
+    }, [columns, rows, gap]);
 
     const handleClick = (index: number, href: string) => {
         const newLoading = [...loading];
@@ -86,8 +105,10 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
         return (
                 <div
                     className={`
-                        w-full max-w-[1200px] h-fit mt-8 px-4
-                        lg:w-[1200px] lg:mt-16 lg:px-0
+                        w-full h-fit mt-8
+                        sm:mt-10
+                        md:mt-12
+                        lg:mt-16
                     `}
                 >
                     <div
@@ -103,8 +124,8 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                             mt-4
                             grid grid-cols-1 gap-4 justify-center
                             md:grid-cols-2
-                            lg:grid-cols-${columns} lg:grid-rows-${rows} lg:gap-${gap}
-                        `}  
+                        `}
+                        style={gridStyle}
                     >
                         {reviews.map((review: any, index: number) => {
 

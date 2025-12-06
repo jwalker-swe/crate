@@ -22,20 +22,23 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
         <>
             <div
                 className={`
-                    w-full max-w-[1200px] h-fit mt-8 px-4
-                    lg:w-[1200px] lg:mt-16 lg:px-0
+                    w-full h-fit mt-8
+                    sm:mt-10
+                    md:mt-12
+                    lg:mt-16
                 `}
             >
                 <SectionTitle title="Popular this week"/>
             </div>
             <div
                 className={`
-                    w-full max-w-[1200px] h-fit mt-4 px-4
-                    grid grid-cols-1 gap-4
-                    sm:grid-cols-2
-                    md:grid-cols-3
-                    lg:w-[1200px] lg:grid-cols-${columns} lg:gap-${gap} lg:px-0
+                    w-full h-fit mt-4
+                    grid grid-cols-2 gap-4
+                    lg:grid-cols-4
                 `}
+                style={{
+                    gap: `${gap * 0.25}rem`
+                }}
             >
                 {albums.map((album, index) => {
                     if (index < columns) {
@@ -76,6 +79,8 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
                                     <h3
                                         className={`
                                             text-secondaryText
+                                            line-clamp-1
+                                            overflow-hidden
                                         `}
                                     >
                                         {album.artists[0].name}
