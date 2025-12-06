@@ -44,16 +44,15 @@ export default function AlbumPageList() {
                     post-info-container
                     //General Styling
                     w-full
-                    flex justify-start items-center gap-2
+                    flex flex-col gap-2
                     mb-4
                     text-xs text-secondaryText font-sans 
-                    //Mobile Styling
-                    //Desktop Styling
+                    sm:flex-row sm:items-center sm:gap-2
                 `}>
                     <div className={`
                         user-info-container
                         //General Styling
-                        flex justify-center items-center gap-1
+                        flex justify-start items-center gap-1
                         //Mobile Styling
                         //Desktop Styling
                     `}>
@@ -80,7 +79,7 @@ export default function AlbumPageList() {
                     <div className={`
                         list-stats
                         //General Styling
-                        flex justify-center items-center gap-2
+                        flex justify-start items-center gap-2
                         //Mobile Styling
                         //Desktop Styling
                     `}>

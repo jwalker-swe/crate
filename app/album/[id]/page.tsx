@@ -250,76 +250,93 @@ export default async function Home({ params }: AlbumPageParams) {
                     `}>
                         <div className="
                             //General Styling
-                            flex flex-row items-center gap-4
+                            flex flex-col gap-4
                             pt-8 pb-8
-                            lg:justify-center lg:gap-8 lg:pt-16
+                            sm:flex-row sm:items-start
+                            lg:justify-center lg:gap-8 lg:pt-16 lg:items-center
                         ">
-                            <img src={albumInfo.cover_image_url} width={320} height={320} alt={`album cover for ${albumInfo.name}`} 
-                                className={`
-                                    //General Styling
-                                    rounded-lg
-                                    w-24 h-24
-                                    flex-shrink-0
-                                    sm:w-32 sm:h-32
-                                    md:w-40 md:h-40
-                                    lg:w-[320px] lg:h-[320px]
-                            `} />
-                            <div className={`
-                                //General Styling
-                                h-auto
-                                flex flex-col justify-center
-                                flex-grow min-w-0
-                            `}>
+                            <div className="
+                                flex flex-row items-center gap-4
+                                sm:flex-1
+                            ">
+                                <img src={albumInfo.cover_image_url} width={320} height={320} alt={`album cover for ${albumInfo.name}`} 
+                                    className={`
+                                        //General Styling
+                                        rounded-lg
+                                        w-32 h-32
+                                        flex-shrink-0
+                                        object-cover
+                                        min-h-[140px]
+                                        sm:w-40 sm:h-40 sm:min-h-[180px]
+                                        md:w-52 md:h-52 md:min-h-[208px]
+                                        lg:w-[320px] lg:h-[320px] lg:min-h-[320px]
+                                `} />
                                 <div className={`
-                                    album-info-container
                                     //General Styling
-                                    w-full
-                                    flex flex-col justify-center items-start
-                                `}>
-                                    <h1 className={`
-                                        album-title
-                                        //General Styling
-                                        text-primaryText text-lg font-bold font-sans 
-                                        line-clamp-2
-                                        sm:text-xl
-                                        md:text-2xl
-                                        lg:text-3xl
-                                    `}>
-                                        {albumInfo.title}
-                                    </h1>
-                                    <h2 className={`
-                                        artist-name
-                                        //General Styling
-                                        text-accentText text-base font-sans
-                                        line-clamp-1
-                                        sm:text-lg
-                                        md:text-xl
-                                        lg:text-3xl
-                                    `}>
-                                        {albumInfo.artists[0].name}
-                                    </h2>
+                                    h-auto
+                                    flex flex-col justify-center
+                                    flex-grow min-w-0
+                                `}
+                                style={{
+                                    maxHeight: '100%'
+                                }}
+                                >
                                     <div className={`
                                         album-info-container
                                         //General Styling
-                                        flex justify-start items-center gap-2
-                                        text-secondaryText font-sans text-xs
-                                        sm:text-sm
+                                        w-full
+                                        flex flex-col justify-center items-start
                                     `}>
-                                        <span className={`year-of-release`}>
-                                            {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
-                                        </span>
-                                        <div className={`
-                                            bg-secondaryText
-                                            w-1 h-1
-                                            rounded-full
+                                        <h1 className={`
+                                            album-title
+                                            //General Styling
+                                            text-primaryText text-lg font-bold font-sans 
+                                            line-clamp-2
+                                            sm:text-xl
+                                            md:text-2xl
+                                            lg:text-3xl
                                         `}>
+                                            {albumInfo.title}
+                                        </h1>
+                                        <h2 className={`
+                                            artist-name
+                                            //General Styling
+                                            text-accentText text-base font-sans
+                                            line-clamp-1
+                                            sm:text-lg
+                                            md:text-xl
+                                            lg:text-3xl
+                                        `}>
+                                            {albumInfo.artists[0].name}
+                                        </h2>
+                                        <div className={`
+                                            album-info-container
+                                            //General Styling
+                                            flex justify-start items-center gap-2
+                                            text-secondaryText font-sans text-xs
+                                            sm:text-sm
+                                        `}>
+                                            <span className={`year-of-release`}>
+                                                {`${releaseDate.releaseMonth} ${releaseDate.releaseDateInfo[2]}, ${releaseDate.releaseDateInfo[0]}`}
+                                            </span>
+                                            <div className={`
+                                                bg-secondaryText
+                                                w-1 h-1
+                                                rounded-full
+                                            `}>
+                                            </div>
+                                            <span className={`total-tracks`}>
+                                                {`${albumInfo.total_tracks} Songs`}
+                                            </span>
                                         </div>
-                                        <span className={`total-tracks`}>
-                                            {`${albumInfo.total_tracks} Songs`}
-                                        </span>
+                                    </div>
+                                    <DisplayAlbumStats id={spotifyId} rating={albumInfo.rating} />
+                                    <div className="hidden sm:block">
+                                        <LogOptions album={albumInfo} session={user ? true : false} />
                                     </div>
                                 </div>
-                                <DisplayAlbumStats id={spotifyId} rating={albumInfo.rating} />
+                            </div>
+                            <div className="sm:hidden">
                                 <LogOptions album={albumInfo} session={user ? true : false} />
                             </div>
                         </div>

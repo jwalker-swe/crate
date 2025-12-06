@@ -120,22 +120,23 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     Producers
                 </li> */}
             </ul>
+            {infoState === 'Track List' && (
             <div className={`
                 //General Styling
                 w-full
-                ${infoState !== 'Track List' ? 'hidden' : ''}
-                grid grid-cols-1
+                flex flex-col gap-2
                 mt-4 p-3
                 bg-secondaryBackground
                 rounded-lg
                 sm:p-4
-                md:grid-cols-2
+                md:grid md:grid-cols-2
             `}>
                 {trackChunks.map((chunk: any, columnIndex: number) => (
                     <div key={columnIndex} className={`
                         column-${columnIndex + 1}
                         flex flex-col gap-2
                         text-secondaryText
+                        md:gap-2
                     `}> 
                         {chunk.map((songTitle: any, itemIndex: number) => {
                             const originalIndex = columnIndex * rowsPerGridColumn + itemIndex;
@@ -153,16 +154,17 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     </div>
                 ))}
             </div>
+            )}
+            {infoState === 'Performed By' && (
             <div className={`
                 //General Styling
                 w-full
-                ${infoState !== 'Performed By' ? 'hidden' : ''}
-                grid grid-cols-1
+                flex flex-col gap-2
                 mt-4 p-3
                 bg-secondaryBackground
                 rounded-lg
                 sm:p-4
-                md:grid-cols-2
+                md:grid md:grid-cols-2
             `}>
                 {artistChunks.map((chunk: any, columnIndex: any) => (
                     <div key={columnIndex} className={`
@@ -186,6 +188,7 @@ export default function AlbumPageInfo({ tracks, totalTracks }: AlbumPageInfoProp
                     </div>
                 ))}
             </div>
+            )}
         </div>
     )
 }
