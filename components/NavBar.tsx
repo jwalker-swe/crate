@@ -7,14 +7,20 @@ import { createClient } from '@/lib/supabase/client';
 import { MagnifyingGlassIcon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
-export default function NavBar({ session }: {session: boolean}) {
+type NavBarProps = {
+    session: boolean;
+    initialUsername?: string | null;
+    initialAvatarUrl?: string | null;
+}
+
+export default function NavBar({ session, initialUsername, initialAvatarUrl }: NavBarProps) {
 
     const supabase = createClient()
 
     const [user, setUser]: any = useState(session)
     const [userId, setUserId]: any = useState('')
-    const [username, setUsername]: any = useState('')
-    const [avatarUrl, setAvatarUrl]: any = useState<string | null>(null)
+    const [username, setUsername]: any = useState(initialUsername || '')
+    const [avatarUrl, setAvatarUrl]: any = useState<string | null>(initialAvatarUrl || null)
     const [modalSearchInput, setModalSearchInput] = useState('')
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
@@ -28,6 +34,7 @@ export default function NavBar({ session }: {session: boolean}) {
             const id = data.user?.id;
 
             if (data.user) {
+                // Fetch user data to keep it updated (initial data prevents pop on first render)
                 const fetchUserData = async () => {
                     const { data, error } = await supabase
                         .from('users')
@@ -43,8 +50,8 @@ export default function NavBar({ session }: {session: boolean}) {
                         return null
                     }
                     if (data) {
-                        await setUsername(data.username)
-                        await setAvatarUrl(data.avatar_url)
+                        setUsername(data.username)
+                        setAvatarUrl(data.avatar_url)
                     }
                 }
                 fetchUserData();
@@ -224,7 +231,7 @@ export default function NavBar({ session }: {session: boolean}) {
 								`}>
                                 <div className={`
                                     profile-nav-container
-                                    flex justify-start items-center
+                                    flex justify-start items-center gap-2
                                     p-2
                                     rounded-lg
                                     transition-colors
@@ -237,6 +244,7 @@ export default function NavBar({ session }: {session: boolean}) {
                                                 w-8 h-8
                                                 rounded-full
                                                 object-cover
+                                                flex-shrink-0
                                             `}
                                         />
                                     ) : (
@@ -245,7 +253,23 @@ export default function NavBar({ session }: {session: boolean}) {
                                             text-secondaryText
                                             group-hover:text-accentText
                                             transition-colors
+                                            flex-shrink-0
                                         `}/>
+                                    )}
+                                    {username && (
+                                        <span className={`
+                                            text-secondaryText
+                                            text-xs
+                                            whitespace-nowrap
+                                            overflow-hidden
+                                            text-ellipsis
+                                            max-w-[100px]
+                                            md:max-w-[120px]
+                                            group-hover:text-accentText
+                                            transition-colors
+                                        `}>
+                                            {username.length > 12 ? `${username.substring(0, 12)}...` : username}
+                                        </span>
                                     )}
                                 </div>
                                 <div className={`

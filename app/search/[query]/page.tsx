@@ -12,6 +12,17 @@ export default async function Home({ params }: SearchPageParams) {
     // Check if user active
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    
+    // Fetch user data for NavBar
+    let userData = null;
+    if (user) {
+        const { data } = await supabase
+            .from('users')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+        userData = data;
+    }
 
     const searchParams = await params;
     const slug = decodeURIComponent(searchParams.query.replace(/-/g, ' '));
@@ -35,7 +46,11 @@ export default async function Home({ params }: SearchPageParams) {
             lg:w-[1200px] lg:px-0
         `}>
             <header>
-                <NavBar session={user ? true : false} />
+                <NavBar 
+                    session={user ? true : false} 
+                    initialUsername={userData?.username || null}
+                    initialAvatarUrl={userData?.avatar_url || null}
+                />
             </header>
             <main>
                 <div className={`

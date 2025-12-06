@@ -119,6 +119,17 @@ export default async function Profile({ params }: ProfileProps) {
     
     // Check if viewing own profile
     const isOwnProfile = currentUserUsername === username;
+    
+    // Fetch current user's data for NavBar
+    let currentUserData = null;
+    if (user) {
+        const { data } = await supabase
+            .from('users')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+        currentUserData = data;
+    }
 
     return (
         <div className={`
@@ -126,7 +137,11 @@ export default async function Profile({ params }: ProfileProps) {
             mx-auto py-4 px-4
             lg:w-[1200px] lg:px-0
         `}>
-            <NavBar session={user ? true : false} />
+            <NavBar 
+                session={user ? true : false} 
+                initialUsername={currentUserData?.username || null}
+                initialAvatarUrl={currentUserData?.avatar_url || null}
+            />
             <div className={`
                 profile-body
                 w-full max-w-[896px]

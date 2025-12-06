@@ -13,6 +13,17 @@ export default async function Home() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser()
     
+    // Fetch user data for NavBar
+    let userData = null;
+    if (user) {
+        const { data } = await supabase
+            .from('users')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+        userData = data;
+    }
+    
     const albumData = await fetchTopAlbums();
 	const justReviewedData = await recentlyReviewed(10);
 
@@ -26,7 +37,11 @@ export default async function Home() {
             `}  
         >
             <header>
-                <NavBar session={user ? true : false} />
+                <NavBar 
+                    session={user ? true : false} 
+                    initialUsername={userData?.username || null}
+                    initialAvatarUrl={userData?.avatar_url || null}
+                />
             </header>
             <main
                 className={`

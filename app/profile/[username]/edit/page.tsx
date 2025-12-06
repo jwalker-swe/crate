@@ -114,7 +114,11 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
             mx-auto py-4 px-4
             lg:w-[1200px] lg:px-0
         `}>
-            <NavBar session={user ? true : false} />
+            <NavBar 
+                session={user ? true : false} 
+                initialUsername={profileData?.username || null}
+                initialAvatarUrl={profileData?.avatar_url || null}
+            />
             <EditProfileForm initialData={initialData} />
         </div>
     );

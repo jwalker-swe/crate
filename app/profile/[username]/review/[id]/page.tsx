@@ -27,6 +27,17 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 	
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Fetch user data for NavBar
+    let userData = null;
+    if (user) {
+        const { data } = await supabase
+            .from('users')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+        userData = data;
+    }
 
     //fetch reviews
 	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
@@ -64,7 +75,11 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
             `}
         >
             <header>
-                <NavBar session={ user ? true : false } />
+                <NavBar 
+                    session={ user ? true : false } 
+                    initialUsername={userData?.username || null}
+                    initialAvatarUrl={userData?.avatar_url || null}
+                />
             </header>
             <main>
 				<div className={`

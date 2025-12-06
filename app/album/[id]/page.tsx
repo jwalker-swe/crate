@@ -29,7 +29,18 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Setup state
     const supabase = await createClient();
-    const { data: { user } }: any = await supabase.auth.getUser();  
+    const { data: { user } }: any = await supabase.auth.getUser();
+    
+    // Fetch user data for NavBar
+    let userData = null;
+    if (user) {
+        const { data } = await supabase
+            .from('users')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+        userData = data;
+    }
 
     // Retrieve album id from url params
     const urlParams = await params;
@@ -219,7 +230,11 @@ export default async function Home({ params }: AlbumPageParams) {
             mx-auto py-4 px-4
             lg:w-[1200px] lg:px-0
         `}>
-            <NavBar session={user ? true : false} />
+            <NavBar 
+                session={user ? true : false} 
+                initialUsername={userData?.username || null}
+                initialAvatarUrl={userData?.avatar_url || null}
+            />
             <div className={`
                 w-full max-w-[896px]
                 mx-auto
