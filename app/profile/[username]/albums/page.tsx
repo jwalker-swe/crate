@@ -29,7 +29,7 @@ export default async function Home({ params }: ProfileProps ) {
 	const { data: albumData } = await supabase
 		.from('user_albums')
 		.select('*, albums(*)')
-		.eq('user_id', userData.id)
+		.eq('user_id', userData?.id)
 		.or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null')
 		.order('created_at', { ascending: false })
 
