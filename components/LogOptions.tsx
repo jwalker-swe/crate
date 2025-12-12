@@ -150,7 +150,7 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                             album_id: albumId,
                             rating: formData.rating,
                             review_text: formData.review,
-                            liked: formData.liked,
+                            is_favorite: formData.liked, // Map 'liked' to 'is_favorite' database column
                         }
                     ])
                     if (error) {

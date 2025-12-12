@@ -105,10 +105,10 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
         return (
                 <div
                     className={`
-                        w-full h-fit mt-8
-                        sm:mt-10
-                        md:mt-12
-                        lg:mt-16
+                        w-full h-fit mt-4
+                        sm:mt-5
+                        md:mt-6
+                        lg:mt-8
                     `}
                 >
                     <div

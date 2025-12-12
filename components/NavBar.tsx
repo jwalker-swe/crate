@@ -292,24 +292,24 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                     z-50
                                     `}>
                                         <Link href={`/profile/${username}`} className={`
-                                        w-full
-                                        px-4 py-2
-                                        flex items-center
+	                                        w-full
+		                                    px-4 py-2
+			                                flex items-center
                                             text-secondaryText
                                             hover:text-accentText
-                                        hover:bg-primaryBackground
-                                        transition-colors
+				                            hover:bg-primaryBackground
+					                        transition-colors
                                         `}>
                                             Profile
                                         </Link>
-                                        <Link href='#' className={`
-                                        w-full
-                                        px-4 py-2
-                                        flex items-center
+                                        <Link href={`/profile/${username}/albums`} className={`
+											w-full
+	                                        px-4 py-2
+		                                    flex items-center
                                             text-secondaryText
                                             hover:text-accentText
-                                        hover:bg-primaryBackground
-                                        transition-colors
+			                                hover:bg-primaryBackground
+				                            transition-colors
                                         `}>
                                             Albums
                                         </Link>

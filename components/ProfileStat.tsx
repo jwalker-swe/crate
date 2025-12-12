@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import Link from "next/link"
 
 type ProfileStatProps = {
     statName: string,
@@ -106,8 +107,11 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
 
         case 'albums':
             return (
-                <div className={`
+                <Link href={`/profile/${username}/albums`} className={`
                     flex flex-col justify-center items-center gap-1
+                    cursor-pointer
+                    hover:opacity-80
+                    transition-opacity
                 `}>
                     <h3 className={`
                         text-xl
@@ -117,7 +121,7 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
                     <p>
                         {statName}
                     </p>
-                </div>
+                </Link>
             )
     }
         

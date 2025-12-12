@@ -12,7 +12,7 @@ const getFillPercent = function(rating: number, index: number) {
 }
 
 
-export default function ReviewRating({ rating }: { rating: number }) {
+export default function ReviewRating({ rating, showNumber = true }: { rating: number, showNumber?: boolean }) {
     return (
         <div className={`
             //General Styling
@@ -20,11 +20,13 @@ export default function ReviewRating({ rating }: { rating: number }) {
             //Mobile Styling
             //Desktop Styling
         `}>
-            <p className={`
-                text-secondaryText
-            `}>
-                {rating.toFixed(1)}
-            </p>
+			{showNumber && (
+				<p className={`
+					text-secondaryText
+				`}>
+					{rating.toFixed(1)}
+				</p>
+			)}
             <div className={`
                 rating-container
                 //General Styling
