@@ -67,7 +67,7 @@ export default async function Home({ params }: ProfileProps ) {
 				>	
 					{`${userData?.display_name}'s`} Log
 				</h1>
-				 <ProfileAlbumsGrid initialAlbumData={albumData} totalColumns={8} totalRows={4} /> 
+				 <ProfileAlbumsGrid initialAlbumData={albumData || []} totalColumns={8} totalRows={4} /> 
 			</main>
 		</div>
 	)

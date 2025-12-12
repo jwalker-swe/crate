@@ -5,11 +5,22 @@ import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
 import { HeartIcon } from "@heroicons/react/24/solid";
 import ReviewRating from "@/components/ReviewRating"
 
-export default function ProfileAlbumsGrid({initialAlbumData, totalColumns, totalRows}: {initialAlbumData: any, totalColumns: number, totalRows: number}) {
+type AlbumData = {
+	albums: {
+		title: string
+		spotify_id: string
+		cover_image_url: string
+	}
+	rating: number | null
+	liked: boolean
+	review_text: string | null
+}
+
+export default function ProfileAlbumsGrid({initialAlbumData, totalColumns, totalRows}: {initialAlbumData: AlbumData[], totalColumns: number, totalRows: number}) {
 
 	const [page, setPage] = useState(1);
 	const [albumsPerPage, setAlbumsPerPage] = useState(totalColumns * totalRows);
-	const [albums, setAlbums] = useState([]);
+	const [albums, setAlbums] = useState<AlbumData[]>([]);
 
 	useEffect(() => {
 		setAlbums(initialAlbumData.slice(0, page * albumsPerPage))
