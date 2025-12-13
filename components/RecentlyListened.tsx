@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabase } from "@/lib/supabase/supabase";
 import { StarIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 
 type RecentActivityProps = {
     album_id: string,
@@ -120,6 +121,7 @@ export default async function RecentlyListened({ username }: { username: string 
                     <div className={`
                             w-fit h-fit
                             flex-grow
+                            flex flex-col
                         `}
                     >
                         <h3 className={`
@@ -187,9 +189,26 @@ export default async function RecentlyListened({ username }: { username: string 
                             text-secondaryText
                             line-clamp-3
                             whitespace-pre-line
+                            flex-grow
                         `}>
                             {activity.review_text}
                         </p>
+                        <div className={`
+                            mt-3
+                            flex justify-end
+                        `}>
+                            <Link 
+                                href={`/profile/${username}/review/${albumData[index].spotify_id}`}
+                                className={`
+                                    text-sm text-secondaryText
+                                    cursor-pointer
+                                    hover:text-accentText
+                                    transition-colors
+                                `}
+                            >
+                                read more
+                            </Link>
+                        </div>
                     </div>
                 </div>
             ))}

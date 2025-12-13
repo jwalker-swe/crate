@@ -4,6 +4,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import ReviewRating from "./ReviewRating";
 import LikeButton from "./LikeButton";
 import { createClient } from "@/lib/supabase/server";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 
 export default async function PopularReviewPreview({albumId, nReviewsToDisplay}: {albumId: string, nReviewsToDisplay: number}) {
@@ -57,22 +58,8 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                 `}>
                     <div className={`
                         //General Styling
-                        min-w-16 min-h-16
-                        bg-white
-                        rounded-lg
-                        //Mobile Styling
-                        //Desktop Styling
-                    `}>
-                        <img src={reviewData.albums[index].cover_image_url} 
-                            className={`
-                                w-16 h-16
-                                rounded-sm
-                            `}
-                        />
-                    </div>
-                    <div className={`
-                        //General Styling
                         flex flex-col items-start justify-center gap-2
+                        flex-1
                         //Mobile Styling
                         //Desktop Styling
                     `}>
@@ -85,14 +72,24 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                             <div className={`
                                 //General Styling
                                 w-6 h-6
-                                bg-white
                                 rounded-full
+                                overflow-hidden
+                                flex-shrink-0
+                                bg-tertiaryBackground
                                 //Mobille Styling
                                 //Desktop Styling
                             `}>
-                                {/* User Profile Image Goes Here */}
+                                {reviewData.avatarUrls[index] ? (
+                                    <img 
+                                        src={reviewData.avatarUrls[index]} 
+                                        alt={`${reviewData.usernames[index]}'s profile`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <UserCircleIcon className="w-6 h-6 text-secondaryText" />
+                                )}
                             </div>
-                            <Link href={`/profile/${reviewData.usernames[0]}`} className={`
+                            <Link href={`/profile/${reviewData.usernames[index]}`} className={`
                                 //General Styling
                                 //Mobile Styling
                                 //Desktop Styling
@@ -106,30 +103,6 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                                 </span>
                             </Link>
                         </div>
-                        <Link href={`#`}>
-                            <div className={`
-                                //General Styling
-                                flex flex-col justify-start items-start
-                                //Mobile Styling
-                                //Desktop Styling
-                            `}>
-                                <h3 className={`
-                                    //General Styling
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    {reviewData.albums[index].title}
-                                </h3>
-                                <p className={`
-                                    //General Styling
-                                    text-xs text-secondaryText
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    {reviewData.albums[index].artists[0].name}
-                                </p>
-                            </div>
-                        </Link>
                         <p className={`
                             //General Styling
                             text-xs text-primaryText line-clamp-3

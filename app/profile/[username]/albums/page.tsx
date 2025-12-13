@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import { createClient } from "@/lib/supabase/server";
 import ProfileAlbumsGrid from "@/components/ProfileAlbumsGrid"
+import Footer from "@/components/Footer";
 
 type ProfileProps = {
 	params: Promise<{
@@ -28,7 +29,7 @@ export default async function Home({ params }: ProfileProps ) {
 	// Fetch albums logged by user of profile being viewed
 	const { data: loggedAlbums } = await supabase
 		.from('user_albums')
-		.select('*, albums(*)')
+		.select('*, albums(id, spotify_id, title, cover_image_url)')
 		.eq('user_id', userData?.id)
 		.or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null')
 		.order('created_at', { ascending: false })
@@ -39,7 +40,7 @@ export default async function Home({ params }: ProfileProps ) {
 	// For queue albums - only get albums where queue = true
 	const { data: wantToListenAlbums } = await supabase
 		.from('user_albums')
-		.select('*, albums(*)')
+		.select('*, albums(id, spotify_id, title, cover_image_url)')
 		.eq('user_id', userData?.id)
 		.eq('queue', true)
 		.order('created_at', { ascending: false })
@@ -55,8 +56,13 @@ export default async function Home({ params }: ProfileProps ) {
 				bg-primaryBackground
 			`}
 		>
-			<header className="sticky top-0 z-50 backdrop-blur-md bg-primaryBackground/80 border-b border-primaryBorder/50">
-				<div className="max-w-7xl mx-auto px-6 lg:px-8">
+			<header>
+				<div className={`
+					content-container
+					w-full max-w-[1200px] h-fit
+					mx-auto py-4 px-4
+					lg:w-[1200px] lg:px-0
+				`}>
 					<NavBar
 						session={user ? true : false}
 						initialUsername={userData?.username || null }
@@ -70,7 +76,8 @@ export default async function Home({ params }: ProfileProps ) {
 					max-w-7xl
 					mx-auto
 					px-6 lg:px-8
-					py-12 lg:py-16
+					pt-12 lg:pt-16
+					pb-24 lg:pb-32
 				`}
 			>
 				{/* Hero Section */}
@@ -97,6 +104,7 @@ export default async function Home({ params }: ProfileProps ) {
 					totalRows={4} 
 				/>
 			</main>
+			<Footer />
 		</div>
 	)
 

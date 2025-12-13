@@ -39,6 +39,13 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
         userData = data;
     }
 
+    // Fetch profile user's data (the user who wrote the review)
+    const { data: profileUserData } = await supabase
+        .from('users')
+        .select('avatar_url')
+        .eq('username', urlParams.username)
+        .single();
+
     //fetch reviews
 	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
 	const reviewId = await getReviewId(review_data?.review.album_review_id);
@@ -181,18 +188,28 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 							<div
 								className={`
 									user-profile-icon-container
-									w-9 h-9
+									w-12 h-12
 									rounded-full
-									bg-white
+									overflow-hidden
+									flex-shrink-0
+									bg-tertiaryBackground
 									flex justify-center items-center
 								`}
-							>	
-								<UserCircleIcon
-									className={`
-										w-9 h-9
-										text-accentText
-									`}
-								/>
+							>
+								{profileUserData?.avatar_url ? (
+									<img 
+										src={profileUserData.avatar_url} 
+										alt={`${urlParams.username}'s profile`}
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<UserCircleIcon
+										className={`
+											w-12 h-12
+											text-secondaryText
+										`}
+									/>
+								)}
 							</div>
 							<div
 								className={`

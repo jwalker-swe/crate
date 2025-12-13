@@ -22,10 +22,7 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
         <>
             <div
                 className={`
-                    w-full h-fit mt-8
-                    sm:mt-10
-                    md:mt-12
-                    lg:mt-16
+                    w-full h-fit
                 `}
             >
                 <SectionTitle title="Popular this week"/>

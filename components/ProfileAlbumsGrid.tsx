@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
 import { HeartIcon } from "@heroicons/react/24/solid";
 import ReviewRating from "@/components/ReviewRating"
+import Link from "next/link"
 
 type AlbumData = {
 	albums: {
 		title: string
-		spotify_id: string
+		spotify_id: string | null
 		cover_image_url: string
-	}
+	} | null
 	rating: number | null
 	liked: boolean
 	review_text: string | null
@@ -120,13 +121,16 @@ export default function ProfileAlbumsGrid({
 					sm:grid-cols-3 
 					md:grid-cols-4 
 					lg:grid-cols-5 
-					xl:grid-cols-6
-					2xl:grid-cols-8
 					gap-4 lg:gap-6
 					w-full
 				`}
 			>
 				{albums.map((album, index) => {
+					// Handle case where albums might be null or spotify_id might be missing
+					if (!album.albums || !album.albums.spotify_id) {
+						return null;
+					}
+
 					return (
 						<div
 							key={`album: ${album.albums.title}-${index}`}
@@ -141,7 +145,7 @@ export default function ProfileAlbumsGrid({
 							}}
 						>
 							{/* Album Cover Card */}
-							<a
+							<Link
 								href={`/album/${album.albums.spotify_id}`}
 								className={`
 									block
@@ -187,7 +191,7 @@ export default function ProfileAlbumsGrid({
 										</div>
 									</div>
 								)}
-							</a>
+							</Link>
 
 							{/* Metadata Bar */}
 							<div

@@ -39,34 +39,33 @@ export default async function Home({ params }: SearchPageParams) {
     }
 
     return (
-        <div className={`
-            page-container
-            w-full max-w-[1200px] h-fit
-            mx-auto py-4 px-4
-            lg:w-[1200px] lg:px-0
-        `}>
+        <div className="min-h-screen bg-primaryBackground">
             <header>
-                <NavBar 
-                    session={user ? true : false} 
-                    initialUsername={userData?.username || null}
-                    initialAvatarUrl={userData?.avatar_url || null}
-                />
-            </header>
-            <main>
                 <div className={`
-                    flex justify-center items-start
-                    mb-16
+                    content-container
+                    w-full max-w-[1200px] h-fit
+                    mx-auto py-4 px-4
+                    lg:w-[1200px] lg:px-0
                 `}>
-                    <ResultsList 
-                        results={arrangedResults} 
-                        userResults={searchResults.users} 
-                        searchType={searchResults.type}
-                        sk={searchParams.query} 
+                    <NavBar 
+                        session={user ? true : false} 
+                        initialUsername={userData?.username || null}
+                        initialAvatarUrl={userData?.avatar_url || null}
                     />
                 </div>
+            </header>
+            <main className="w-full max-w-[1200px] mx-auto px-4 lg:px-0 pb-16 pt-8">
+                <ResultsList 
+                    results={arrangedResults} 
+                    userResults={searchResults.users} 
+                    searchType={searchResults.type}
+                    sk={searchParams.query} 
+                />
             </main>
-            <footer>
-                <Footer />
+            <footer className="border-t border-primaryBorder/50 mt-20">
+                <div className="w-full max-w-[1200px] mx-auto px-4 lg:px-0">
+                    <Footer />
+                </div>
             </footer>
         </div>
     )

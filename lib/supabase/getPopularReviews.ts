@@ -31,24 +31,24 @@ export default async function getPopularReviews(albumId: string) {
         return bLikes - aLikes;
     });
 
-    const usernames = await Promise.all(reviews.map(async (review: any) => {
+    const userData = await Promise.all(reviews.map(async (review: any) => {
         const { data, error } = await supabase
             .from('users')
-            .select('username')
+            .select('username, avatar_url')
             .eq('id', review.user_id)
             .single();
 
         if (error) {
-            console.error('Error fetching username: ', error);
-            return null;
+            console.error('Error fetching user data: ', error);
+            return { username: null, avatar_url: null };
         }
 
         if (!data) {
-            console.log('No username found');
-            return null;
+            console.log('No user data found');
+            return { username: null, avatar_url: null };
         }
 
-        return data?.username;
+        return { username: data?.username, avatar_url: data?.avatar_url };
     }));
 
     const albums = await Promise.all(reviews.map(async (review: any) => {
@@ -71,5 +71,8 @@ export default async function getPopularReviews(albumId: string) {
         return data;
     }));
 
-    return { reviews, usernames, albums };
+    const usernames = userData.map(user => user.username);
+    const avatarUrls = userData.map(user => user.avatar_url);
+
+    return { reviews, usernames, avatarUrls, albums };
 }
