@@ -21,6 +21,7 @@ import LogOptions from "@/components/LogOptions";
 import { createClient } from "@/lib/supabase/server";
 import PopularReviewPreview from "@/components/PopularReviewPreview";
 import getAlbumIdBySpotifyId from "@/lib/supabase/getAlbumIdBySpotifyId";
+import WantToListenButton from "@/components/WantToListenButton"
 
 
 type StateType = string;
@@ -222,6 +223,22 @@ export default async function Home({ params }: AlbumPageParams) {
     // Seperate out release year from release date
     const releaseDate = getReleaseDate(albumInfo.release_date);
 
+    // Check if album is in user's queue (server-side)
+    let isInQueue = false;
+    if (user && albumId) {
+        const { data: userAlbum } = await supabase
+            .from('user_albums')
+            .select('id, queue, rating, review_text, is_favorite, liked')
+            .eq('user_id', user.id)
+            .eq('album_id', albumId)
+            .maybeSingle();
+
+        if (userAlbum) {
+            // Album is in queue if queue = true
+            isInQueue = userAlbum.queue === true;
+        }
+    }
+
     return (
         <div className={`
             //General Styling
@@ -332,12 +349,28 @@ export default async function Home({ params }: AlbumPageParams) {
                                     </div>
                                     <DisplayAlbumStats id={spotifyId} rating={albumInfo.rating} />
                                     <div className="hidden sm:block">
-                                        <LogOptions album={albumInfo} session={user ? true : false} />
+                                        <div className="flex items-center gap-3">
+                                            <WantToListenButton 
+                                                album={albumInfo} 
+                                                albumId={albumId}
+                                                userId={user?.id || null}
+                                                initialIsInQueue={isInQueue}
+                                            />
+                                            <LogOptions album={albumInfo} session={user ? true : false} />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="sm:hidden">
-                                <LogOptions album={albumInfo} session={user ? true : false} />
+                                <div className="flex flex-col gap-3">
+                                    <WantToListenButton 
+                                        album={albumInfo} 
+                                        albumId={albumId}
+                                        userId={user?.id || null}
+                                        initialIsInQueue={isInQueue}
+                                    />
+                                    <LogOptions album={albumInfo} session={user ? true : false} />
+                                </div>
                             </div>
                         </div>
                         <div className={`

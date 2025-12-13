@@ -100,6 +100,7 @@ export type Database = {
           review_text: string | null
           updated_at: string | null
           user_id: string
+          queue: boolean | null
         }
         Insert: {
           album_id: string
@@ -111,6 +112,7 @@ export type Database = {
           review_text?: string | null
           updated_at?: string | null
           user_id: string
+          queue?: boolean | null
         }
         Update: {
           album_id?: string
@@ -122,6 +124,7 @@ export type Database = {
           review_text?: string | null
           updated_at?: string | null
           user_id?: string
+          queue?: boolean | null
         }
         Relationships: [
           {

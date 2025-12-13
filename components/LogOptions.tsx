@@ -150,7 +150,8 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                             album_id: albumId,
                             rating: formData.rating,
                             review_text: formData.review,
-                            is_favorite: formData.liked, // Map 'liked' to 'is_favorite' database column
+                            is_favorite: formData.liked,
+                            queue: false  // Add this - album is no longer in queue when logged
                         }
                     ])
                     if (error) {
