@@ -57,58 +57,60 @@ export default function ProfileAlbumsGrid({
 	return (
 		<div className="w-full">
 			{/* Toggle Buttons */}
-			<div className="mb-8 flex items-center gap-4">
-				<button
-					onClick={() => setViewMode('logged')}
-					className={`
-						relative
-						px-6 py-2.5
-						text-sm font-medium
-						rounded-full
-						transition-all duration-300 ease-out
-						${
-							viewMode === 'logged'
-								? 'text-primaryText bg-secondaryBackground'
-								: 'text-secondaryText hover:text-primaryText'
-						}
-					`}
-				>
-					Logged
-					{viewMode === 'logged' && (
-						<div className="absolute inset-0 rounded-full bg-accentText/10 border border-accentText/30"></div>
-					)}
-				</button>
-				
-				<button
-					onClick={() => setViewMode('queue')}
-					className={`
-						relative
-						px-6 py-2.5
-						text-sm font-medium
-						rounded-full
-						transition-all duration-300 ease-out
-						${
-							viewMode === 'queue'
-								? 'text-primaryText bg-secondaryBackground'
-								: 'text-secondaryText hover:text-primaryText'
-						}
-					`}
-				>
-					Queue
-					{viewMode === 'queue' && (
-						<div className="absolute inset-0 rounded-full bg-accentText/10 border border-accentText/30"></div>
-					)}
-				</button>
+			<div className="mb-8 flex flex-wrap items-center gap-4">
+				<div className="flex items-center gap-4">
+					<button
+						onClick={() => setViewMode('logged')}
+						className={`
+							relative
+							px-6 py-2.5
+							text-sm font-medium
+							rounded-full
+							transition-all duration-300 ease-out
+							${
+								viewMode === 'logged'
+									? 'text-primaryText bg-secondaryBackground'
+									: 'text-secondaryText hover:text-primaryText'
+							}
+						`}
+					>
+						Logged
+						{viewMode === 'logged' && (
+							<div className="absolute inset-0 rounded-full bg-accentText/10 border border-accentText/30"></div>
+						)}
+					</button>
+					
+					<button
+						onClick={() => setViewMode('queue')}
+						className={`
+							relative
+							px-6 py-2.5
+							text-sm font-medium
+							rounded-full
+							transition-all duration-300 ease-out
+							${
+								viewMode === 'queue'
+									? 'text-primaryText bg-secondaryBackground'
+									: 'text-secondaryText hover:text-primaryText'
+							}
+						`}
+					>
+						Queue
+						{viewMode === 'queue' && (
+							<div className="absolute inset-0 rounded-full bg-accentText/10 border border-accentText/30"></div>
+						)}
+					</button>
+				</div>
 
 				{/* Count badges */}
-				<div className="ml-auto flex items-center gap-4 text-sm text-secondaryText">
-					<span className="flex items-center gap-2">
-						<span className="w-2 h-2 rounded-full bg-accentText"></span>
-						{loggedAlbums.length} logged
+				<div className="flex items-center gap-4 text-sm text-secondaryText flex-shrink-0 md:ml-auto">
+					<span className="flex items-center gap-2 whitespace-nowrap">
+						<span className="w-2 h-2 rounded-full bg-accentText flex-shrink-0"></span>
+						<span>{loggedAlbums.length} logged</span>
 					</span>
-					<span className="flex items-center gap-2">
-						<span className="w-2 h-2 rounded-full bg-secondaryText"></span>
-						{queueAlbums.length} in queue
+					<span className="flex items-center gap-2 whitespace-nowrap">
+						<span className="w-2 h-2 rounded-full bg-secondaryText flex-shrink-0"></span>
+						<span>{queueAlbums.length} in queue</span>
 					</span>
 				</div>
 			</div>

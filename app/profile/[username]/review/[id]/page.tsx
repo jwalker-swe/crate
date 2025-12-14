@@ -76,96 +76,121 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
     return (
         <div
             className={`
-                w-[1200px] h-fit
-                mx-auto py-4
-				font-system
+                w-full min-h-screen
+                bg-primaryBackground
             `}
         >
             <header>
-                <NavBar 
-                    session={ user ? true : false } 
-                    initialUsername={userData?.username || null}
-                    initialAvatarUrl={userData?.avatar_url || null}
-                />
+                <div className={`
+                    content-container
+                    w-full max-w-[1200px] h-fit
+                    mx-auto py-4 px-4
+                    lg:w-[1200px] lg:px-0
+                `}>
+                    <NavBar 
+                        session={ user ? true : false } 
+                        initialUsername={userData?.username || null}
+                        initialAvatarUrl={userData?.avatar_url || null}
+                    />
+                </div>
             </header>
             <main>
 				<div className={`
-					w-[896px]
+					w-full max-w-[896px]
 					mx-auto
-					pb-18
+					pb-18 px-4
+					lg:w-[896px] lg:px-0
 				`}>
 					<section>
 						<div className={`
 							//General Styling
 							//Mobile Styling
-							//Desktop Styling `}>
+							//Desktop Styling 
+						`}>
 							<div className="
 								//General Styling
-								flex justify-center items-center gap-8
-								pt-16 pb-8
-								//Mobile Styling
-								//Desktop Styling
+								flex flex-col gap-4
+								pt-8 pb-8
+								sm:flex-row sm:items-start sm:gap-4
+								lg:justify-center lg:gap-8 lg:pt-16 lg:items-center
 							">
-								<img src={review_data?.review.album_cover_art} width={320} height={320} alt={`album cover for ${review_data?.spotify.name}`} 
-									className={`
-										//General Styling
-										rounded-lg
-										//Mobile Styling
-										//Desktop Styling
-								`} />
-								<div className={`
-									//General Styling
-									h-[320px]
-									flex flex-col justify-center
-									//Mobile Styling
-									//Desktop Styling
-								`}>
+								<div className="
+									flex flex-row items-center gap-4
+									sm:flex-1
+								">
+									<img src={review_data?.review.album_cover_art} width={320} height={320} alt={`album cover for ${review_data?.spotify.name}`} 
+										className={`
+											//General Styling
+											rounded-lg
+											w-32 h-32
+											flex-shrink-0
+											object-cover
+											min-h-[140px]
+											sm:w-40 sm:h-40 sm:min-h-[180px]
+											md:w-52 md:h-52 md:min-h-[208px]
+											lg:w-[320px] lg:h-[320px] lg:min-h-[320px]
+										`} />
 									<div className={`
-										album-info-container
 										//General Styling
-										w-136
-										flex flex-col justify-center items-left
-										//Mobile Styling
-										//Desktop Styling
-									`}>
-										<h1 className={`
-											album-title
-											//General Styling
-											text-primaryText text-3xl font-bold 
-											//Mobile Styling
-											//Desktop Styling
-										`}>
-											{review_data?.spotify.name}
-										</h1>
-										<h2 className={`
-											artist-name
-											//General Styling
-											text-accentText text-3xl 
-											//Mobile Styling
-											//Desktop Styling
-										`}>
-											{review_data?.spotify.artists[0].name}
-										</h2>
+										h-auto
+										flex flex-col justify-center
+										flex-grow min-w-0
+									`}
+									style={{
+										maxHeight: '100%'
+									}}
+									>
 										<div className={`
 											album-info-container
 											//General Styling
-											flex justify-start items-center gap-2
-											text-secondaryText 
+											w-full
+											flex flex-col justify-center items-start
 											//Mobile Styling
 											//Desktop Styling
 										`}>
-											<span className={`year-of-release`}>
-												{`${release_date.releaseMonth} ${release_date.releaseDateInfo[2]}, ${release_date.releaseDateInfo[0]}`}
-											</span>
-											<div className={`
-												bg-secondaryText
-												w-1 h-1
-												rounded-full
+											<h1 className={`
+												album-title
+												//General Styling
+												text-primaryText text-lg font-bold font-sans 
+												line-clamp-2
+												sm:text-xl
+												md:text-2xl
+												lg:text-3xl
 											`}>
+												{review_data?.spotify.name}
+											</h1>
+											<h2 className={`
+												artist-name
+												//General Styling
+												text-accentText text-base font-sans
+												line-clamp-1
+												sm:text-lg
+												md:text-xl
+												lg:text-3xl
+											`}>
+												{review_data?.spotify.artists[0].name}
+											</h2>
+											<div className={`
+												album-info-container
+												//General Styling
+												flex flex-wrap justify-start items-center gap-2
+												text-secondaryText font-sans text-xs
+												sm:text-sm
+											`}>
+												<span className={`year-of-release whitespace-nowrap`}>
+													{`${release_date.releaseMonth} ${release_date.releaseDateInfo[2]}, ${release_date.releaseDateInfo[0]}`}
+												</span>
+												<div className={`
+													bg-secondaryText
+													w-1 h-1
+													rounded-full
+													flex-shrink-0
+												`}>
+												</div>
+												<span className={`total-tracks whitespace-nowrap`}>
+													{`${review_data?.spotify.total_tracks} Songs`}
+												</span>
 											</div>
-											<span className={`total-tracks`}>
-												{`${review_data?.spotify.total_tracks} Songs`}
-											</span>
 										</div>
 									</div>
 								</div>
@@ -174,14 +199,17 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 					</section>
 					<section className="
 						review-section
-						p-8
+						p-4
+						sm:p-6
+						md:p-8
 						bg-secondaryBackground
 						rounded-lg
+						mt-8
 					">
 						<div
 							className={`
 								reviewer-user-info
-								flex justify-start items-center gap-4
+								flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4
 								pb-2
 							`}
 						>
@@ -215,12 +243,14 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 								className={`
 									w-full
 									flex flex-col justify-between items-start
+									gap-2
 								`}
 							>
 								<div
 									className={`
 										w-full
-										flex justify-between items-start
+										flex flex-col sm:flex-row justify-between items-start sm:items-center
+										gap-2 sm:gap-4
 									`}
 								>
 									<div
@@ -231,11 +261,12 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 										<div
 											className={`
 												flex justify-start items-center gap-2
+												flex-wrap
 											`}
 										>
 											<p
 												className={`
-													text-secondaryText
+													text-secondaryText text-sm
 												`}
 											>
 												Review by
@@ -243,7 +274,7 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 											<Link
 												href={`/profile/${urlParams.username}`}
 												className={`
-													text-secondaryText
+													text-secondaryText text-sm
 													hover:text-accentText
 												`}
 											>
@@ -254,7 +285,8 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 									</div>
 									<p
 										className={`
-											text-secondaryText
+											text-secondaryText text-sm
+											whitespace-nowrap
 										`}
 									>
 										{date_reviewed.releaseMonth} {date_reviewed.releaseDateInfo[2]}, {date_reviewed.releaseDateInfo[0]}
@@ -266,7 +298,7 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 						<div
 							className={`
 								mt-4	
-								text-secondaryText
+								text-secondaryText text-sm sm:text-base
 								whitespace-pre-line
 							`}
 						>
@@ -276,9 +308,7 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 					<CommentSection reviewId={reviewId} userId={user ? user.id : null} commentData={initialCommentData ?? { data: [], usernames: [] }} activeUser={activeUser}/>
 				</div>
             </main>
-            <footer>
-                <Footer />
-            </footer>
+            <Footer />
         </div>
     )
 }
