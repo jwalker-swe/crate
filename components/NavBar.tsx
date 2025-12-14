@@ -4,8 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client';
-import { MagnifyingGlassIcon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, UserCircleIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import AlbumSearchLogModal from './AlbumSearchLogModal';
 
 type NavBarProps = {
     session: boolean;
@@ -23,6 +24,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
     const [avatarUrl, setAvatarUrl]: any = useState<string | null>(initialAvatarUrl || null)
     const [modalSearchInput, setModalSearchInput] = useState('')
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+    const [isAlbumLogModalOpen, setIsAlbumLogModalOpen] = useState(false)
 
     const router = useRouter();
 
@@ -128,21 +130,55 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                 md:w-auto md:gap-16
              `}>
                 <div className={`flex items-center gap-2 md:gap-4`}>
+                    {/* Add Album button - only show if user is logged in */}
+                    {user && (
+                        <button
+                            onClick={() => setIsAlbumLogModalOpen(true)}
+                            className={`
+                                group
+                                flex items-center gap-2
+                                p-2
+                                rounded-lg
+                                hover:bg-secondaryBackground
+                                transition-colors
+                                cursor-pointer
+                                md:px-3 md:py-2
+                            `}
+                        >
+                            <PlusIcon className={`
+                                w-5 h-5
+                                text-secondaryText
+                                group-hover:text-accentText
+                                transition-colors
+                                md:w-4 md:h-4
+                            `} />
+                            <span className={`
+                                hidden
+                                md:inline-block
+                                text-sm
+                                text-secondaryText
+                                group-hover:text-accentText
+                                transition-colors
+                            `}>
+                                Add Album
+                            </span>
+                        </button>
+                    )}
                     {/* Search button - icon only on small, icon + text on larger screens */}
                     <button
                         onClick={openSearchModal}
-                                        className={`
+                        className={`
                             group
                             flex items-center gap-2
                             p-2
-                                            rounded-lg
+                            rounded-lg
                             hover:bg-secondaryBackground
                             transition-colors
-                                        cursor-pointer
+                            cursor-pointer
                             md:px-3 md:py-2
-                                    `}
-                                >
-                                    <MagnifyingGlassIcon className={`
+                        `}
+                    >
+                        <MagnifyingGlassIcon className={`
                             w-5 h-5
                             text-secondaryText
                             group-hover:text-accentText
@@ -153,13 +189,13 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                             hidden
                             md:inline-block
                             text-sm
-                                            text-secondaryText
+                            text-secondaryText
                             group-hover:text-accentText
                             transition-colors
                         `}>
                             Search
                         </span>
-                                </button>
+                    </button>
                     <ul className={`
                         //General Styling
                         flex items-center gap-2
@@ -455,6 +491,14 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                         </form>
                     </div>
                 </div>
+             )}
+             {/* Album Search & Log Modal */}
+             {user && (
+                 <AlbumSearchLogModal
+                     isOpen={isAlbumLogModalOpen}
+                     onClose={() => setIsAlbumLogModalOpen(false)}
+                     userId={userId}
+                 />
              )}
         </div>
     )

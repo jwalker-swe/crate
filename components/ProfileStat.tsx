@@ -57,10 +57,13 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
         following = followingCount
 
         // Fetch user's count of albums listened to
+        // Only count albums that have been logged (rated, reviewed, liked, or favorited)
+        // Exclude albums that are only in the queue
         const {count: albumCount, error: albumError} = await supabase
             .from('user_albums')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', id)
+            .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null')
 
         if (albumError) {
             console.error('Error determining number of albums listened: ', albumError)
