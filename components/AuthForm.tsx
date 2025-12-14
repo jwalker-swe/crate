@@ -14,6 +14,9 @@ export default function Auth() {
 
     const [mode, setMode] = useState(`${param}`)
     const [loading, setLoading] = useState(false)
+    const [showForgotPassword, setShowForgotPassword] = useState(false)
+    const [resetEmailSent, setResetEmailSent] = useState(false)
+    const [resetError, setResetError] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -89,6 +92,36 @@ export default function Auth() {
             ...prev,
             [name]: value
         }))
+    }
+
+    const handleForgotPassword = async function(e: React.FormEvent) {
+        e.preventDefault()
+        setResetError(null)
+        setLoading(true)
+
+        if (!formData.email) {
+            setResetError('Please enter your email address')
+            setLoading(false)
+            return
+        }
+
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+                redirectTo: `${window.location.origin}/auth/reset-password`,
+            })
+
+            if (error) {
+                setResetError(error.message)
+                setLoading(false)
+            } else {
+                setResetEmailSent(true)
+                setLoading(false)
+            }
+        } catch (error) {
+            console.error('Error sending password reset email:', error)
+            setResetError('An error occurred. Please try again.')
+            setLoading(false)
+        }
     }
 
     return (
@@ -219,12 +252,34 @@ export default function Auth() {
                             <div className={`
                                 w-full
                             `}>
-                                <label htmlFor='password' className={`
-                                    block
-                                    text-sm text-secondaryText
+                                <div className={`
+                                    flex justify-between items-center
+                                    mb-1
                                 `}>
-                                    Password
-                                </label>
+                                    <label htmlFor='password' className={`
+                                        block
+                                        text-sm text-secondaryText
+                                    `}>
+                                        Password
+                                    </label>
+                                    {mode === 'sign-in' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowForgotPassword(true)
+                                                setResetEmailSent(false)
+                                                setResetError(null)
+                                            }}
+                                            className={`
+                                                text-xs text-accentText
+                                                hover:text-primaryButtonHover
+                                                transition-colors
+                                            `}
+                                        >
+                                            Forgot password?
+                                        </button>
+                                    )}
+                                </div>
                                 <input
                                     type='password'
                                     id='password'
@@ -233,7 +288,8 @@ export default function Auth() {
                                     minLength={6}
                                     value={formData.password}
                                     onChange={handleChange}
-                                    required
+                                    required={!showForgotPassword}
+                                    disabled={showForgotPassword}
                                     className={`
                                         w-full
                                         p-2
@@ -241,21 +297,112 @@ export default function Auth() {
                                         rounded-sm
                                         bg-primaryBackground
                                         focus:outline-none
+                                        ${showForgotPassword ? 'opacity-50 cursor-not-allowed' : ''}
                                     `}
                                 />
                             </div>
-                            <button type='submit' className={`
-                                w-full
-                                mt-4 p-3
-                                text-center
-                                bg-accentText
-                                rounded-sm
-                                hover:cursor-pointer
-                                hover:bg-primaryButtonHover
-                                hover:text-primaryTextHover
-                            `}>
-                                {mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
-                            </button>
+                            {showForgotPassword ? (
+                                <>
+                                    {resetEmailSent ? (
+                                        <div className={`
+                                            w-full
+                                            mt-4 p-4
+                                            bg-accentText/10
+                                            border border-accentText/30
+                                            rounded-sm
+                                        `}>
+                                            <p className={`
+                                                text-sm text-primaryText
+                                                text-center
+                                            `}>
+                                                Password reset email sent! Check your inbox for instructions.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowForgotPassword(false)
+                                                    setResetEmailSent(false)
+                                                    setFormData(prev => ({ ...prev, email: '' }))
+                                                }}
+                                                className={`
+                                                    w-full
+                                                    mt-3 p-2
+                                                    text-sm
+                                                    text-center
+                                                    bg-secondaryBackground
+                                                    rounded-sm
+                                                    hover:bg-tertiaryBackground
+                                                    transition-colors
+                                                `}
+                                            >
+                                                Back to Sign In
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <button 
+                                                type='button'
+                                                onClick={handleForgotPassword}
+                                                disabled={loading}
+                                                className={`
+                                                    w-full
+                                                    mt-4 p-3
+                                                    text-center
+                                                    bg-accentText
+                                                    rounded-sm
+                                                    hover:cursor-pointer
+                                                    hover:bg-primaryButtonHover
+                                                    hover:text-primaryTextHover
+                                                    disabled:opacity-50
+                                                    disabled:cursor-not-allowed
+                                                `}
+                                            >
+                                                {loading ? 'Sending...' : 'Send Reset Email'}
+                                            </button>
+                                            {resetError && (
+                                                <p className={`
+                                                    mt-2
+                                                    text-sm text-red-500
+                                                    text-center
+                                                `}>
+                                                    {resetError}
+                                                </p>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowForgotPassword(false)
+                                                    setResetError(null)
+                                                }}
+                                                className={`
+                                                    w-full
+                                                    mt-2 p-2
+                                                    text-sm
+                                                    text-center
+                                                    text-secondaryText
+                                                    hover:text-primaryText
+                                                    transition-colors
+                                                `}
+                                            >
+                                                Back to Sign In
+                                            </button>
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                <button type='submit' className={`
+                                    w-full
+                                    mt-4 p-3
+                                    text-center
+                                    bg-accentText
+                                    rounded-sm
+                                    hover:cursor-pointer
+                                    hover:bg-primaryButtonHover
+                                    hover:text-primaryTextHover
+                                `}>
+                                    {mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
+                                </button>
+                            )}
                     </form>
                     <div className={`
                         w-full

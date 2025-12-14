@@ -25,6 +25,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
     const [modalSearchInput, setModalSearchInput] = useState('')
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
     const [isAlbumLogModalOpen, setIsAlbumLogModalOpen] = useState(false)
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
     const router = useRouter();
 
@@ -105,6 +106,24 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
         };
     }, [isSearchModalOpen]);
 
+    // Close profile menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (isProfileMenuOpen && !target.closest('.profile-menu-container')) {
+                setIsProfileMenuOpen(false);
+            }
+        };
+
+        if (isProfileMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isProfileMenuOpen]);
+
     return (
         <div className={`
             //General Styling
@@ -139,7 +158,10 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                 flex items-center gap-2
                                 p-2
                                 rounded-lg
-                                hover:bg-secondaryBackground
+                                text-primaryText
+                                bg-primaryButton
+                                hover:bg-primaryButtonHover
+                                hover:text-primaryTextHover
                                 transition-colors
                                 cursor-pointer
                                 md:px-3 md:py-2
@@ -147,20 +169,18 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                         >
                             <PlusIcon className={`
                                 w-5 h-5
-                                text-secondaryText
-                                group-hover:text-accentText
                                 transition-colors
                                 md:w-4 md:h-4
+                                flex-shrink-0
                             `} />
                             <span className={`
                                 hidden
-                                md:inline-block
+                                lg:inline-block
                                 text-sm
-                                text-secondaryText
-                                group-hover:text-accentText
                                 transition-colors
+                                whitespace-nowrap
                             `}>
-                                Add Album
+                                Log Album
                             </span>
                         </button>
                     )}
@@ -264,14 +284,23 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
 								className={`
 									group 
 									relative 
+									profile-menu-container
 								`}>
-                                <div className={`
-                                    profile-nav-container
-                                    flex justify-start items-center gap-2
-                                    p-2
-                                    rounded-lg
-                                    transition-colors
-                                `}>
+                                <button
+                                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                                    className={`
+                                        profile-nav-container
+                                        flex justify-start items-center gap-2
+                                        p-2
+                                        rounded-lg
+                                        transition-colors
+                                        w-full
+                                        text-left
+                                        bg-transparent
+                                        border-none
+                                        cursor-pointer
+                                    `}
+                                >
                                     {avatarUrl ? (
                                         <img 
                                             src={avatarUrl} 
@@ -307,7 +336,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                             {username.length > 12 ? `${username.substring(0, 12)}...` : username}
                                         </span>
                                     )}
-                                </div>
+                                </button>
                                 <div className={`
                                     profile-nav-menu
                                     absolute
@@ -315,19 +344,23 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                     top-full
                                     mt-2
                                     flex flex-col
-                                    invisible
-                                    opacity-0
                                     bg-secondaryBackground
                                     rounded-lg
                                     shadow-lg
                                     min-w-[144px]
                                     overflow-hidden
-                                    group-hover:visible 
-                                    group-hover:opacity-100
                                     transition-all duration-200
                                     z-50
+                                    ${
+                                        isProfileMenuOpen
+                                            ? 'visible opacity-100'
+                                            : 'invisible opacity-0 md:group-hover:visible md:group-hover:opacity-100'
+                                    }
                                     `}>
-                                        <Link href={`/profile/${username}`} className={`
+                                        <Link 
+                                            href={`/profile/${username}`} 
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                            className={`
 	                                        w-full
 		                                    px-4 py-2
 			                                flex items-center
@@ -338,7 +371,10 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                         `}>
                                             Profile
                                         </Link>
-                                        <Link href={`/profile/${username}/albums`} className={`
+                                        <Link 
+                                            href={`/profile/${username}/albums`} 
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                            className={`
 											w-full
 	                                        px-4 py-2
 		                                    flex items-center
@@ -349,7 +385,10 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                         `}>
                                             Albums
                                         </Link>
-                                        <Link href='#' className={`
+                                        <Link 
+                                            href='#' 
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                            className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
@@ -360,7 +399,10 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                         `}>
                                             Reviews
                                         </Link>
-                                        <Link href='#' className={`
+                                        <Link 
+                                            href='#' 
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                            className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
@@ -371,7 +413,10 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                         `}>
                                             Lists
                                         </Link>
-                                        <Link href='#' className={`
+                                        <Link 
+                                            href='#' 
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                            className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
@@ -382,10 +427,13 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                         `}>
                                             Likes
                                         </Link>
-                                        <button onClick={() => {
-                                            supabase.auth.signOut();
-                                            router.push('/')
-                                        }} className={`
+                                        <button 
+                                            onClick={() => {
+                                                setIsProfileMenuOpen(false);
+                                                supabase.auth.signOut();
+                                                router.push('/')
+                                            }} 
+                                            className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
