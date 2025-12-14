@@ -93,18 +93,24 @@ export default function Auth() {
 
     return (
         <div className={`
-            w-[1200px] h-screen
-            mx-auto py-4
+            w-full max-w-[1200px] h-screen
+            mx-auto py-4 px-4
+            lg:px-0
             bg-primaryBackground
         `}>
             <section className={`
                 w-full h-full
                 flex justify-center items-center
-                px-16 py-8
+                px-4 py-8
+                sm:px-8
+                lg:px-16
             `}>
                 <div className={`
-                    w-2xl
-                    px-32 pt-8 pb-14
+                    w-full max-w-2xl
+                    px-6 pt-8 pb-14
+                    sm:px-12
+                    md:px-20
+                    lg:px-32
                     bg-secondaryBackground
                     rounded-lg
                 `}>
@@ -112,6 +118,7 @@ export default function Auth() {
                         <Image src={'/images/crate-logo-cropped.png'} alt='crate logo'
                             width={220} height={25} className={`
                                 mx-auto p-4
+                                max-w-full h-auto
                             `}
                         />
                     </Link>
@@ -253,7 +260,7 @@ export default function Auth() {
                     <div className={`
                         w-full
                         mt-4
-                        flex justify-center items-center gap-2
+                        flex flex-wrap justify-center items-center gap-2
                     `}>
                         <p className={`
                             text-secondaryText
