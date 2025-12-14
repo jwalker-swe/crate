@@ -2,6 +2,7 @@ import NavBar from "@/components/NavBar";
 import { createClient } from "@/lib/supabase/server";
 import ProfileAlbumsGrid from "@/components/ProfileAlbumsGrid"
 import Footer from "@/components/Footer";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 type ProfileProps = {
 	params: Promise<{
@@ -81,19 +82,50 @@ export default async function Home({ params }: ProfileProps ) {
 				`}
 			>
 				{/* Hero Section */}
-				<div className="mb-12 lg:mb-16">
-					<h1
-						className={`
-							text-4xl lg:text-5xl xl:text-6xl
-							font-bold
-							text-primaryText
-							mb-3
-							tracking-tight
-						`}
-					>	
-						{userData?.display_name || userData?.username}'s Log
-					</h1>
-					<div className="h-px w-24 bg-gradient-to-r from-accentText to-transparent mt-4"></div>
+				<div className="mb-12 lg:mb-16 flex items-center gap-6">
+					{/* Profile Picture */}
+					<div className={`
+						w-16 h-16
+						md:w-20 md:h-20
+						lg:w-24 lg:h-24
+						rounded-full
+						bg-secondaryBackground
+						flex-shrink-0
+						overflow-hidden
+						flex items-center justify-center
+					`}>
+						{userData?.avatar_url ? (
+							<img 
+								src={userData.avatar_url} 
+								alt={`${userData.display_name || userData.username}'s profile`}
+								className="w-full h-full object-cover"
+							/>
+						) : (
+							<UserCircleIcon className="w-full h-full text-accentText" />
+						)}
+					</div>
+					
+					{/* Text Content */}
+					<div className="flex flex-col">
+						<h1
+							className={`
+								text-4xl lg:text-5xl xl:text-6xl
+								font-bold
+								text-primaryText
+								tracking-tight
+							`}
+						>	
+							{userData?.display_name || userData?.username}'s Log
+						</h1>
+						<p className={`
+							text-lg lg:text-xl
+							text-secondaryText
+							mt-1
+						`}>
+							@{userData?.username}
+						</p>
+						<div className="h-px w-24 bg-gradient-to-r from-accentText to-transparent mt-4"></div>
+					</div>
 				</div>
 
 				{/* Albums Grid with Toggle */}
