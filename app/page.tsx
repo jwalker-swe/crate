@@ -20,7 +20,7 @@ import TopAlbumsSection from "@/components/TopAlbumsSection";
 import JustReviewed from "@/components/JustReviewed";
 import getFollowingActivity from "@/lib/supabase/getFollowingActivity";
 import getFollowingReviews from "@/lib/supabase/getFollowingReviews";
-import UserActivityIcon from "@/components/UserActivityIcon";
+import ActivityFeedItem from "@/components/ActivityFeedItem";
 
 //Create function to get Album data
 
@@ -180,30 +180,20 @@ export default async function Home() {
             {followingActivity.length > 0 ? (
               <div className={`
                 w-full
-                flex flex-wrap justify-start items-start gap-6
-                p-6
-                bg-secondaryBackground
-                rounded-lg
+                flex flex-col gap-3
               `}>
-                {followingActivity.slice(0, 8).map((activity) => (
-                  <div key={`${activity.user_id}-${activity.album_id}-${activity.created_at}`} className="flex flex-col items-center gap-2">
-                    <UserActivityIcon
-                      username={activity.username}
-                      avatarUrl={activity.avatar_url}
-                      activityType={activity.activity_type}
-                      rating={activity.rating}
-                      spotifyId={activity.album_spotify_id || undefined}
-                      hasReview={activity.activity_type === 'reviewed'}
-                    />
-                    {activity.album_title && (
-                      <Link 
-                        href={`/album/${activity.album_spotify_id || activity.album_id}`}
-                        className="text-xs text-secondaryText hover:text-accentText text-center max-w-[90px] line-clamp-2 transition-colors"
-                      >
-                        {activity.album_title}
-                      </Link>
-                    )}
-                  </div>
+                {followingActivity.slice(0, 5).map((activity) => (
+                  <ActivityFeedItem
+                    key={`${activity.user_id}-${activity.album_id}-${activity.created_at}`}
+                    username={activity.username}
+                    activityType={activity.activity_type}
+                    rating={activity.rating}
+                    albumTitle={activity.album_title}
+                    albumCover={activity.album_cover}
+                    albumSpotifyId={activity.album_spotify_id}
+                    albumId={activity.album_id}
+                    createdAt={activity.created_at}
+                  />
                 ))}
               </div>
             ) : (

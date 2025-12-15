@@ -10,16 +10,39 @@ export default async function getPopularRecentReviews(reviewTotal: number = 10) 
         const oneWeekAgoISO = oneWeekAgo.toISOString();
 
         // Get reviews from the past week
-        const { data: reviews, error } = await supabase
+        const { data: weekReviews, error: weekError } = await supabase
             .from('user_albums')
             .select('*')
             .not('review_text', 'is', null)
             .gte('created_at', oneWeekAgoISO)
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching reviews: ', error);
+        if (weekError) {
+            console.error('Error fetching week reviews: ', weekError);
             return null;
+        }
+
+        // Determine how many reviews we need
+        const minReviews = Math.max(4, reviewTotal || 10);
+        let reviews = weekReviews || [];
+
+        // If we don't have enough reviews from this week, fetch older ones
+        if (reviews.length < minReviews) {
+            const { data: olderReviews, error: olderError } = await supabase
+                .from('user_albums')
+                .select('*')
+                .not('review_text', 'is', null)
+                .lt('created_at', oneWeekAgoISO)
+                .order('created_at', { ascending: false })
+                .limit(minReviews - reviews.length);
+
+            if (olderError) {
+                console.error('Error fetching older reviews: ', olderError);
+                // Continue with just week reviews if older fetch fails
+            } else if (olderReviews) {
+                // Combine week reviews with older reviews
+                reviews = [...reviews, ...olderReviews];
+            }
         }
 
         if (!reviews || reviews.length === 0) {
@@ -90,8 +113,8 @@ export default async function getPopularRecentReviews(reviewTotal: number = 10) 
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
 
-        // Take the top reviews
-        const topReviews = reviewsWithLikes.slice(0, reviewTotal || 10);
+        // Take the top reviews (at least 4, or up to reviewTotal)
+        const topReviews = reviewsWithLikes.slice(0, minReviews);
 
         // Remove likeCount from review objects (it was only for sorting)
         const cleanedReviews = topReviews.map(({ likeCount, ...review }) => review);
