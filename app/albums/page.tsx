@@ -5,7 +5,7 @@ import TopAlbums from "@/components/TopAlbums";
 import JustReviewed from "@/components/JustReviewed";
 import { createClient } from "@/lib/supabase/server";
 import RecentlyReleased from "@/components/RecentlyReleased";
-import recentlyReviewed from "@/lib/spotify/getRecentlyReviewed";
+import getPopularRecentReviews from "@/lib/supabase/getPopularRecentReviews";
 
 
 export default async function Home() {
@@ -25,7 +25,7 @@ export default async function Home() {
     }
     
     const albumData = await fetchTopAlbums();
-	const justReviewedData = await recentlyReviewed(10);
+	const justReviewedData = await getPopularRecentReviews(10);
 
     return (
         <div className="min-h-screen bg-primaryBackground">

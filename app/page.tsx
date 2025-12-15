@@ -11,12 +11,16 @@ import { Suspense } from "react";
 import SectionTitle from "@/components/SectionTitle";
 import ArticlePreview from "@/components/ArticlePreview";
 import { SpotifyAlbumsResponse, SpotifyAlbums } from "@/types/spotify";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 import { supabase } from "@/lib/supabase/supabase";
 import SignUpButton from "@/components/SignUpButton";
 import HomePageReviewPreview from "@/components/HomePageReviewPreview";
 import TopAlbumsLoading from "@/components/TopAlbumsLoading";
 import TopAlbumsSection from "@/components/TopAlbumsSection";
+import JustReviewed from "@/components/JustReviewed";
+import getFollowingActivity from "@/lib/supabase/getFollowingActivity";
+import getFollowingReviews from "@/lib/supabase/getFollowingReviews";
+import UserActivityIcon from "@/components/UserActivityIcon";
 
 //Create function to get Album data
 
@@ -131,8 +135,119 @@ export default async function Home() {
   }
 
   const recentReviews = await getRecentReviewData()
+  
+  // Get activity from users being followed (for signed-in users)
+  const followingActivity = user ? await getFollowingActivity(user.id, 10) : [];
+  const justReviewedData = user ? await getFollowingReviews(user.id, 6) : null;
 
+  // If user is signed in, show different content
+  if (user) {
+    return (
+      <div className={`
+        content-container
+        w-full max-w-[1200px] h-fit
+        mx-auto py-4 px-4
+        lg:w-[1200px] lg:px-0
+      `}>
+        <NavBar 
+          session={true} 
+          initialUsername={userData?.username || null}
+          initialAvatarUrl={userData?.avatar_url || null}
+        />
+        
+        <main className={`
+          w-full max-w-[1200px]
+          mx-auto
+          pb-16 pt-8 px-4
+          lg:px-0
+        `}>
+          {/* Top Albums Section */}
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <SectionTitle title="Top Albums" />
+            </div>
+            <Suspense fallback={<TopAlbumsLoading />}>
+              <TopAlbumsSection />
+            </Suspense>
+          </section>
 
+          {/* Activity from Following */}
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <SectionTitle title="Activity from Following" />
+              {followingActivity.length > 0 && <ViewAll pageLink="activity" />}
+            </div>
+            {followingActivity.length > 0 ? (
+              <div className={`
+                w-full
+                flex flex-wrap justify-start items-start gap-6
+                p-6
+                bg-secondaryBackground
+                rounded-lg
+              `}>
+                {followingActivity.slice(0, 8).map((activity) => (
+                  <div key={`${activity.user_id}-${activity.album_id}-${activity.created_at}`} className="flex flex-col items-center gap-2">
+                    <UserActivityIcon
+                      username={activity.username}
+                      avatarUrl={activity.avatar_url}
+                      activityType={activity.activity_type}
+                      rating={activity.rating}
+                      spotifyId={activity.album_spotify_id || undefined}
+                      hasReview={activity.activity_type === 'reviewed'}
+                    />
+                    {activity.album_title && (
+                      <Link 
+                        href={`/album/${activity.album_spotify_id || activity.album_id}`}
+                        className="text-xs text-secondaryText hover:text-accentText text-center max-w-[90px] line-clamp-2 transition-colors"
+                      >
+                        {activity.album_title}
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`
+                w-full
+                p-8
+                bg-secondaryBackground
+                rounded-lg
+                text-center
+              `}>
+                <p className="text-secondaryText mb-4">
+                  You're not following anyone yet.
+                </p>
+                <Link 
+                  href="/search"
+                  className="text-accentText hover:text-primaryButtonHover transition-colors"
+                >
+                  Discover users to follow →
+                </Link>
+              </div>
+            )}
+          </section>
+
+          {/* Recently Reviewed Section */}
+          {justReviewedData && (
+            <section className="mb-12"> 
+              <JustReviewed 
+                columns={2} 
+                rows={3} 
+                gap={4} 
+                data={justReviewedData} 
+                user={user}
+              />
+            </section>
+          )}
+ 
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Original marketing/homepage for non-signed-in users
   return (
     <div className={`
       content-container
