@@ -14,6 +14,7 @@ export default function Auth() {
 
     const [mode, setMode] = useState(`${param}`)
     const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -23,9 +24,19 @@ export default function Auth() {
 
     const router = useRouter()
 
+    // Sync mode with URL param changes
+    useEffect(() => {
+        if (param && (param === 'sign-in' || param === 'sign-up' || param === 'forgot-password')) {
+            setMode(`${param}`)
+            setMessage(null)
+        }
+    }, [param])
+
     const handleSubmit = async function(e: React.FormEvent) {
         // Prevent page reload
         e.preventDefault();
+        setLoading(true)
+        setMessage(null)
 
         // Handle form submission if signing up
         if (mode === 'sign-up') {
@@ -41,11 +52,15 @@ export default function Auth() {
                     }
                 })
 
-                if (data) {
+                if (error) {
+                    setMessage({ type: 'error', text: error.message || 'An error occurred while trying to sign up.' })
+                } else if (data) {
                     router.push(`/auth/sign-in`)
                 }
-            } catch (error) {
-                console.error('An error occurred while trying to sign up.', error)
+            } catch (error: any) {
+                setMessage({ type: 'error', text: error.message || 'An unexpected error occurred while trying to sign up.' })
+            } finally {
+                setLoading(false)
             }
         }
 
@@ -57,7 +72,9 @@ export default function Auth() {
                     password: formData.password
                 })
 
-                if (data) {
+                if (error) {
+                    setMessage({ type: 'error', text: error.message || 'Invalid email or password.' })
+                } else if (data) {
                     // Get signed-in user's info from Supabase
                     const { data: { user } } = await supabase.auth.getUser();
                     if (user) {
@@ -77,8 +94,32 @@ export default function Auth() {
                         console.error('Could not get user info.');
                     }
                 }
-            } catch (error) {
-                console.error('An unexpected error occurred while trying to sign in.', error)
+            } catch (error: any) {
+                setMessage({ type: 'error', text: error.message || 'An unexpected error occurred while trying to sign in.' })
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        // Handle password reset request
+        if (mode === 'forgot-password') {
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+                    redirectTo: `${window.location.origin}/auth/reset-password`,
+                })
+
+                if (error) {
+                    setMessage({ type: 'error', text: error.message || 'Failed to send password reset email.' })
+                } else {
+                    setMessage({ 
+                        type: 'success', 
+                        text: 'Password reset email sent! Please check your inbox and follow the instructions to reset your password.' 
+                    })
+                }
+            } catch (error: any) {
+                setMessage({ type: 'error', text: error.message || 'An unexpected error occurred.' })
+            } finally {
+                setLoading(false)
             }
         }
     }
@@ -125,8 +166,20 @@ export default function Auth() {
                     <h1 className={`
                         text-3xl text-center
                     `}>
-                        {mode === 'sign-in' ? 'Log in to your account' : 'Sign up for an account'}
+                        {mode === 'sign-in' ? 'Log in to your account' : 
+                         mode === 'forgot-password' ? 'Reset your password' : 
+                         'Sign up for an account'}
                     </h1>
+                    {message && (
+                        <div className={`
+                            w-full mt-4 p-3 rounded-sm
+                            ${message.type === 'success' 
+                                ? 'bg-green-900/30 text-green-300 border border-green-700' 
+                                : 'bg-red-900/30 text-red-300 border border-red-700'}
+                        `}>
+                            {message.text}
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit} className={`
                         flex flex-col justify-center items-start
                         mt-8 space-y-2
@@ -216,67 +269,128 @@ export default function Auth() {
                                     `}
                                 />
                             </div>
-                            <div className={`
-                                w-full
-                            `}>
-                                <label htmlFor='password' className={`
-                                    block
-                                    text-sm text-secondaryText
+                            {mode !== 'forgot-password' && (
+                                <div className={`
+                                    w-full
                                 `}>
-                                    Password
-                                </label>
-                                <input
-                                    type='password'
-                                    id='password'
-                                    name='password'
-                                    placeholder='Enter a password...'
-                                    minLength={6}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    className={`
-                                        w-full
-                                        p-2
-                                        text-sm
-                                        rounded-sm
-                                        bg-primaryBackground
-                                        focus:outline-none
-                                    `}
-                                />
-                            </div>
-                            <button type='submit' className={`
-                                w-full
-                                mt-4 p-3
-                                text-center
-                                bg-accentText
-                                rounded-sm
-                                hover:cursor-pointer
-                                hover:bg-primaryButtonHover
-                                hover:text-primaryTextHover
-                            `}>
-                                {mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
+                                    <label htmlFor='password' className={`
+                                        block
+                                        text-sm text-secondaryText
+                                    `}>
+                                        Password
+                                    </label>
+                                    <input
+                                        type='password'
+                                        id='password'
+                                        name='password'
+                                        placeholder='Enter a password...'
+                                        minLength={6}
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        className={`
+                                            w-full
+                                            p-2
+                                            text-sm
+                                            rounded-sm
+                                            bg-primaryBackground
+                                            focus:outline-none
+                                        `}
+                                    />
+                                    {mode === 'sign-in' && (
+                                        <button
+                                            type='button'
+                                            onClick={() => {
+                                                setMode('forgot-password')
+                                                setMessage(null)
+                                                router.push('/auth/forgot-password')
+                                            }}
+                                            className={`
+                                                mt-2
+                                                text-sm text-accentText
+                                                hover:text-primaryButtonHover
+                                                hover:cursor-pointer
+                                            `}
+                                        >
+                                            Forgot password?
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            <button 
+                                type='submit' 
+                                disabled={loading}
+                                className={`
+                                    w-full
+                                    mt-4 p-3
+                                    text-center
+                                    bg-accentText
+                                    rounded-sm
+                                    hover:cursor-pointer
+                                    hover:bg-primaryButtonHover
+                                    hover:text-primaryTextHover
+                                    disabled:opacity-50
+                                    disabled:cursor-not-allowed
+                                `}
+                            >
+                                {loading 
+                                    ? 'Loading...' 
+                                    : mode === 'sign-in' 
+                                        ? 'Sign In' 
+                                        : mode === 'forgot-password'
+                                            ? 'Send Reset Email'
+                                            : 'Sign Up'}
                             </button>
                     </form>
-                    <div className={`
-                        w-full
-                        mt-4
-                        flex flex-wrap justify-center items-center gap-2
-                    `}>
-                        <p className={`
-                            text-secondaryText
+                    {mode !== 'forgot-password' && (
+                        <div className={`
+                            w-full
+                            mt-4
+                            flex flex-wrap justify-center items-center gap-2
                         `}>
-                            {mode === 'sign-in' ? `Don't have an account?` : `Already have an account?`}
-                        </p>
-                        <button onClick={() => {
-                            setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')
-                        }} className={`
-                            text-accentText
-                            hover:cursor-pointer
-                            hover:text-primaryButtonHover
+                            <p className={`
+                                text-secondaryText
+                            `}>
+                                {mode === 'sign-in' ? `Don't have an account?` : `Already have an account?`}
+                            </p>
+                            <button onClick={() => {
+                                const newMode = mode === 'sign-in' ? 'sign-up' : 'sign-in'
+                                setMode(newMode)
+                                setMessage(null)
+                                router.push(`/auth/${newMode}`)
+                            }} className={`
+                                text-accentText
+                                hover:cursor-pointer
+                                hover:text-primaryButtonHover
+                            `}>
+                                {mode === 'sign-in' ? `Sign up` : `Log in`}
+                            </button>
+                        </div>
+                    )}
+                    {mode === 'forgot-password' && (
+                        <div className={`
+                            w-full
+                            mt-4
+                            flex flex-wrap justify-center items-center gap-2
                         `}>
-                            {mode === 'sign-in' ? `Sign up` : `Log in`}
-                        </button>
-                    </div>
+                            <p className={`
+                                text-secondaryText
+                            `}>
+                                Remember your password?
+                            </p>
+                            <button onClick={() => {
+                                setMode('sign-in')
+                                setMessage(null)
+                                router.push('/auth/sign-in')
+                            }} className={`
+                                text-accentText
+                                hover:cursor-pointer
+                                hover:text-primaryButtonHover
+                            `}>
+                                Back to sign in
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
         </div>
