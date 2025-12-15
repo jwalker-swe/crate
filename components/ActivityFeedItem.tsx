@@ -34,9 +34,18 @@ export default function ActivityFeedItem({
         'queued': 'added to queue'
     }[activityType] || 'interacted with';
 
-    const activityLink = activityType === 'reviewed' && albumSpotifyId
-        ? `/profile/${username}/review/${albumSpotifyId}`
-        : `/album/${albumSpotifyId || albumId}`;
+    // Determine the link based on activity type
+    let activityLink: string;
+    if (activityType === 'reviewed' && albumSpotifyId) {
+        // Navigate to the review page
+        activityLink = `/profile/${username}/review/${albumSpotifyId}`;
+    } else if (activityType === 'queued') {
+        // Navigate to the user's albums page with queue view parameter
+        activityLink = `/profile/${username}/albums?view=queue`;
+    } else {
+        // For rated, liked, favorited - navigate to the album page
+        activityLink = `/album/${albumSpotifyId || albumId}`;
+    }
 
     const profileLink = `/profile/${username}`;
 

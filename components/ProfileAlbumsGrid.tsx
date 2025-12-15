@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
 import { HeartIcon } from "@heroicons/react/24/solid";
 import ReviewRating from "@/components/ReviewRating"
@@ -30,8 +31,9 @@ export default function ProfileAlbumsGrid({
 	totalColumns: number
 	totalRows: number
 }) {
-
-	const [viewMode, setViewMode] = useState<ViewMode>('logged');
+	const searchParams = useSearchParams();
+	const initialViewMode = searchParams.get('view') === 'queue' ? 'queue' : 'logged';
+	const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 	const [page, setPage] = useState(1);
 	const [albumsPerPage, setAlbumsPerPage] = useState(totalColumns * totalRows);
 	const [albums, setAlbums] = useState<AlbumData[]>([]);
