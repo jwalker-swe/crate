@@ -104,9 +104,11 @@ export default function Auth() {
         // Handle password reset request
         if (mode === 'forgot-password') {
             try {
+                // Use environment variable for production, fallback to current origin for development
+                const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
                 const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-                    redirectTo: `${window.location.origin}/auth/reset-password`,
-                })
+                    redirectTo: `${siteUrl}/auth/reset-password`,
+                }) 
 
                 if (error) {
                     setMessage({ type: 'error', text: error.message || 'Failed to send password reset email.' })
