@@ -14,13 +14,10 @@ export default function Auth() {
 
     const [mode, setMode] = useState(`${param}`)
     const [loading, setLoading] = useState(false)
-<<<<<<< HEAD
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-=======
     const [showForgotPassword, setShowForgotPassword] = useState(false)
     const [resetEmailSent, setResetEmailSent] = useState(false)
     const [resetError, setResetError] = useState<string | null>(null)
->>>>>>> logFromNav
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -307,26 +304,38 @@ export default function Auth() {
                                     `}
                                 />
                             </div>
-<<<<<<< HEAD
                             {mode !== 'forgot-password' && (
                                 <div className={`
                                     w-full
-=======
-                            <div className={`
-                                w-full
-                            `}>
-                                <div className={`
-                                    flex justify-between items-center
-                                    mb-1
->>>>>>> logFromNav
                                 `}>
-                                    <label htmlFor='password' className={`
-                                        block
-                                        text-sm text-secondaryText
+                                    <div className={`
+                                        flex justify-between items-center
+                                        mb-1
                                     `}>
-                                        Password
-                                    </label>
-<<<<<<< HEAD
+                                        <label htmlFor='password' className={`
+                                            block
+                                            text-sm text-secondaryText
+                                        `}>
+                                            Password
+                                        </label>
+                                        {mode === 'sign-in' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowForgotPassword(true)
+                                                    setResetEmailSent(false)
+                                                    setResetError(null)
+                                                }}
+                                                className={`
+                                                    text-xs text-accentText
+                                                    hover:text-primaryButtonHover
+                                                    transition-colors
+                                                `}
+                                            >
+                                                Forgot password?
+                                            </button>
+                                        )}
+                                    </div>
                                     <input
                                         type='password'
                                         id='password'
@@ -335,7 +344,8 @@ export default function Auth() {
                                         minLength={6}
                                         value={formData.password}
                                         onChange={handleChange}
-                                        required
+                                        required={!showForgotPassword}
+                                        disabled={showForgotPassword}
                                         className={`
                                             w-full
                                             p-2
@@ -343,69 +353,11 @@ export default function Auth() {
                                             rounded-sm
                                             bg-primaryBackground
                                             focus:outline-none
+                                            ${showForgotPassword ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
                                     />
-                                    {mode === 'sign-in' && (
-                                        <button
-                                            type='button'
-                                            onClick={() => {
-                                                setMode('forgot-password')
-                                                setMessage(null)
-                                                router.push('/auth/forgot-password')
-                                            }}
-                                            className={`
-                                                mt-2
-                                                text-sm text-accentText
-                                                hover:text-primaryButtonHover
-                                                hover:cursor-pointer
-=======
-                                    {mode === 'sign-in' && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setShowForgotPassword(true)
-                                                setResetEmailSent(false)
-                                                setResetError(null)
-                                            }}
-                                            className={`
-                                                text-xs text-accentText
-                                                hover:text-primaryButtonHover
-                                                transition-colors
->>>>>>> logFromNav
-                                            `}
-                                        >
-                                            Forgot password?
-                                        </button>
-                                    )}
                                 </div>
-<<<<<<< HEAD
                             )}
-                            <button 
-                                type='submit' 
-                                disabled={loading}
-                                className={`
-=======
-                                <input
-                                    type='password'
-                                    id='password'
-                                    name='password'
-                                    placeholder='Enter a password...'
-                                    minLength={6}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required={!showForgotPassword}
-                                    disabled={showForgotPassword}
-                                    className={`
-                                        w-full
-                                        p-2
-                                        text-sm
-                                        rounded-sm
-                                        bg-primaryBackground
-                                        focus:outline-none
-                                        ${showForgotPassword ? 'opacity-50 cursor-not-allowed' : ''}
-                                    `}
-                                />
-                            </div>
                             {showForgotPassword ? (
                                 <>
                                     {resetEmailSent ? (
@@ -495,35 +447,31 @@ export default function Auth() {
                                     )}
                                 </>
                             ) : (
-                                <button type='submit' className={`
->>>>>>> logFromNav
-                                    w-full
-                                    mt-4 p-3
-                                    text-center
-                                    bg-accentText
-                                    rounded-sm
-                                    hover:cursor-pointer
-                                    hover:bg-primaryButtonHover
-                                    hover:text-primaryTextHover
-<<<<<<< HEAD
-                                    disabled:opacity-50
-                                    disabled:cursor-not-allowed
-                                `}
-                            >
-                                {loading 
-                                    ? 'Loading...' 
-                                    : mode === 'sign-in' 
-                                        ? 'Sign In' 
-                                        : mode === 'forgot-password'
-                                            ? 'Send Reset Email'
-                                            : 'Sign Up'}
-                            </button>
-=======
-                                `}>
-                                    {mode === 'sign-in' ? 'Sign In' : 'Sign Up'}
+                                <button 
+                                    type='submit' 
+                                    disabled={loading}
+                                    className={`
+                                        w-full
+                                        mt-4 p-3
+                                        text-center
+                                        bg-accentText
+                                        rounded-sm
+                                        hover:cursor-pointer
+                                        hover:bg-primaryButtonHover
+                                        hover:text-primaryTextHover
+                                        disabled:opacity-50
+                                        disabled:cursor-not-allowed
+                                    `}
+                                >
+                                    {loading 
+                                        ? 'Loading...' 
+                                        : mode === 'sign-in' 
+                                            ? 'Sign In' 
+                                            : mode === 'forgot-password'
+                                                ? 'Send Reset Email'
+                                                : 'Sign Up'}
                                 </button>
                             )}
->>>>>>> logFromNav
                     </form>
                     {mode !== 'forgot-password' && (
                         <div className={`
