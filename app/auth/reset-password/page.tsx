@@ -4,9 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -263,5 +263,23 @@ export default function ResetPassword() {
                 </div>
             </section>
         </div>
+    )
+}
+
+export default function ResetPassword() {
+    return (
+        <Suspense fallback={
+            <div className={`
+                w-full max-w-[1200px] h-screen
+                mx-auto py-4 px-4
+                lg:px-0
+                bg-primaryBackground
+                flex items-center justify-center
+            `}>
+                <div className="text-secondaryText">Loading...</div>
+            </div>
+        }>
+            <ResetPasswordForm />
+        </Suspense>
     )
 }
