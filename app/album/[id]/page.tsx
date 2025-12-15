@@ -420,6 +420,8 @@ export default async function Home({ params }: AlbumPageParams) {
                                     avatarUrl={activity.avatar_url}
                                     activityType={activity.activity_type}
                                     rating={activity.rating}
+                                    spotifyId={spotifyId}
+                                    hasReview={activity.activity_type === 'reviewed'}
                                 />
                             ))
                         ) : (
