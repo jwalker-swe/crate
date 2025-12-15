@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/server";
 import PopularReviewPreview from "@/components/PopularReviewPreview";
 import getAlbumIdBySpotifyId from "@/lib/supabase/getAlbumIdBySpotifyId";
 import WantToListenButton from "@/components/WantToListenButton"
+import getFriendsActivity from "@/lib/supabase/getFriendsActivity";
 
 
 type StateType = string;
@@ -239,6 +240,9 @@ export default async function Home({ params }: AlbumPageParams) {
         }
     }
 
+    // Get friends' activity for this album
+    const friendsActivity = user && albumId ? await getFriendsActivity(albumId, user.id) : [];
+
     return (
         <div className={`
             //General Styling
@@ -408,9 +412,21 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <UserActivityIcon />
-                        <UserActivityIcon />
-                        <UserActivityIcon />
+                        {friendsActivity.length > 0 ? (
+                            friendsActivity.slice(0, 5).map((activity, index) => (
+                                <UserActivityIcon
+                                    key={activity.user_id}
+                                    username={activity.username}
+                                    avatarUrl={activity.avatar_url}
+                                    activityType={activity.activity_type}
+                                    rating={activity.rating}
+                                />
+                            ))
+                        ) : (
+                            <p className="text-secondaryText text-sm">
+                                No activity from friends yet
+                            </p>
+                        )}
                     </div>
                 </section>
                 {/* Popular Reviews Section */}
