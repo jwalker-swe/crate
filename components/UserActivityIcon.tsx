@@ -1,6 +1,9 @@
+'use client'
+
 import { UserCircleIcon, StarIcon } from "@heroicons/react/24/solid";
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useState } from "react";
 
 type UserActivityIconProps = {
     username: string;
@@ -23,14 +26,20 @@ const getFillPercent = (rating: number, index: number) => {
 }
 
 export default function UserActivityIcon({ username, avatarUrl, activityType, rating, spotifyId, hasReview }: UserActivityIconProps) {
+    const [isLoading, setIsLoading] = useState(false);
+    
     // Determine the link destination - go to review page if there's a review, otherwise profile
     const linkHref = (activityType === 'reviewed' && spotifyId) 
         ? `/profile/${username}/review/${spotifyId}`
         : `/profile/${username}`;
 
+    const handleClick = () => {
+        setIsLoading(true);
+    };
+
     return (
         <div>
-            <Link href={linkHref} className="group">
+            <Link href={linkHref} className="group" onClick={handleClick}>
                 <div className={`
                     user-activity-icon-container
                     //General Styling
@@ -64,12 +73,18 @@ export default function UserActivityIcon({ username, avatarUrl, activityType, ra
                                 <img 
                                     src={avatarUrl} 
                                     alt={`${username}'s profile`}
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover ${isLoading ? 'filter brightness-50' : ''}`}
                                 />
                             ) : (
                                 <UserCircleIcon width={48} height={48} className={`
                                     text-secondaryText
+                                    ${isLoading ? 'opacity-50' : ''}
                                 `}/>
+                            )}
+                            {isLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="loader" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div>
+                                </div>
                             )}
                         </div>
                         {activityType === 'reviewed' && (
