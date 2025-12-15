@@ -1,6 +1,5 @@
 'use client'
 
-<<<<<<< HEAD
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -21,6 +20,9 @@ function ResetPasswordForm() {
     useEffect(() => {
         // Check if we have a valid password reset token in the URL
         const checkToken = async () => {
+            // Wait a bit for Supabase to process the hash if present
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
             const hashParams = new URLSearchParams(window.location.hash.substring(1))
             const accessToken = hashParams.get('access_token')
             const type = hashParams.get('type')
@@ -34,21 +36,33 @@ function ResetPasswordForm() {
                 if (token && typeParam === 'recovery') {
                     setIsValidToken(true)
                 } else {
+                    // Check session as fallback
+                    const { data: { session } } = await supabase.auth.getSession()
+                    if (session) {
+                        setIsValidToken(true)
+                    } else {
+                        setMessage({ 
+                            type: 'error', 
+                            text: 'Invalid or expired password reset link. Please request a new one.' 
+                        })
+                    }
+                }
+            } else {
+                // Check session as fallback
+                const { data: { session } } = await supabase.auth.getSession()
+                if (session) {
+                    setIsValidToken(true)
+                } else {
                     setMessage({ 
                         type: 'error', 
                         text: 'Invalid or expired password reset link. Please request a new one.' 
                     })
                 }
-            } else {
-                setMessage({ 
-                    type: 'error', 
-                    text: 'Invalid or expired password reset link. Please request a new one.' 
-                })
             }
         }
         
         checkToken()
-    }, [searchParams])
+    }, [searchParams, supabase])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -58,135 +72,57 @@ function ResetPasswordForm() {
         // Validate passwords match
         if (password !== confirmPassword) {
             setMessage({ type: 'error', text: 'Passwords do not match.' })
-=======
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
-
-export default function ResetPassword() {
-    const supabase = createClient()
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
-
-    useEffect(() => {
-        // Check if we have a valid session (user clicked the reset link)
-        const checkSession = async () => {
-            // Wait a bit for Supabase to process the hash if present
-            await new Promise(resolve => setTimeout(resolve, 500))
-            
-            const { data: { session } } = await supabase.auth.getSession()
-            const hash = window.location.hash
-            
-            // If no session and no hash with token, this might be a direct navigation
-            if (!session && (!hash || !hash.includes('access_token'))) {
-                // Check if there are search params (alternative token format)
-                const token = searchParams.get('token')
-                const type = searchParams.get('type')
-                
-                if (!token && type !== 'recovery') {
-                    // No valid reset token - show message but don't redirect immediately
-                    // User might have clicked the link and it's still processing
-                    setError('Please click the password reset link from your email to continue.')
-                }
-            }
-        }
-        checkSession()
-    }, [router, searchParams])
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError(null)
-        setLoading(true)
-
-        // Validate passwords
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long')
->>>>>>> logFromNav
             setLoading(false)
             return
         }
 
-<<<<<<< HEAD
         // Validate password length
         if (password.length < 6) {
             setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' })
-=======
-        if (password !== confirmPassword) {
-            setError('Passwords do not match')
->>>>>>> logFromNav
             setLoading(false)
             return
         }
 
         try {
-<<<<<<< HEAD
             const { error } = await supabase.auth.updateUser({
                 password: password
             })
 
             if (error) {
                 setMessage({ type: 'error', text: error.message || 'Failed to update password.' })
+                setLoading(false)
             } else {
                 setMessage({ 
                     type: 'success', 
-                    text: 'Password updated successfully! Redirecting to sign in...' 
+                    text: 'Password updated successfully! Redirecting...' 
                 })
-                // Redirect to sign in after a short delay
-=======
-            // Update the password
-            const { error: updateError } = await supabase.auth.updateUser({
-                password: password
-            })
+                
+                // Success - get user info and redirect to profile if available
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from('users')
+                        .select('username')
+                        .eq('id', user.id)
+                        .single()
 
-            if (updateError) {
-                setError(updateError.message)
-                setLoading(false)
-                return
-            }
-
-            // Success - get user info and redirect to profile
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('users')
-                    .select('username')
-                    .eq('id', user.id)
-                    .single()
-
-                if (profile && profile.username) {
-                    setSuccess(true)
-                    setTimeout(() => {
-                        router.push(`/profile/${profile.username}`)
-                    }, 2000)
+                    if (profile && profile.username) {
+                        setTimeout(() => {
+                            router.push(`/profile/${profile.username}`)
+                        }, 2000)
+                    } else {
+                        setTimeout(() => {
+                            router.push('/auth/sign-in')
+                        }, 2000)
+                    }
                 } else {
-                    setSuccess(true)
                     setTimeout(() => {
-                        router.push('/')
+                        router.push('/auth/sign-in')
                     }, 2000)
                 }
-            } else {
-                setSuccess(true)
->>>>>>> logFromNav
-                setTimeout(() => {
-                    router.push('/auth/sign-in')
-                }, 2000)
             }
-<<<<<<< HEAD
         } catch (error: any) {
             setMessage({ type: 'error', text: error.message || 'An unexpected error occurred.' })
-        } finally {
-=======
-        } catch (err) {
-            console.error('Error resetting password:', err)
-            setError('An error occurred. Please try again.')
->>>>>>> logFromNav
             setLoading(false)
         }
     }
@@ -225,8 +161,7 @@ export default function ResetPassword() {
                     <h1 className={`
                         text-3xl text-center
                     `}>
-<<<<<<< HEAD
-                        Reset your password
+                        Reset Your Password
                     </h1>
                     {message && (
                         <div className={`
@@ -239,52 +174,6 @@ export default function ResetPassword() {
                         </div>
                     )}
                     {isValidToken ? (
-=======
-                        Reset Your Password
-                    </h1>
-                    {!success && error && error.includes('Please click') ? (
-                        <div className={`
-                            mt-8 p-4
-                            bg-accentText/10
-                            border border-accentText/30
-                            rounded-sm
-                        `}>
-                            <p className={`
-                                text-sm text-primaryText
-                                text-center
-                            `}>
-                                {error}
-                            </p>
-                            <Link 
-                                href='/auth/sign-in'
-                                className={`
-                                    block
-                                    mt-3
-                                    text-center
-                                    text-sm text-accentText
-                                    hover:text-primaryButtonHover
-                                    transition-colors
-                                `}
-                            >
-                                Go to Sign In
-                            </Link>
-                        </div>
-                    ) : success ? (
-                        <div className={`
-                            mt-8 p-4
-                            bg-accentText/10
-                            border border-accentText/30
-                            rounded-sm
-                        `}>
-                            <p className={`
-                                text-sm text-primaryText
-                                text-center
-                            `}>
-                                Password reset successfully! Redirecting...
-                            </p>
-                        </div>
-                    ) : error && error.includes('Please click') ? null : (
->>>>>>> logFromNav
                         <form onSubmit={handleSubmit} className={`
                             flex flex-col justify-center items-start
                             mt-8 space-y-2
@@ -345,18 +234,6 @@ export default function ResetPassword() {
                                     `}
                                 />
                             </div>
-<<<<<<< HEAD
-=======
-                            {error && (
-                                <p className={`
-                                    w-full
-                                    text-sm text-red-500
-                                    text-center
-                                `}>
-                                    {error}
-                                </p>
-                            )}
->>>>>>> logFromNav
                             <button 
                                 type='submit' 
                                 disabled={loading}
@@ -373,7 +250,6 @@ export default function ResetPassword() {
                                     disabled:cursor-not-allowed
                                 `}
                             >
-<<<<<<< HEAD
                                 {loading ? 'Updating...' : 'Update Password'}
                             </button>
                         </form>
@@ -401,29 +277,10 @@ export default function ResetPassword() {
                                 Request New Reset Link
                             </button>
                         </div>
-=======
-                                {loading ? 'Resetting...' : 'Reset Password'}
-                            </button>
-                        </form>
->>>>>>> logFromNav
                     )}
                     <div className={`
                         w-full
                         mt-4
-<<<<<<< HEAD
-                        flex flex-wrap justify-center items-center gap-2
-                    `}>
-                        <p className={`
-                            text-secondaryText
-                        `}>
-                            Remember your password?
-                        </p>
-                        <Link href='/auth/sign-in' className={`
-                            text-accentText
-                            hover:text-primaryButtonHover
-                        `}>
-                            Back to sign in
-=======
                         flex justify-center items-center
                     `}>
                         <Link href='/auth/sign-in' className={`
@@ -432,7 +289,6 @@ export default function ResetPassword() {
                             transition-colors
                         `}>
                             Back to Sign In
->>>>>>> logFromNav
                         </Link>
                     </div>
                 </div>
@@ -441,7 +297,6 @@ export default function ResetPassword() {
     )
 }
 
-<<<<<<< HEAD
 export default function ResetPassword() {
     return (
         <Suspense fallback={
@@ -459,5 +314,3 @@ export default function ResetPassword() {
         </Suspense>
     )
 }
-=======
->>>>>>> logFromNav
