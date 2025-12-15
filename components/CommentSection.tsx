@@ -54,12 +54,18 @@ export default function CommentSection ({reviewId, userId, commentData, activeUs
 
 			if (error) {
 				console.error("Error deleting comment: ", error);
+				return;
 			}
 
-			setComments(prev => ({
+			// Find the index of the comment being deleted and remove both comment and corresponding username
+			setComments(prev => {
+				const commentIndex = prev.data.findIndex(comment => comment.id === commentId);
+				return {
 					...prev,
-					data: prev.data.filter(comment => comment.id != commentId)
-				}));
+					data: prev.data.filter(comment => comment.id !== commentId),
+					usernames: prev.usernames.filter((_, index) => index !== commentIndex)
+				};
+			});
 
 			console.log("Comment deleted successfully");
 		} catch (error) {
