@@ -23,27 +23,35 @@ export default function LikeButton({ size, likeData, reviewId, likeTotal, user }
                     flex justify-center items-center gap-2
                 `}
             >
-                <p
+                <button
+                    onClick={() => {
+                        handleLike(reviewId, like);
+                        like ? setLikeCounter(likeCounter - 1) : setLikeCounter(likeCounter + 1)
+                        like ? setLike(false) : setLike(true);
+                    }}
                     className={`
-                        text-secondaryText
+                        flex items-center gap-2
+                        transition-all duration-200
+                        ${like ? 'text-accentText' : 'text-secondaryText'}
                     `}
                 >
-                    {likeCounter}
-                </p>
-                <button >
                     <HeartIcon
                         width={iconSize}    
                         height={iconSize}
-                        onClick={() => {
-                            handleLike(reviewId, like);
-                            like ? setLikeCounter(likeCounter - 1) : setLikeCounter(likeCounter + 1)
-                            like ? setLike(false) : setLike(true);
-                        }}
                         className={`
                             cursor-pointer 
-                            ${like ? 'text-accentText hover:text-secondaryText' : 'text-secondaryText hover:text-accentText'}
+                            transition-colors duration-200
+                            ${like ? 'text-accentText hover:text-red-400' : 'text-secondaryText hover:text-accentText'}
                         `}
                     />
+                    <span
+                        className={`
+                            text-sm font-medium
+                            ${like ? 'text-accentText' : 'text-secondaryText'}
+                        `}
+                    >
+                        {likeCounter}
+                    </span>
                 </button>
             </div>
         )
@@ -54,14 +62,12 @@ export default function LikeButton({ size, likeData, reviewId, likeTotal, user }
                     flex justify-center items-center gap-2
                 `}
             >
-                <p
+                <div
                     className={`
+                        flex items-center gap-2
                         text-secondaryText
                     `}
                 >
-                    {likeCounter}
-                </p>
-                <button >
                     <HeartIcon
                         width={iconSize}    
                         height={iconSize}
@@ -69,7 +75,15 @@ export default function LikeButton({ size, likeData, reviewId, likeTotal, user }
                             text-secondaryText
                         `}
                     />
-                </button>
+                    <span
+                        className={`
+                            text-sm font-medium
+                            text-secondaryText
+                        `}
+                    >
+                        {likeCounter}
+                    </span>
+                </div>
             </div>
         )
     }

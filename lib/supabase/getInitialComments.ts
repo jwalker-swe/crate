@@ -1,5 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 
+type CommentWithReplies = {
+	id: string;
+	review_id: string;
+	user_id: string;
+	comment_text: string;
+	parent_comment_id: string | null;
+	created_at: string;
+	updated_at: string;
+	replies?: CommentWithReplies[];
+	username?: string | null;
+};
+
 export default async function getInitialComments(reviewId: string) {
 	const supabase = await createClient();
 
@@ -8,7 +20,7 @@ export default async function getInitialComments(reviewId: string) {
 			.from("review_comments")
 			.select("*")
 			.eq("review_id", reviewId)
-			.order("created_at", { ascending: false });
+			.order("created_at", { ascending: true }); // Changed to ascending to maintain chronological order
 
 		if (error) {
 			console.error("Error fetching comments: ", error);
@@ -37,10 +49,69 @@ export default async function getInitialComments(reviewId: string) {
 		// Create a lookup map for O(1) access
 		const usersMap = new Map(usersData?.map(user => [user.id, user]) || []);
 		
-		// Build usernames array in the same order as comments
-		const usernames = data.map(comment => usersMap.get(comment.user_id) || null);
+		// Add username to each comment and organize into tree structure
+		const commentsWithUsernames: CommentWithReplies[] = data.map(comment => ({
+			...comment,
+			username: usersMap.get(comment.user_id)?.username || null,
+			replies: []
+		}));
 
-		return { data, usernames };
+		// Organize comments into tree structure (top-level comments and their replies)
+		const topLevelComments: CommentWithReplies[] = [];
+		const commentsMap = new Map<string, CommentWithReplies>();
+
+		// First pass: create map of all comments
+		commentsWithUsernames.forEach(comment => {
+			commentsMap.set(comment.id, comment);
+		});
+
+		// Second pass: organize into tree
+		commentsWithUsernames.forEach(comment => {
+			if (!comment.parent_comment_id) {
+				// Top-level comment
+				topLevelComments.push(comment);
+			} else {
+				// Reply - add to parent's replies array
+				const parent = commentsMap.get(comment.parent_comment_id);
+				if (parent) {
+					if (!parent.replies) {
+						parent.replies = [];
+					}
+					parent.replies.push(comment);
+				}
+			}
+		});
+
+		// Sort top-level comments by created_at descending (newest first)
+		topLevelComments.sort((a, b) => 
+			new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		);
+
+		// Sort replies within each comment by created_at ascending (oldest first)
+		topLevelComments.forEach(comment => {
+			if (comment.replies) {
+				comment.replies.sort((a, b) => 
+					new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+				);
+			}
+		});
+
+		// Flatten for backward compatibility (for existing code that expects flat array)
+		const flatData = topLevelComments.flatMap(comment => {
+			const result = [comment];
+			if (comment.replies) {
+				result.push(...comment.replies);
+			}
+			return result;
+		});
+
+		const usernames = flatData.map(comment => ({ username: comment.username }));
+
+		return { 
+			data: topLevelComments, // Return tree structure
+			flatData, // Also return flat structure for backward compatibility
+			usernames 
+		};
 
 	} catch (error) {
 		console.error("Error fetching comment data: ", error);
