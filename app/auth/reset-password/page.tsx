@@ -26,7 +26,7 @@ export default function ResetPassword() {
             
             if (accessToken && type === 'recovery') {
                 setIsValidToken(true)
-            } else {
+            } else if (searchParams) {
                 // Also check query params (some email clients may strip the hash)
                 const token = searchParams.get('token')
                 const typeParam = searchParams.get('type')
@@ -38,6 +38,11 @@ export default function ResetPassword() {
                         text: 'Invalid or expired password reset link. Please request a new one.' 
                     })
                 }
+            } else {
+                setMessage({ 
+                    type: 'error', 
+                    text: 'Invalid or expired password reset link. Please request a new one.' 
+                })
             }
         }
         
