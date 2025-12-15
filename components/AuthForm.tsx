@@ -201,10 +201,20 @@ export default function Auth() {
                     <h1 className={`
                         text-3xl text-center
                     `}>
-                        {mode === 'sign-in' ? 'Log in to your account' : 
+                        {showForgotPassword ? 'Reset your password' :
+                         mode === 'sign-in' ? 'Log in to your account' : 
                          mode === 'forgot-password' ? 'Reset your password' : 
                          'Sign up for an account'}
                     </h1>
+                    {showForgotPassword && (
+                        <p className={`
+                            text-sm text-secondaryText
+                            text-center
+                            mt-2
+                        `}>
+                            Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                    )}
                     {message && (
                         <div className={`
                             w-full mt-4 p-3 rounded-sm
@@ -284,13 +294,13 @@ export default function Auth() {
                                     block
                                     text-sm text-secondaryText
                                 `}>
-                                    Email address
+                                    {showForgotPassword ? 'Email address for password reset' : 'Email address'}
                                 </label>
                                 <input
                                     type='email'
                                     id='email'
                                     name='email'
-                                    placeholder='Enter your email...'
+                                    placeholder={showForgotPassword ? 'Enter the email associated with your account...' : 'Enter your email...'}
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
@@ -304,7 +314,7 @@ export default function Auth() {
                                     `}
                                 />
                             </div>
-                            {mode !== 'forgot-password' && (
+                            {mode !== 'forgot-password' && !showForgotPassword && (
                                 <div className={`
                                     w-full
                                 `}>
@@ -344,8 +354,7 @@ export default function Auth() {
                                         minLength={6}
                                         value={formData.password}
                                         onChange={handleChange}
-                                        required={!showForgotPassword}
-                                        disabled={showForgotPassword}
+                                        required
                                         className={`
                                             w-full
                                             p-2
@@ -353,7 +362,6 @@ export default function Auth() {
                                             rounded-sm
                                             bg-primaryBackground
                                             focus:outline-none
-                                            ${showForgotPassword ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
                                     />
                                 </div>
@@ -371,8 +379,16 @@ export default function Auth() {
                                             <p className={`
                                                 text-sm text-primaryText
                                                 text-center
+                                                font-medium
                                             `}>
-                                                Password reset email sent! Check your inbox for instructions.
+                                                Password reset email sent!
+                                            </p>
+                                            <p className={`
+                                                text-xs text-secondaryText
+                                                text-center
+                                                mt-2
+                                            `}>
+                                                Check your inbox and follow the instructions to reset your password. The link will expire in 1 hour.
                                             </p>
                                             <button
                                                 type="button"
@@ -383,7 +399,7 @@ export default function Auth() {
                                                 }}
                                                 className={`
                                                     w-full
-                                                    mt-3 p-2
+                                                    mt-4 p-2
                                                     text-sm
                                                     text-center
                                                     bg-secondaryBackground
@@ -397,6 +413,21 @@ export default function Auth() {
                                         </div>
                                     ) : (
                                         <>
+                                            <div className={`
+                                                w-full
+                                                mt-2
+                                                p-3
+                                                bg-accentText/5
+                                                border border-accentText/20
+                                                rounded-sm
+                                            `}>
+                                                <p className={`
+                                                    text-xs text-secondaryText
+                                                    text-center
+                                                `}>
+                                                    We'll send a password reset link to the email address you enter below.
+                                                </p>
+                                            </div>
                                             <button 
                                                 type='button'
                                                 onClick={handleForgotPassword}
@@ -414,7 +445,7 @@ export default function Auth() {
                                                     disabled:cursor-not-allowed
                                                 `}
                                             >
-                                                {loading ? 'Sending...' : 'Send Reset Email'}
+                                                {loading ? 'Sending reset email...' : 'Send Password Reset Email'}
                                             </button>
                                             {resetError && (
                                                 <p className={`
@@ -441,7 +472,7 @@ export default function Auth() {
                                                     transition-colors
                                                 `}
                                             >
-                                                Back to Sign In
+                                                Cancel - Back to Sign In
                                             </button>
                                         </>
                                     )}
@@ -473,7 +504,7 @@ export default function Auth() {
                                 </button>
                             )}
                     </form>
-                    {mode !== 'forgot-password' && (
+                    {mode !== 'forgot-password' && !showForgotPassword && (
                         <div className={`
                             w-full
                             mt-4
