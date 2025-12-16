@@ -13,9 +13,19 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
 
     console.log("Data: ", reviewData);
 
-    if (!reviewData) {
+    if (!reviewData || !reviewData.reviews || reviewData.reviews.length === 0) {
         return (
-            <div>
+            <div className={`
+                //General Styling
+                w-full
+                flex justify-start items-center
+                mb-16
+                //Mobile Styling
+                //Desktop Styling
+            `}>
+                <p className="text-secondaryText text-sm">
+                    No reviews written for this album yet
+                </p>
             </div>
         )
     }

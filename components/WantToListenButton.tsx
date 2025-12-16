@@ -186,7 +186,8 @@ export default function WantToListenButton({ album, albumId, userId, initialIsIn
             disabled={isLoading}
             className={`
                 group
-                flex items-center gap-2
+                flex items-center justify-center gap-2
+                w-full
                 mt-4 px-4 py-2
                 rounded-lg
                 border

@@ -217,11 +217,13 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                 <div className={`
                     log-button-container
                     mt-4
+                    w-full
                 `}>
                     <button onClick={() => {
                         handleOpen()
                     }} className={`
                         log-button
+                        w-full
                         px-8 py-2
                         bg-accentText
                         rounded-lg

@@ -21,6 +21,8 @@ import JustReviewed from "@/components/JustReviewed";
 import getFollowingActivity from "@/lib/supabase/getFollowingActivity";
 import getFollowingReviews from "@/lib/supabase/getFollowingReviews";
 import ActivityFeedItem from "@/components/ActivityFeedItem";
+import getTopAlbumsFromFollowing from "@/lib/supabase/getTopAlbumsFromFollowing";
+import TopAlbumsFromFollowing from "@/components/TopAlbumsFromFollowing";
 
 //Create function to get Album data
 
@@ -139,6 +141,7 @@ export default async function Home() {
   // Get activity from users being followed (for signed-in users)
   const followingActivity = user ? await getFollowingActivity(user.id, 10) : [];
   const justReviewedData = user ? await getFollowingReviews(user.id, 6) : null;
+  const topAlbumsFromFollowing = user ? await getTopAlbumsFromFollowing(user.id, 5) : null;
 
   // If user is signed in, show different content
   if (user) {
@@ -164,11 +167,15 @@ export default async function Home() {
           {/* Top Albums Section */}
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6">
-              <SectionTitle title="Top Albums" />
+              <SectionTitle title={topAlbumsFromFollowing ? "Top Albums from Following" : "Top Albums"} />
             </div>
-            <Suspense fallback={<TopAlbumsLoading />}>
-              <TopAlbumsSection />
-            </Suspense>
+            {topAlbumsFromFollowing && topAlbumsFromFollowing.length > 0 ? (
+              <TopAlbumsFromFollowing albums={topAlbumsFromFollowing} />
+            ) : (
+              <Suspense fallback={<TopAlbumsLoading />}>
+                <TopAlbumsSection />
+              </Suspense>
+            )}
           </section>
 
           {/* Activity from Following */}

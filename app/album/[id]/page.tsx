@@ -366,7 +366,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                 </div>
                             </div>
                             <div className="sm:hidden">
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3 w-full">
                                     <WantToListenButton 
                                         album={albumInfo} 
                                         albumId={albumId}
