@@ -50,23 +50,23 @@ export default async function Home() {
                 lg:px-0
             `}>
                 {/* Popular Albums Section */}
-                <section className="mb-20">
+                <section className="mb-12">
                     <TopAlbums albums={popularAlbumsThisWeek || albumData.topAlbums} columns={4} gap={4} />
                 </section>
 
                 {/* Recent Releases Section */}
-                <section className="mb-20">
+                <section className="mb-12">
                     <RecentlyReleased albums={albumData.recentAlbums} columns={8} gap={2}/>
                 </section>
 
                 {/* Just Reviewed Section */}
-                <section className="mb-20">
+                <section className="mb-12">
                     <JustReviewed columns={2} rows={3} gap={6} data={justReviewedData} user={user} />
                 </section>
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-primaryBorder/50 mt-20">
+            <footer className="border-t border-primaryBorder/50 mt-12">
                 <div className="w-full max-w-[1200px] mx-auto px-4 lg:px-0">
                     <Footer />
                 </div>
