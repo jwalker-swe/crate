@@ -30,24 +30,25 @@ export default async function Home() {
 	const popularAlbumsThisWeek = await getPopularAlbumsThisWeek(4);
 
     return (
-        <div className="min-h-screen bg-primaryBackground">
-            <header>
-                <div className={`
-                    content-container
-                    w-full max-w-[1200px] h-fit
-                    mx-auto py-4 px-4
-                    lg:w-[1200px] lg:px-0
-                `}>
-                    <NavBar 
-                        session={user ? true : false} 
-                        initialUsername={userData?.username || null}
-                        initialAvatarUrl={userData?.avatar_url || null}
-                    />
-                </div>
-            </header>
-
+        <div className={`
+            content-container
+            w-full max-w-[1200px] h-fit
+            mx-auto py-4 px-4
+            lg:w-[1200px] lg:px-0
+        `}>
+            <NavBar 
+                session={user ? true : false} 
+                initialUsername={userData?.username || null}
+                initialAvatarUrl={userData?.avatar_url || null}
+            />
+            
             {/* Main Content */}
-            <main className="w-full max-w-[1200px] mx-auto px-4 lg:px-0 pb-16 pt-8">
+            <main className={`
+                w-full max-w-[1200px]
+                mx-auto
+                pb-16 pt-8 px-4
+                lg:px-0
+            `}>
                 {/* Popular Albums Section */}
                 <section className="mb-20">
                     <TopAlbums albums={popularAlbumsThisWeek || albumData.topAlbums} columns={4} gap={4} />
