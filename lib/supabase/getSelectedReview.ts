@@ -26,6 +26,23 @@ export default async function getSelectedReview(spotify_id: string, username: st
 			return null;
 		}
 		
+		// Get user_id from username
+		const { data: userData, error: userError } = await supabase
+			.from('users')
+			.select('id')
+			.eq('username', username)
+			.single();
+
+		if (userError) {
+			console.error("Error fetching user data: ", userError);
+			return null;
+		}
+
+		if (!userData) {
+			console.error("User not found");
+			return null;
+		}
+		
 		try {
 
 			const spotify_response = await fetch(`https://api.spotify.com/v1/albums/${spotify_id}`, {
@@ -47,6 +64,7 @@ export default async function getSelectedReview(spotify_id: string, username: st
 					.from('user_albums')
 					.select('*')
 					.eq('album_id', albumData.id)
+					.eq('user_id', userData.id)
 					.single()
 
 				if (error) {
