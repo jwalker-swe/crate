@@ -6,6 +6,7 @@ import JustReviewed from "@/components/JustReviewed";
 import { createClient } from "@/lib/supabase/server";
 import RecentlyReleased from "@/components/RecentlyReleased";
 import getPopularRecentReviews from "@/lib/supabase/getPopularRecentReviews";
+import getPopularAlbumsThisWeek from "@/lib/supabase/getPopularAlbumsThisWeek";
 
 
 export default async function Home() {
@@ -26,6 +27,7 @@ export default async function Home() {
     
     const albumData = await fetchTopAlbums();
 	const justReviewedData = await getPopularRecentReviews(10);
+	const popularAlbumsThisWeek = await getPopularAlbumsThisWeek(4);
 
     return (
         <div className="min-h-screen bg-primaryBackground">
@@ -48,7 +50,7 @@ export default async function Home() {
             <main className="w-full max-w-[1200px] mx-auto px-4 lg:px-0 pb-16 pt-8">
                 {/* Popular Albums Section */}
                 <section className="mb-20">
-                    <TopAlbums albums={albumData.topAlbums} columns={4} gap={4} />
+                    <TopAlbums albums={popularAlbumsThisWeek || albumData.topAlbums} columns={4} gap={4} />
                 </section>
 
                 {/* Recent Releases Section */}
