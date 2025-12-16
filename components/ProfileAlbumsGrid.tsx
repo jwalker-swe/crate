@@ -32,7 +32,7 @@ export default function ProfileAlbumsGrid({
 	totalRows: number
 }) {
 	const searchParams = useSearchParams();
-	const initialViewMode = searchParams.get('view') === 'queue' ? 'queue' : 'logged';
+	const initialViewMode = searchParams?.get('view') === 'queue' ? 'queue' : 'logged';
 	const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 	const [page, setPage] = useState(1);
 	const [albumsPerPage, setAlbumsPerPage] = useState(totalColumns * totalRows);
