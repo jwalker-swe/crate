@@ -428,10 +428,12 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                             Likes
                                         </Link>
                                         <button 
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 setIsProfileMenuOpen(false);
-                                                supabase.auth.signOut();
-                                                router.push('/')
+                                                await supabase.auth.signOut();
+                                                router.refresh();
+                                                // Use window.location for a full page reload to ensure server components re-render
+                                                window.location.href = '/';
                                             }} 
                                             className={`
                                         w-full

@@ -400,7 +400,7 @@ export default async function Profile({ params }: ProfileProps) {
                                 <SectionTitle title={'Recently Reviewed'} />
                                 <ViewAll pageLink="reviews" />
                             </div>
-                            <RecentlyListened username={username} />
+                            <RecentlyListened username={username} user={user} />
                             {/* Component to feth favorite albums based on username */}
                         </div>
                     </section>

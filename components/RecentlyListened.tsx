@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabase } from "@/lib/supabase/supabase";
-import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
+import LikeButton from "./LikeButton";
+import SearchDataForCurrentUser from "@/lib/supabase/searchDataForCurrentUser";
+import ReviewRating from "./ReviewRating";
 
 type RecentActivityProps = {
     album_id: string,
@@ -75,18 +77,40 @@ const fetchAlbumData = function(albumIds: string[]) {
     return albumData
 }
 
-const getFillPercent = function(rating: number, index: number) {
-    const diff = rating - index;
-    if ( diff >= 0 ) {
-        return 100
-    } else if (diff === -0.5) {
-        return 50
-    } else {
-        return 0
+const fetchLikesForReviews = async function(reviewIds: string[]) {
+    if (!reviewIds || reviewIds.length === 0) {
+        return [];
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('review_likes')
+            .select('*')
+            .in('review_id', reviewIds);
+
+        if (error) {
+            console.error('Error fetching likes:', error);
+            return [];
+        }
+
+        // Group likes by review_id
+        const likesMap = new Map();
+        data?.forEach(like => {
+            if (!likesMap.has(like.review_id)) {
+                likesMap.set(like.review_id, []);
+            }
+            likesMap.get(like.review_id).push(like);
+        });
+
+        // Return array of likes for each review in the same order
+        return reviewIds.map(reviewId => likesMap.get(reviewId) || []);
+    } catch (err) {
+        console.error('Unexpected error fetching likes:', err);
+        return [];
     }
 }
 
-export default async function RecentlyListened({ username }: { username: string }) {
+export default async function RecentlyListened({ username, user }: { username: string, user?: any }) {
 
     const recentActivity = await fetchRecentActivity(username)
     if (!recentActivity) {
@@ -95,6 +119,12 @@ export default async function RecentlyListened({ username }: { username: string 
     
     const isolatedIds = await isolateAlbumIds(recentActivity)
     const albumData = await Promise.all(fetchAlbumData(isolatedIds));
+
+    // Get review IDs (activity.id is the review ID)
+    const reviewIds = recentActivity.map(activity => activity.id);
+    
+    // Fetch likes for all reviews
+    const likesData = await fetchLikesForReviews(reviewIds);
 
     return (
         <div className={`
@@ -136,52 +166,7 @@ export default async function RecentlyListened({ username }: { username: string 
                                 flex justify-start items-center gap-2
                             `}
                         >
-                            <p className={`
-                                text-secondaryText
-                            `}>
-                                {/* {albumData[index].artists[0].name} */}
-                                {activity.rating.toFixed(1)}
-                            </p>
-                            <div className={`
-                                    flex justify-start items-center
-                                `}
-                            >
-                                {[1, 2, 3, 4, 5].map((i) => {
-                                    //Get fill percentage
-                                    const fillPercentage = getFillPercent(activity.rating, i);
-
-                                    return (
-                                        <div className={`
-                                            relative 
-                                            w-4 h-4
-                                        `} key={i}>
-                                            {/* Background stars */}
-                                            <StarIcon className={`
-                                                    text-secondaryText
-                                                    w-4 h-4
-                                                `}
-                                            />
-
-                                            {/* Foreground stars */}
-                                            <div className={`
-                                                absolute
-                                                h-full top-0 left-0
-                                                overflow-hidden
-                                                pointer-events-none
-                                            `} style={{
-                                                width: `${fillPercentage}%`
-                                            }}>
-                                                <StarIcon
-                                                    className={`
-                                                        w-4 h-m-4
-                                                        text-accentText
-                                                    `}
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                            <ReviewRating rating={activity.rating} />
                         </div>
                         <p className={`
                             mt-2
@@ -195,8 +180,36 @@ export default async function RecentlyListened({ username }: { username: string 
                         </p>
                         <div className={`
                             mt-3
-                            flex justify-end
+                            flex justify-between items-center
                         `}>
+                            <div className={`
+                                flex justify-center items-center gap-4
+                            `}>
+                                {(() => {
+                                    const likes = likesData[index] || [];
+                                    let liked: boolean;
+                                    let count: number;
+
+                                    if (user) {
+                                        const likeData = SearchDataForCurrentUser(user.id, likes);
+                                        liked = likeData.liked;
+                                        count = likeData.count;
+                                    } else {
+                                        count = likes.length;
+                                        liked = false;
+                                    }
+
+                                    return (
+                                        <LikeButton 
+                                            size={4} 
+                                            likeData={liked} 
+                                            reviewId={activity.id} 
+                                            likeTotal={count} 
+                                            user={user ? true : false} 
+                                        />
+                                    );
+                                })()}
+                            </div>
                             <Link 
                                 href={`/profile/${username}/review/${albumData[index].spotify_id}`}
                                 className={`
