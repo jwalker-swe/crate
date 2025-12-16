@@ -25,7 +25,14 @@ export default async function Home() {
         userData = data;
     }
     
-    const albumData = await fetchTopAlbums();
+    let albumData = null;
+    try {
+        albumData = await fetchTopAlbums();
+    } catch (error) {
+        console.error('Error fetching top albums:', error);
+        // Continue with null albumData, will use fallbacks
+    }
+    
 	const justReviewedData = await getPopularRecentReviews(10);
 	const popularAlbumsThisWeek = await getPopularAlbumsThisWeek(4);
 
@@ -51,12 +58,12 @@ export default async function Home() {
             `}>
                 {/* Popular Albums Section */}
                 <section className="mb-12">
-                    <TopAlbums albums={popularAlbumsThisWeek || albumData.topAlbums} columns={4} gap={4} />
+                    <TopAlbums albums={popularAlbumsThisWeek || albumData?.topAlbums || []} columns={4} gap={4} />
                 </section>
 
                 {/* Recent Releases Section */}
                 <section className="mb-12">
-                    <RecentlyReleased albums={albumData.recentAlbums} columns={8} gap={2}/>
+                    <RecentlyReleased albums={albumData?.recentAlbums || []} columns={8} gap={2}/>
                 </section>
 
                 {/* Just Reviewed Section */}
