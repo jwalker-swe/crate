@@ -199,6 +199,7 @@ export default async function Home() {
                     albumCover={activity.album_cover}
                     albumSpotifyId={activity.album_spotify_id}
                     albumId={activity.album_id}
+                    userAlbumId={activity.user_album_id}
                     createdAt={activity.created_at}
                   />
                 ))}

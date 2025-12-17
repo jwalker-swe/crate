@@ -11,6 +11,7 @@ type FollowingActivity = {
     album_title: string | null;
     album_cover: string | null;
     album_spotify_id: string | null;
+    user_album_id: string; // The UUID of the user_albums row
     created_at: string;
 }
 
@@ -43,7 +44,7 @@ export default async function getFollowingActivity(userId: string | null, limit:
         // Include albums that have been reviewed, rated, liked, favorited, or queued
         const { data: userAlbumsData, error: userAlbumsError } = await supabase
             .from('user_albums')
-            .select('user_id, album_id, rating, review_text, is_favorite, liked, queue, created_at')
+            .select('id, user_id, album_id, rating, review_text, is_favorite, liked, queue, created_at')
             .in('user_id', followingIds)
             .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true')
             .order('created_at', { ascending: false })
@@ -117,6 +118,7 @@ export default async function getFollowingActivity(userId: string | null, limit:
                 album_title: album?.title || null,
                 album_cover: album?.cover_image_url || null,
                 album_spotify_id: album?.spotify_id || null,
+                user_album_id: ua.id, // The UUID of the user_albums row
                 created_at: ua.created_at
             };
         });

@@ -11,6 +11,7 @@ type UserActivityIconProps = {
     activityType: 'reviewed' | 'rated' | 'liked' | 'favorited' | 'queued';
     rating: number | null;
     spotifyId?: string;
+    userAlbumId?: string; // The UUID of the user_albums row (for review links)
     hasReview?: boolean;
 }
 
@@ -25,12 +26,12 @@ const getFillPercent = (rating: number, index: number) => {
     }
 }
 
-export default function UserActivityIcon({ username, avatarUrl, activityType, rating, spotifyId, hasReview }: UserActivityIconProps) {
+export default function UserActivityIcon({ username, avatarUrl, activityType, rating, spotifyId, userAlbumId, hasReview }: UserActivityIconProps) {
     const [isLoading, setIsLoading] = useState(false);
     
     // Determine the link destination - go to review page if there's a review, otherwise profile
-    const linkHref = (activityType === 'reviewed' && spotifyId) 
-        ? `/profile/${username}/review/${spotifyId}`
+    const linkHref = (activityType === 'reviewed' && userAlbumId) 
+        ? `/profile/${username}/review/${userAlbumId}`
         : `/profile/${username}`;
 
     const handleClick = () => {

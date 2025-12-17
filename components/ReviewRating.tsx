@@ -12,7 +12,12 @@ const getFillPercent = function(rating: number, index: number) {
 }
 
 
-export default function ReviewRating({ rating, showNumber = true }: { rating: number, showNumber?: boolean }) {
+export default function ReviewRating({ rating, showNumber = true }: { rating: number | null, showNumber?: boolean }) {
+    // If rating is null, don't render anything
+    if (rating === null) {
+        return null;
+    }
+
     return (
         <div className={`
             //General Styling

@@ -231,7 +231,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                                 <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={count} user={user ? true : false} />
                                             </div>
                                             <Link
-                                                href={`/profile/${users[index].username}/review/${albums[index].spotify_id}`}
+                                                href={`/profile/${users[index].username}/review/${reviews[index].id}`}
                                             >
                                                 <p
                                                     className={`

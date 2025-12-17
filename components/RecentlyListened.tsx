@@ -233,7 +233,7 @@ export default async function RecentlyListened({ username, user }: { username: s
                                 })()}
                             </div>
                             <Link 
-                                href={`/profile/${username}/review/${album.spotify_id}`}
+                                href={`/profile/${username}/review/${activity.id}`}
                                 className={`
                                     text-sm text-secondaryText
                                     cursor-pointer
@@ -246,7 +246,8 @@ export default async function RecentlyListened({ username, user }: { username: s
                         </div>
                     </div>
                 </div>
-            ))}
+                );
+            })}
         </div>
     )
 }

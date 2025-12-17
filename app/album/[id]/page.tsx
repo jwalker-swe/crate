@@ -421,6 +421,7 @@ export default async function Home({ params }: AlbumPageParams) {
                                     activityType={activity.activity_type}
                                     rating={activity.rating}
                                     spotifyId={spotifyId}
+                                    userAlbumId={activity.user_album_id}
                                     hasReview={activity.activity_type === 'reviewed'}
                                 />
                             ))

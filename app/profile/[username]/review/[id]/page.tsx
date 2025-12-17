@@ -48,9 +48,9 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
         .eq('username', urlParams.username)
         .single();
 
-    //fetch reviews
-	const review_data = await getSelectedReview(urlParams.id, urlParams.username);
-	const reviewId = await getReviewId(review_data?.review.album_review_id);
+    //fetch reviews - urlParams.id is now the UUID of the user_albums row
+	const review_data = await getSelectedReview(urlParams.id);
+	const reviewId = urlParams.id; // The review ID is the UUID itself
 	const initialCommentData = await getInitialComments(reviewId);
 	const likeData = await getReviewLikes(reviewId, user?.id || null);
 	

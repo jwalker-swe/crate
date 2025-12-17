@@ -11,6 +11,7 @@ type ActivityFeedItemProps = {
     albumCover: string | null;
     albumSpotifyId: string | null;
     albumId: string;
+    userAlbumId?: string; // The UUID of the user_albums row (for review links)
     createdAt: string;
 }
 
@@ -22,6 +23,7 @@ export default function ActivityFeedItem({
     albumCover,
     albumSpotifyId,
     albumId,
+    userAlbumId,
     createdAt
 }: ActivityFeedItemProps) {
     const router = useRouter();
@@ -36,9 +38,9 @@ export default function ActivityFeedItem({
 
     // Determine the link based on activity type
     let activityLink: string;
-    if (activityType === 'reviewed' && albumSpotifyId) {
-        // Navigate to the review page
-        activityLink = `/profile/${username}/review/${albumSpotifyId}`;
+    if (activityType === 'reviewed' && userAlbumId) {
+        // Navigate to the review page using the user_albums UUID
+        activityLink = `/profile/${username}/review/${userAlbumId}`;
     } else if (activityType === 'queued') {
         // Navigate to the user's albums page with queue view parameter
         activityLink = `/profile/${username}/albums?view=queue`;

@@ -10,6 +10,7 @@ type FriendActivity = {
     is_favorite: boolean | null;
     liked: boolean | null;
     queue: boolean | null;
+    user_album_id: string; // The UUID of the user_albums row
     created_at: string | null;
 }
 
@@ -42,7 +43,7 @@ export default async function getFriendsActivity(albumId: string, userId: string
         // Include albums that have been reviewed, rated, liked, favorited, or queued
         const { data: userAlbumsData, error: userAlbumsError } = await supabase
             .from('user_albums')
-            .select('user_id, rating, review_text, is_favorite, liked, queue, created_at')
+            .select('id, user_id, rating, review_text, is_favorite, liked, queue, created_at')
             .eq('album_id', albumId)
             .in('user_id', followingIds)
             .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true')
@@ -101,6 +102,7 @@ export default async function getFriendsActivity(albumId: string, userId: string
                 is_favorite: ua.is_favorite,
                 liked: ua.liked,
                 queue: ua.queue,
+                user_album_id: ua.id, // The UUID of the user_albums row
                 created_at: ua.created_at
             };
         });

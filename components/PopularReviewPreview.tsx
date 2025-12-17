@@ -137,7 +137,7 @@ export default async function PopularReviewPreview({albumId, nReviewsToDisplay}:
                                 <ReviewRating rating={review.rating} />
                                 <LikeButton size={4} likeData={liked} reviewId={review.id} likeTotal={likeTotal} user={user ? true : false} />
                             </div>
-                            <Link href={`/profile/${reviewData.usernames[index]}/review/${reviewData.albums[index].spotify_id}`}>
+                            <Link href={`/profile/${reviewData.usernames[index]}/review/${review.id}`}>
                                 <p
                                     className={`
                                         cursor-pointer
