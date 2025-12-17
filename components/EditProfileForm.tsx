@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import FavoriteAlbumsSelector from './FavoriteAlbumsSelector';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
+import { validateUsername, sanitizeUsernameInput } from '@/lib/validation/usernameValidation';
 
 type Album = {
     id?: string; // Optional - only present if already in database
@@ -592,6 +593,14 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
         setSuccess(false);
         setImageError(null);
 
+        // Validate username
+        const usernameValidation = validateUsername(formData.username);
+        if (!usernameValidation.valid) {
+            setError(usernameValidation.error || 'Invalid username');
+            setLoading(false);
+            return;
+        }
+
         try {
             const { data: { user } } = await supabase.auth.getUser();
             
@@ -845,7 +854,10 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                         type="text"
                         id="username"
                         value={formData.username}
-                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                        onChange={(e) => {
+                            const sanitized = sanitizeUsernameInput(e.target.value);
+                            setFormData({ ...formData, username: sanitized });
+                        }}
                         required
                         className={`
                             w-full

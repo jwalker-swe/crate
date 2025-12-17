@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { validateUsername, sanitizeUsernameInput } from '@/lib/validation/usernameValidation'
 
 export default function Auth() {
     const supabase = createClient()
@@ -43,6 +44,14 @@ export default function Auth() {
 
         // Handle form submission if signing up
         if (mode === 'sign-up') {
+            // Validate username
+            const usernameValidation = validateUsername(formData.username)
+            if (!usernameValidation.valid) {
+                setMessage({ type: 'error', text: usernameValidation.error || 'Invalid username' })
+                setLoading(false)
+                return
+            }
+
             try {
                 const { data, error } = await supabase.auth.signUp({
                     email: formData.email,
@@ -131,10 +140,20 @@ export default function Auth() {
 
     const handleChange = function(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }))
+        
+        // Sanitize username input in real-time
+        if (name === 'username') {
+            const sanitized = sanitizeUsernameInput(value)
+            setFormData(prev => ({
+                ...prev,
+                [name]: sanitized
+            }))
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }))
+        }
     }
 
     const handleForgotPassword = async function(e: React.FormEvent) {
