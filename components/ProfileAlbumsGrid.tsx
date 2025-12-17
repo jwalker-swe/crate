@@ -190,7 +190,7 @@ export default function ProfileAlbumsGrid({
 								{/* Queue indicator badge */}
 								{viewMode === 'queue' && (
 									<div className="absolute top-3 right-3">
-										<div className="px-2 py-1 bg-primaryBackground/90 backdrop-blur-sm rounded-full">
+										<div className="px-2 py-1.5 bg-primaryBackground/90 backdrop-blur-sm rounded-full flex items-center justify-center">
 											<span className="text-xs text-secondaryText">Queue</span>
 										</div>
 									</div>
