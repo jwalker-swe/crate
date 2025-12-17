@@ -152,17 +152,22 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 											//Mobile Styling
 											//Desktop Styling
 										`}>
-											<h1 className={`
-												album-title
-												//General Styling
-												text-primaryText text-lg font-bold font-sans 
-												line-clamp-2
-												sm:text-xl
-												md:text-2xl
-												lg:text-3xl
-											`}>
-												{review_data?.spotify.name}
-											</h1>
+											<Link href={`/album/${review_data?.spotify.id}`}>
+												<h1 className={`
+													album-title
+													//General Styling
+													text-primaryText text-lg font-bold font-sans 
+													line-clamp-2
+													sm:text-xl
+													md:text-2xl
+													lg:text-3xl
+													cursor-pointer
+													hover:text-accentText
+													transition-colors
+												`}>
+													{review_data?.spotify.name}
+												</h1>
+											</Link>
 											<h2 className={`
 												artist-name
 												//General Styling
