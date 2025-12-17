@@ -174,7 +174,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                     </div>
                                     <div
                                         className={`
-                                            flex flex-col justify-start items-start gap-2 flex-grow h-[144]
+                                            flex flex-col justify-start items-start gap-2 flex-grow min-w-0
                                         `}
                                     >
                                         <Link href={`/profile/${users[index].username}`}>
@@ -190,12 +190,17 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                         <div onClick={() => handleClick(index, `/album/${albums[index].spotify_id}`)}>
                                             <div
                                                 className={`
-                                                    flex justify-start items-center gap-1 cursor-pointer
+                                                    flex flex-col md:flex-row md:items-center md:gap-1 cursor-pointer
+                                                    min-w-0 w-full
                                                 `}
                                             >
                                                 <h3
                                                     className={`
                                                         hover:text-accentText
+                                                        line-clamp-1
+                                                        overflow-hidden
+                                                        text-ellipsis
+                                                        min-w-0
                                                     `}
                                                 >
                                                     {albums[index].title}
@@ -203,6 +208,10 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                                 <p
                                                     className={`
                                                         text-xs text-secondaryText
+                                                        line-clamp-1
+                                                        overflow-hidden
+                                                        text-ellipsis
+                                                        min-w-0
                                                     `}
                                                 >
                                                     by {albums[index].artists[0].name}
@@ -211,7 +220,9 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                         </div>
                                         <p
                                             className={`
-                                                text-xs line-clamp-3 flex-grow
+                                                text-xs line-clamp-3
+                                                mb-3
+                                                min-w-0 w-full
                                             `}
                                         >
                                             {reviews[index].review_text}
@@ -219,12 +230,15 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                         <div
                                             className={`
                                                 w-full
-                                                flex justify-between items-center
+                                                flex flex-col sm:flex-row sm:justify-between sm:items-center
+                                                gap-3 sm:gap-4
+                                                mt-auto
                                             `}
                                         >
                                             <div
                                                 className={`
-                                                    flex justify-center items-center gap-4
+                                                    flex justify-start items-center gap-3 sm:gap-4
+                                                    flex-shrink-0
                                                 `}
                                             >
                                                 <ReviewRating rating={reviews[index].rating} />
@@ -232,12 +246,17 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                             </div>
                                             <Link
                                                 href={`/profile/${users[index].username}/review/${reviews[index].id}`}
+                                                className={`
+                                                    flex-shrink-0
+                                                    self-start sm:self-center
+                                                `}
                                             >
                                                 <p
                                                     className={`
                                                         text-sm text-secondaryText
                                                         cursor-pointer
                                                         hover:text-accentText
+                                                        whitespace-nowrap
                                                     `}
                                                 >
                                                     read more

@@ -106,22 +106,27 @@ export default function ActivityFeedItem({
                 
                 {/* Activity Content */}
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    {/* Container: stacked on small screens, inline on larger screens */}
+                    <div className="flex flex-col md:flex-row md:items-center md:gap-2 mb-1">
+                        {/* Username - on its own line on small screens */}
                         <button
                             onClick={handleUsernameClick}
-                            className="text-secondaryText hover:text-accentText transition-colors text-left"
+                            className="text-secondaryText hover:text-accentText transition-colors text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] mb-1 md:mb-0 md:max-w-none"
                         >
                             @{username}
                         </button>
-                        <span className="text-secondaryText">
-                            {activityText}
-                        </span>
-                        {rating !== null && (
-                            <div className="flex items-center gap-1">
-                                <span className="text-accentText font-medium">{rating}</span>
-                                <span className="text-secondaryText text-sm">★</span>
-                            </div>
-                        )}
+                        {/* Activity text and rating - below username on small screens, inline on larger screens */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-secondaryText">
+                                {activityText}
+                            </span>
+                            {rating !== null && (
+                                <div className="flex items-center gap-1">
+                                    <span className="text-accentText font-medium">{rating}</span>
+                                    <span className="text-secondaryText text-sm">★</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     {albumTitle && (
                         <h3 className="text-xl font-semibold text-primaryText mb-1 group-hover:text-accentText transition-colors line-clamp-1">
