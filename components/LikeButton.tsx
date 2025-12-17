@@ -14,9 +14,30 @@ export default function LikeButton({ size, likeData, reviewId, likeTotal, user }
     const [like, setLike] = useState<boolean>(likeData);
     const [loading, setLoading] = useState<boolean>(false);
     const [likeCounter, setLikeCounter] = useState<number>(likeTotal);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(user);
+
+    // Check authentication state on mount and when user prop changes
+    useEffect(() => {
+        const checkAuth = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            setIsLoggedIn(!!user);
+        };
+        checkAuth();
+    }, [user]);
+
+    // Update like state when likeData prop changes
+    useEffect(() => {
+        setLike(likeData);
+    }, [likeData]);
+
+    // Update like counter when likeTotal prop changes
+    useEffect(() => {
+        setLikeCounter(likeTotal);
+    }, [likeTotal]);
 
     
-    if (user) {
+    if (isLoggedIn) {
         return (
             <div
                 className={`
