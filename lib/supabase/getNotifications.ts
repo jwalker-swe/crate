@@ -101,6 +101,8 @@ export default async function getNotifications(userId: string, limit: number = 2
             id: `follow-${f.id}`,
             type: 'follow' as NotificationType,
             user_id: f.follower_id,
+            review_id: undefined as string | undefined,
+            comment_text: undefined as string | undefined,
             created_at: f.created_at,
             read: false // Will be updated after fetching read status
         }));
@@ -110,6 +112,7 @@ export default async function getNotifications(userId: string, limit: number = 2
             type: 'like' as NotificationType,
             user_id: l.user_id,
             review_id: l.review_id,
+            comment_text: undefined as string | undefined,
             created_at: l.created_at,
             read: false
         }));
