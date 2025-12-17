@@ -63,7 +63,7 @@ export default async function getNotifications(userId: string, limit: number = 2
         if (reviewIds.length > 0) {
             const { data: reviewLikes, error: likesError } = await supabase
                 .from('review_likes')
-                .select('id, review_id, user_id, created_at')
+                .select('review_id, user_id, created_at')
                 .in('review_id', reviewIds)
                 .neq('user_id', userId) // Don't notify for own likes
                 .gte('created_at', thirtyDaysAgoISO)
@@ -108,7 +108,7 @@ export default async function getNotifications(userId: string, limit: number = 2
         }));
 
         const likeNotifications = likes.map(l => ({
-            id: `like-${l.id}`,
+            id: `like-${l.user_id}-${l.review_id}`,
             type: 'like' as NotificationType,
             user_id: l.user_id,
             review_id: l.review_id,
