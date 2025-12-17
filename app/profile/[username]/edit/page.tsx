@@ -118,6 +118,7 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
                 session={user ? true : false} 
                 initialUsername={profileData?.username || null}
                 initialAvatarUrl={profileData?.avatar_url || null}
+                initialUserId={user?.id || null}
             />
             <EditProfileForm initialData={initialData} />
         </div>

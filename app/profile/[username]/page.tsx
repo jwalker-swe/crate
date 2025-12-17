@@ -43,6 +43,7 @@ export default async function Profile({ params }: ProfileProps) {
                     session={user ? true : false} 
                     initialUsername={null}
                     initialAvatarUrl={null}
+                    initialUserId={user?.id || null}
                 />
                 <div className={`
                     w-full max-w-[896px]
@@ -177,6 +178,7 @@ export default async function Profile({ params }: ProfileProps) {
                 session={user ? true : false} 
                 initialUsername={currentUserData?.username || null}
                 initialAvatarUrl={currentUserData?.avatar_url || null}
+                initialUserId={user?.id || null}
             />
             <div className={`
                 profile-body

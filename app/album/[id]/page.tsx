@@ -255,6 +255,7 @@ export default async function Home({ params }: AlbumPageParams) {
                 session={user ? true : false} 
                 initialUsername={userData?.username || null}
                 initialAvatarUrl={userData?.avatar_url || null}
+                initialUserId={user?.id || null}
             />
             <div className={`
                 w-full max-w-[896px]

@@ -68,6 +68,7 @@ export default async function Home({ params }: ProfileProps ) {
 						session={user ? true : false}
 						initialUsername={userData?.username || null }
 						initialAvatarUrl={userData?.avatar_url || null}
+						initialUserId={user?.id || null}
 					/>
 				</div>
 			</header>

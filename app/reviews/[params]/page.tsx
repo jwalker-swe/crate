@@ -42,6 +42,7 @@ export default async function Home({ params }: ReviewPageParams) {
                     session={ user ? true : false } 
                     initialUsername={userData?.username || null}
                     initialAvatarUrl={userData?.avatar_url || null}
+                    initialUserId={user?.id || null}
                 />
             </header>
             <main>

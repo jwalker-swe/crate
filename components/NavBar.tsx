@@ -13,14 +13,15 @@ type NavBarProps = {
     session: boolean;
     initialUsername?: string | null;
     initialAvatarUrl?: string | null;
+    initialUserId?: string | null;
 }
 
-export default function NavBar({ session, initialUsername, initialAvatarUrl }: NavBarProps) {
+export default function NavBar({ session, initialUsername, initialAvatarUrl, initialUserId }: NavBarProps) {
 
     const supabase = createClient()
 
     const [user, setUser]: any = useState(session)
-    const [userId, setUserId]: any = useState('')
+    const [userId, setUserId]: any = useState(initialUserId || '')
     const [username, setUsername]: any = useState(initialUsername || '')
     const [avatarUrl, setAvatarUrl]: any = useState<string | null>(initialAvatarUrl || null)
     const [modalSearchInput, setModalSearchInput] = useState('')
@@ -248,8 +249,8 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                     flex-shrink-0
                     md:gap-4 md:h-12
                 `}>
-                    {user && (
-                        <NotificationButton userId={userId} currentUsername={username} />
+                    {(user || initialUserId) && (
+                        <NotificationButton userId={userId || initialUserId || null} currentUsername={username} />
                     )}
                     {!user && (
                         <>
