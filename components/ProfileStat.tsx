@@ -30,6 +30,11 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
 
         id = userData?.id
 
+        // If user doesn't exist, return null
+        if (!id) {
+            return null
+        }
+
         // Fetch user followers by username lookup
         const {count: followerCount, error: followerError} = await supabase
             .from('follows')
@@ -38,10 +43,10 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
 
         if (followerError) {
             console.error('Error determining number of followers: ', followerError)
-            return 0
+            followers = 0
+        } else {
+            followers = followerCount || 0
         }
-
-        followers = followerCount
 
         // Fetch user following by username lookup
         const {count: followingCount, error: followingError} = await supabase
@@ -51,10 +56,10 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
 
         if (followingError) {
             console.error(`Error determing following count: `, followingError)
-            return 0
+            following = 0
+        } else {
+            following = followingCount || 0
         }
-
-        following = followingCount
 
         // Fetch user's count of albums listened to
         // Only count albums that have been logged (rated, reviewed, liked, or favorited)
@@ -67,9 +72,10 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
 
         if (albumError) {
             console.error('Error determining number of albums listened: ', albumError)
+            albumsListened = 0
+        } else {
+            albumsListened = albumCount || 0
         }
-
-        albumsListened = albumCount
 
     } catch (error) {
         console.error(`Couldn't fetch user id: `, error)
@@ -84,7 +90,7 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
                     <h3 className={`
                         text-xl
                     `}>
-                        {following}
+                        {followers ?? 0}
                     </h3>
                     <p>
                         {statName}
@@ -100,7 +106,7 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
                     <h3 className={`
                         text-xl
                     `}>
-                        {followers}
+                        {following ?? 0}
                     </h3>
                     <p>
                         {statName}
@@ -119,13 +125,16 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
                     <h3 className={`
                         text-xl
                     `}>
-                        {albumsListened}
+                        {albumsListened ?? 0}
                     </h3>
                     <p>
                         {statName}
                     </p>
                 </Link>
             )
+        
+        default:
+            return null
     }
         
 }

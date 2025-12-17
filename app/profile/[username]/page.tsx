@@ -25,11 +25,47 @@ export default async function Profile({ params }: ProfileProps) {
     const { data: { user }, error } = await supabase.auth.getUser()
     
     // Get profile user's data
-    const { data: profileUserData } = await supabase
+    const { data: profileUserData, error: profileUserError } = await supabase
         .from('users')
         .select('id, username, display_name, bio, avatar_url')
         .eq('username', username)
         .single();
+
+    // If user doesn't exist, return 404
+    if (profileUserError || !profileUserData) {
+        return (
+            <div className={`
+                w-full max-w-[1200px] h-fit
+                mx-auto py-4 px-4
+                lg:w-[1200px] lg:px-0
+            `}>
+                <NavBar 
+                    session={user ? true : false} 
+                    initialUsername={null}
+                    initialAvatarUrl={null}
+                />
+                <div className={`
+                    w-full max-w-[896px]
+                    mx-auto
+                    pb-18
+                    lg:w-[896px]
+                    flex flex-col items-center justify-center
+                    min-h-[400px]
+                `}>
+                    <h1 className="text-2xl font-bold mb-4">User Not Found</h1>
+                    <p className="text-secondaryText mb-4">
+                        The user @{username} does not exist.
+                    </p>
+                    <Link 
+                        href="/"
+                        className="text-accentText hover:text-primaryButtonHover transition-colors"
+                    >
+                        Return to Home →
+                    </Link>
+                </div>
+            </div>
+        )
+    }
 
     // Get favorite albums for the profile user
     let favoriteAlbumsData: any[] = [];

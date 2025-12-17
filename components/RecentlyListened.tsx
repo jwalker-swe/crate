@@ -29,7 +29,17 @@ const fetchRecentActivity = async function(username: string) {
             .select('id')
             .eq('username', username)
             .single()
-        const userId = data?.id;
+        
+        if (error || !data) {
+            console.error(`Error fetching user id: `, error)
+            return null
+        }
+        
+        const userId = data.id;
+        
+        if (!userId) {
+            return null
+        }
 
         //Fetch recent activity
         try {
@@ -40,14 +50,20 @@ const fetchRecentActivity = async function(username: string) {
                 .not('review_text', 'is', null)
                 .order('created_at', {ascending: false})
                 .limit(4)
-            const recentActivity = data;
-
-            return recentActivity;
+            
+            if (error) {
+                console.error(`Error fetching recent activity: `, error)
+                return null
+            }
+            
+            return data || null;
         } catch (err) {
             console.error(`Unexpected error fetching recent activity: `, err)
+            return null
         }
     } catch (err) {
         console.error(`Unexpected error fetching user id: `, err)
+        return null
     }
 }
 
@@ -133,7 +149,13 @@ export default async function RecentlyListened({ username, user }: { username: s
                 mt-4
             `}
         >
-            {recentActivity.map((activity, index) => (
+            {recentActivity.map((activity, index) => {
+                const album = albumData[index];
+                if (!album) {
+                    return null;
+                }
+                
+                return (
                 <div key={activity.id}
                     className={`
                         w-full h-full
@@ -143,7 +165,7 @@ export default async function RecentlyListened({ username, user }: { username: s
                         rounded-lg
                     `}
                 >
-                    <img src={albumData[index].cover_image_url} alt="Album Cover"
+                    <img src={album.cover_image_url} alt="Album Cover"
                         className={`
                             w-32 h-32 rounded-sm
                         `}
@@ -160,7 +182,7 @@ export default async function RecentlyListened({ username, user }: { username: s
                             hover:text-accentText
                             cursor-pointer
                         `}>
-                            {albumData[index].title}
+                            {album.title}
                         </h3>
                         <div className={`
                                 flex justify-start items-center gap-2
@@ -211,7 +233,7 @@ export default async function RecentlyListened({ username, user }: { username: s
                                 })()}
                             </div>
                             <Link 
-                                href={`/profile/${username}/review/${albumData[index].spotify_id}`}
+                                href={`/profile/${username}/review/${album.spotify_id}`}
                                 className={`
                                     text-sm text-secondaryText
                                     cursor-pointer
