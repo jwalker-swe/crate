@@ -170,56 +170,60 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
-                                <p className={`
-                                    text-secondaryText
-                                `}>
-                                    {review.rating.toFixed(1)}
-                                </p>
-                                <div className={`
-                                    rating-container
-                                    //General Styling
-                                    flex justify-center items-center 
-                                    //Mobile Styling
-                                    //Desktop Styling
-                                `}>
-                                    {[1, 2, 3, 4, 5].map((index: number) => {
-                                        const fillPercentage = getFillPercent(review.rating, index)
+                                {review.rating !== null && (
+                                    <>
+                                        <p className={`
+                                            text-secondaryText
+                                        `}>
+                                            {review.rating.toFixed(1)}
+                                        </p>
+                                        <div className={`
+                                            rating-container
+                                            //General Styling
+                                            flex justify-center items-center 
+                                            //Mobile Styling
+                                            //Desktop Styling
+                                        `}>
+                                            {[1, 2, 3, 4, 5].map((index: number) => {
+                                                const fillPercentage = getFillPercent(review.rating, index)
 
-                                        return (
-                                            <div 
-                                                className={`
-                                                relative 
-                                                w-4 h-4
-                                                `} 
-                                                key={`star-${index}`}
-                                            >
-                                                {/* Background stars */}
-                                                <StarIcon className={`
-                                                        text-secondaryText
-                                                        w-4 h-4
-                                                    `}
-                                                />
-
-                                                {/* Foreground stars */}
-                                                <div className={`
-                                                    absolute
-                                                    h-full top-0 left-0
-                                                    overflow-hidden
-                                                    pointer-events-none
-                                                `} style={{
-                                                    width: `${fillPercentage}%`
-                                                }}>
-                                                    <StarIcon
+                                                return (
+                                                    <div 
                                                         className={`
-                                                            w-4 h-m-4
-                                                            text-accentText
-                                                        `}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )
+                                                        relative 
+                                                        w-4 h-4
+                                                        `} 
+                                                        key={`star-${index}`}
+                                                    >
+                                                        {/* Background stars */}
+                                                        <StarIcon className={`
+                                                                text-secondaryText
+                                                                w-4 h-4
+                                                            `}
+                                                        />
+
+                                                        {/* Foreground stars */}
+                                                        <div className={`
+                                                            absolute
+                                                            h-full top-0 left-0
+                                                            overflow-hidden
+                                                            pointer-events-none
+                                                        `} style={{
+                                                            width: `${fillPercentage}%`
+                                                        }}>
+                                                            <StarIcon
+                                                                className={`
+                                                                    w-4 h-m-4
+                                                                    text-accentText
+                                                                `}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )
                                     })}
-                                </div>
+                                        </div>
+                                    </>
+                                )}
                                 {/* Post Date */}
                             </div>
                         </div>
