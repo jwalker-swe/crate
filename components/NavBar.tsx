@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { MagnifyingGlassIcon, UserCircleIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import AlbumSearchLogModal from './AlbumSearchLogModal';
+import NotificationButton from './NotificationButton';
 
 type NavBarProps = {
     session: boolean;
@@ -247,6 +248,9 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                     flex-shrink-0
                     md:gap-4 md:h-12
                 `}>
+                    {user && (
+                        <NotificationButton userId={userId} currentUsername={username} />
+                    )}
                     {!user && (
                         <>
                             <Link href='/auth/sign-in'>                    
