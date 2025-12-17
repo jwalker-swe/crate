@@ -327,6 +327,8 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl }: N
                                     )}
                                     {username && (
                                         <span className={`
+                                            hidden
+                                            md:inline
                                             text-secondaryText
                                             text-xs
                                             whitespace-nowrap
