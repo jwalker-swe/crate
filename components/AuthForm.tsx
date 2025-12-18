@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { validateUsername, sanitizeUsernameInput } from '@/lib/validation/usernameValidation'
+import checkUsernameAvailabilityClient from '@/lib/supabase/checkUsernameAvailabilityClient'
 
 export default function Auth() {
     const supabase = createClient()
@@ -52,6 +53,14 @@ export default function Auth() {
                 return
             }
 
+            // Check if username is available
+            const isAvailable = await checkUsernameAvailabilityClient(formData.username)
+            if (!isAvailable) {
+                setMessage({ type: 'error', text: 'This username is already taken. Please choose another one.' })
+                setLoading(false)
+                return
+            }
+
             try {
                 const { data, error } = await supabase.auth.signUp({
                     email: formData.email,
@@ -65,12 +74,34 @@ export default function Auth() {
                 })
 
                 if (error) {
-                    setMessage({ type: 'error', text: error.message || 'An error occurred while trying to sign up.' })
-                } else if (data) {
+                    // Check if error is about email already being registered
+                    const errorMessage = error.message?.toLowerCase() || '';
+                    if (
+                        errorMessage.includes('already registered') ||
+                        errorMessage.includes('email already') ||
+                        errorMessage.includes('user already exists') ||
+                        errorMessage.includes('email address is already') ||
+                        error.code === 'signup_disabled' ||
+                        error.status === 422
+                    ) {
+                        setMessage({ 
+                            type: 'error', 
+                            text: 'This email is already registered. Please sign in instead or use a different email address.' 
+                        });
+                    } else {
+                        setMessage({ type: 'error', text: error.message || 'An error occurred while trying to sign up.' });
+                    }
+                    setLoading(false);
+                    return;
+                }
+
+                // Only navigate if there's no error and we have data
+                if (data && !error) {
                     router.push(`/auth/sign-in`)
                 }
             } catch (error: any) {
                 setMessage({ type: 'error', text: error.message || 'An unexpected error occurred while trying to sign up.' })
+                setLoading(false)
             } finally {
                 setLoading(false)
             }

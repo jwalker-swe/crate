@@ -7,6 +7,7 @@ import FavoriteAlbumsSelector from './FavoriteAlbumsSelector';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
 import { validateUsername, sanitizeUsernameInput } from '@/lib/validation/usernameValidation';
+import checkUsernameAvailabilityClient from '@/lib/supabase/checkUsernameAvailabilityClient';
 
 type Album = {
     id?: string; // Optional - only present if already in database
@@ -610,6 +611,16 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 return;
             }
 
+            // Check if username is available (only if it changed)
+            if (formData.username !== initialData.username) {
+                const isAvailable = await checkUsernameAvailabilityClient(formData.username, user.id);
+                if (!isAvailable) {
+                    setError('This username is already taken. Please choose another one.');
+                    setLoading(false);
+                    return;
+                }
+            }
+
             // Handle profile picture upload/removal
             let newAvatarUrl: string | null = avatarUrl;
             
@@ -677,7 +688,12 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
 
             if (updateError) {
                 console.error('Error updating profile:', updateError);
-                setError(updateError.message || 'Failed to update profile');
+                // Check if it's a unique constraint violation
+                if (updateError.code === '23505' || updateError.message?.includes('unique') || updateError.message?.includes('duplicate')) {
+                    setError('This username is already taken. Please choose another one.');
+                } else {
+                    setError(updateError.message || 'Failed to update profile');
+                }
                 setLoading(false);
                 return;
             }
@@ -690,7 +706,18 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
 
                 if (emailError) {
                     console.error('Error updating email:', emailError);
-                    setError(emailError.message || 'Failed to update email');
+                    // Check if error is about email already being registered
+                    const errorMessage = emailError.message?.toLowerCase() || '';
+                    if (
+                        errorMessage.includes('already registered') ||
+                        errorMessage.includes('email already') ||
+                        errorMessage.includes('user already exists') ||
+                        errorMessage.includes('email address is already')
+                    ) {
+                        setError('This email is already registered. Please use a different email address.');
+                    } else {
+                        setError(emailError.message || 'Failed to update email');
+                    }
                     setLoading(false);
                     return;
                 }
