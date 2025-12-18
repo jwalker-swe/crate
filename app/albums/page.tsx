@@ -69,7 +69,7 @@ export default async function Home() {
 
                 {/* Just Reviewed Section */}
                 <section className="mb-12">
-                    <JustReviewed columns={2} rows={3} gap={6} data={justReviewedData} user={user} />
+                    <JustReviewed columns={2} rows={3} gap={6} data={justReviewedData} user={user} sortQuery="sort=popular" />
                 </section>
             </main>
 
