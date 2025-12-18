@@ -266,10 +266,10 @@ export default function ReviewsList({
                     <button
                         onClick={() => setSortType('popular')}
                         className={`
-                            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                             ${sortType === 'popular' 
-                                ? 'bg-accentText text-primaryBackground' 
-                                : 'bg-secondaryBackground text-secondaryText hover:bg-opacity-80'
+                                ? 'bg-accentText text-primaryText' 
+                                : 'bg-secondaryBackground text-secondaryText hover:bg-primaryBackground hover:text-accentText'
                             }
                         `}
                     >
@@ -278,10 +278,10 @@ export default function ReviewsList({
                     <button
                         onClick={() => setSortType('recent')}
                         className={`
-                            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                             ${sortType === 'recent' 
-                                ? 'bg-accentText text-primaryBackground' 
-                                : 'bg-secondaryBackground text-secondaryText hover:bg-opacity-80'
+                                ? 'bg-accentText text-primaryText' 
+                                : 'bg-secondaryBackground text-secondaryText hover:bg-primaryBackground hover:text-accentText'
                             }
                         `}
                     >
@@ -290,10 +290,10 @@ export default function ReviewsList({
                     <button
                         onClick={() => setSortType('highestRated')}
                         className={`
-                            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                             ${sortType === 'highestRated' 
-                                ? 'bg-accentText text-primaryBackground' 
-                                : 'bg-secondaryBackground text-secondaryText hover:bg-opacity-80'
+                                ? 'bg-accentText text-primaryText' 
+                                : 'bg-secondaryBackground text-secondaryText hover:bg-primaryBackground hover:text-accentText'
                             }
                         `}
                     >
@@ -303,10 +303,10 @@ export default function ReviewsList({
                         <button
                             onClick={() => setSortType('following')}
                             className={`
-                                px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                                px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                                 ${sortType === 'following' 
-                                    ? 'bg-accentText text-primaryBackground' 
-                                    : 'bg-secondaryBackground text-secondaryText hover:bg-opacity-80'
+                                    ? 'bg-accentText text-primaryText' 
+                                    : 'bg-secondaryBackground text-secondaryText hover:bg-primaryBackground hover:text-accentText'
                                 }
                             `}
                         >
@@ -316,10 +316,10 @@ export default function ReviewsList({
                     <button
                         onClick={() => setSortType('trending')}
                         className={`
-                            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer
                             ${sortType === 'trending' 
-                                ? 'bg-accentText text-primaryBackground' 
-                                : 'bg-secondaryBackground text-secondaryText hover:bg-opacity-80'
+                                ? 'bg-accentText text-primaryText' 
+                                : 'bg-secondaryBackground text-secondaryText hover:bg-primaryBackground hover:text-accentText'
                             }
                         `}
                     >

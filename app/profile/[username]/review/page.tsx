@@ -6,6 +6,7 @@ import getUserPopularReviews from "@/lib/supabase/getUserPopularReviews";
 import getUserHighestRatedReviews from "@/lib/supabase/getUserHighestRatedReviews";
 import getUserTrendingReviews from "@/lib/supabase/getUserTrendingReviews";
 import ReviewsList from "@/components/ReviewsList";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 type UserReviewsPageProps = {
     params: Promise<{ username: string }>;
@@ -46,20 +47,36 @@ export default async function UserReviewsPage({ params, searchParams }: UserRevi
     if (!profileUserData) {
         return (
             <div className={`
-                w-full max-w-[1200px] h-fit
-                mx-auto py-4 px-4
-                lg:w-[1200px] lg:px-0
+                w-full min-h-screen
+                bg-primaryBackground
             `}>
-                <NavBar 
-                    session={user ? true : false} 
-                    initialUsername={userData?.username || null}
-                    initialAvatarUrl={userData?.avatar_url || null}
-                    initialUserId={user?.id || null}
-                />
-                <div className="mt-8 text-center">
-                    <h1 className="text-2xl font-bold mb-4">User Not Found</h1>
-                    <p className="text-secondaryText">The user @{username} does not exist.</p>
-                </div>
+                <header>
+                    <div className={`
+                        content-container
+                        w-full max-w-[1200px] h-fit
+                        mx-auto py-4 px-4
+                        lg:w-[1200px] lg:px-0
+                    `}>
+                        <NavBar 
+                            session={user ? true : false} 
+                            initialUsername={userData?.username || null}
+                            initialAvatarUrl={userData?.avatar_url || null}
+                            initialUserId={user?.id || null}
+                        />
+                    </div>
+                </header>
+                <main className={`
+                    max-w-7xl
+                    mx-auto
+                    px-6 lg:px-8
+                    pt-12 lg:pt-16
+                    pb-24 lg:pb-32
+                `}>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold mb-4">User Not Found</h1>
+                        <p className="text-secondaryText">The user @{username} does not exist.</p>
+                    </div>
+                </main>
                 <Footer />
             </div>
         );
@@ -76,26 +93,81 @@ export default async function UserReviewsPage({ params, searchParams }: UserRevi
     return (
         <div
             className={`
-                w-full max-w-[1200px] h-fit
-                mx-auto py-4 px-4
-                lg:w-[1200px] lg:px-0
+                w-full min-h-screen
+                bg-primaryBackground
             `}
         >
             <header>
-                <NavBar 
-                    session={user ? true : false} 
-                    initialUsername={userData?.username || null}
-                    initialAvatarUrl={userData?.avatar_url || null}
-                    initialUserId={user?.id || null}
-                />
-            </header>
-            <main className="pb-12">
-                <div className="mt-8 mb-4">
-                    <h1 className="text-2xl font-bold mb-2">
-                        {profileUserData.display_name || profileUserData.username}'s Reviews
-                    </h1>
-                    <p className="text-secondaryText">@{username}</p>
+                <div className={`
+                    content-container
+                    w-full max-w-[1200px] h-fit
+                    mx-auto py-4 px-4
+                    lg:w-[1200px] lg:px-0
+                `}>
+                    <NavBar 
+                        session={user ? true : false} 
+                        initialUsername={userData?.username || null}
+                        initialAvatarUrl={userData?.avatar_url || null}
+                        initialUserId={user?.id || null}
+                    />
                 </div>
+            </header>
+            <main
+                className={`
+                    max-w-7xl
+                    mx-auto
+                    px-6 lg:px-8
+                    pt-12 lg:pt-16
+                    pb-24 lg:pb-32
+                `}
+            >
+                {/* Hero Section */}
+                <div className="mb-12 lg:mb-16 flex items-center gap-6">
+                    {/* Profile Picture */}
+                    <div className={`
+                        w-16 h-16
+                        md:w-20 md:h-20
+                        lg:w-24 lg:h-24
+                        rounded-full
+                        bg-secondaryBackground
+                        flex-shrink-0
+                        overflow-hidden
+                        flex items-center justify-center
+                    `}>
+                        {profileUserData.avatar_url ? (
+                            <img 
+                                src={profileUserData.avatar_url} 
+                                alt={`${profileUserData.display_name || profileUserData.username}'s profile`}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <UserCircleIcon className="w-full h-full text-accentText" />
+                        )}
+                    </div>
+                    
+                    {/* Text Content */}
+                    <div className="flex flex-col">
+                        <h1
+                            className={`
+                                text-4xl lg:text-5xl xl:text-6xl
+                                font-bold
+                                text-primaryText
+                                tracking-tight
+                            `}
+                        >	
+                            {profileUserData.display_name || profileUserData.username}'s Reviews
+                        </h1>
+                        <p className={`
+                            text-lg lg:text-xl
+                            text-secondaryText
+                            mt-1
+                        `}>
+                            @{username}
+                        </p>
+                        <div className="h-px w-24 bg-gradient-to-r from-accentText to-transparent mt-4"></div>
+                    </div>
+                </div>
+
                 <ReviewsList 
                     popularData={popularData}
                     recentData={recentData}
