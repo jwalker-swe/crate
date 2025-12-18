@@ -59,7 +59,7 @@ interface RecentReviews {
     }[]
 }
 
-export default function JustReviewed({ columns, rows, gap, data, user }: { columns: number, rows: number, gap: number, data: any, user: any }) {
+export default function JustReviewed({ columns, rows, gap, data, user, sortQuery }: { columns: number, rows: number, gap: number, data: any, user: any, sortQuery?: string }) {
 
     const [loading, setLoading] = useState(Array(data?.reviews?.length || 0).fill(false));
     const [gridStyle, setGridStyle] = useState<React.CSSProperties>({});
@@ -117,13 +117,16 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                         `}
                     >
                         <SectionTitle title="Recently Reviewed" />
-                        <ViewAll pageLink="reviews/popular" />
+                        <ViewAll 
+                            pageLink="reviews" 
+                            query={sortQuery !== undefined ? sortQuery : (user ? "sort=following" : undefined)}
+                        />
                     </div>
                     <div
                         className={`
                             mt-4
                             grid grid-cols-1 gap-4 justify-center
-                            md:grid-cols-2
+                            md:grid-cols-2 md:items-stretch
                         `}
                         style={gridStyle}
                     >
@@ -145,6 +148,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                         flex justify-start items-start gap-4 p-6
                                         rounded-xl
                                         bg-secondaryBackground
+                                        md:h-full
                                     `}
                                 >
                                     <div
@@ -175,6 +179,7 @@ export default function JustReviewed({ columns, rows, gap, data, user }: { colum
                                     <div
                                         className={`
                                             flex flex-col justify-start items-start gap-2 flex-grow min-w-0
+                                            md:h-full
                                         `}
                                     >
                                         <Link href={`/profile/${users[index].username}`}>
