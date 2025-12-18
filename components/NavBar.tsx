@@ -393,7 +393,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                             Albums
                                         </Link>
                                         <Link 
-                                            href='#' 
+                                            href={username ? `/profile/${username}/review` : '#'} 
                                             onClick={() => setIsProfileMenuOpen(false)}
                                             className={`
                                         w-full
