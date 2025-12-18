@@ -25,7 +25,9 @@ export default function ReviewsList({
     followingData,
     trendingData,
     user,
-    initialSortType = 'popular'
+    initialSortType = 'popular',
+    hideFollowing = false,
+    username
 }: { 
     popularData: any;
     recentData: any;
@@ -34,6 +36,8 @@ export default function ReviewsList({
     trendingData: any;
     user: any;
     initialSortType?: SortType;
+    hideFollowing?: boolean;
+    username?: string;
 }) {
     const [sortType, setSortType] = useState<SortType>(initialSortType);
     const router = useRouter();
@@ -119,11 +123,14 @@ export default function ReviewsList({
                 limit: '20'
             });
             
-            if (sortType === 'following' && user) {
+            if (username) {
+                params.append('username', username);
+            } else if (sortType === 'following' && user) {
                 params.append('userId', user.id);
             }
 
-            const response = await fetch(`/api/reviews?${params.toString()}`);
+            const apiEndpoint = username ? '/api/user-reviews' : '/api/reviews';
+            const response = await fetch(`${apiEndpoint}?${params.toString()}`);
             const newData = await response.json();
 
             if (newData.reviews && newData.reviews.length > 0) {
@@ -144,7 +151,7 @@ export default function ReviewsList({
         } finally {
             setLoadingMore(false);
         }
-    }, [sortType, page, currentData.hasMore, loadingMore, user]);
+    }, [sortType, page, currentData.hasMore, loadingMore, user, username]);
 
     // Intersection Observer for infinite scroll
     useEffect(() => {
@@ -292,7 +299,7 @@ export default function ReviewsList({
                     >
                         Highest Rated
                     </button>
-                    {user && (
+                    {user && !hideFollowing && (
                         <button
                             onClick={() => setSortType('following')}
                             className={`

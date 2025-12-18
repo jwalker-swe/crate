@@ -59,7 +59,7 @@ interface RecentReviews {
     }[]
 }
 
-export default function JustReviewed({ columns, rows, gap, data, user, sortQuery }: { columns: number, rows: number, gap: number, data: any, user: any, sortQuery?: string }) {
+export default function JustReviewed({ columns, rows, gap, data, user, sortQuery, pageLink }: { columns: number, rows: number, gap: number, data: any, user: any, sortQuery?: string, pageLink?: string }) {
 
     const [loading, setLoading] = useState(Array(data?.reviews?.length || 0).fill(false));
     const [gridStyle, setGridStyle] = useState<React.CSSProperties>({});
@@ -118,7 +118,7 @@ export default function JustReviewed({ columns, rows, gap, data, user, sortQuery
                     >
                         <SectionTitle title="Recently Reviewed" />
                         <ViewAll 
-                            pageLink="reviews" 
+                            pageLink={pageLink || "reviews"} 
                             query={sortQuery !== undefined ? sortQuery : (user ? "sort=following" : undefined)}
                         />
                     </div>
@@ -126,7 +126,7 @@ export default function JustReviewed({ columns, rows, gap, data, user, sortQuery
                         className={`
                             mt-4
                             grid grid-cols-1 gap-4 justify-center
-                            md:grid-cols-2 md:items-stretch
+                            ${columns > 1 ? 'md:grid-cols-2 md:items-stretch' : ''}
                         `}
                         style={gridStyle}
                     >

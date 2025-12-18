@@ -7,7 +7,8 @@ import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import { UserCircleIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/lib/supabase/server";
-import RecentlyListened from "@/components/RecentlyListened";
+import JustReviewed from "@/components/JustReviewed";
+import getUserRecentReviews from "@/lib/supabase/getUserRecentReviews";
 import Link from "next/link";
 // import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -167,6 +168,9 @@ export default async function Profile({ params }: ProfileProps) {
             .single();
         currentUserData = data;
     }
+
+    // Fetch user's recent reviews for the JustReviewed component
+    const userRecentReviewsData = await getUserRecentReviews(username, 6);
 
     return (
         <div className={`
@@ -442,13 +446,16 @@ export default async function Profile({ params }: ProfileProps) {
                         <div className={`
                             favorite-albums-container
                         `}>
-                            <div className={`
-                                flex justify-between items-center
-                            `}>
-                                <SectionTitle title={'Recently Reviewed'} />
-                                <ViewAll pageLink="reviews" />
-                            </div>
-                            <RecentlyListened username={username} user={user} />
+                            {userRecentReviewsData && (
+                                <JustReviewed 
+                                    columns={1} 
+                                    rows={3} 
+                                    gap={4} 
+                                    data={userRecentReviewsData} 
+                                    user={user}
+                                    pageLink={`profile/${username}/review`}
+                                />
+                            )}
                             {/* Component to feth favorite albums based on username */}
                         </div>
                     </section>
