@@ -112,6 +112,7 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
         <div className={`
             w-full max-w-[1200px] h-fit
             mx-auto py-4 px-4
+            pb-24 lg:pb-32
             lg:w-[1200px] lg:px-0
         `}>
             <NavBar 
