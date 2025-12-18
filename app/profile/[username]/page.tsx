@@ -5,6 +5,7 @@ import NavBar from "@/components/NavBar";
 import ProfileStat from "@/components/ProfileStat";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
+import Footer from "@/components/Footer";
 import { UserCircleIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/lib/supabase/server";
 import JustReviewed from "@/components/JustReviewed";
@@ -461,6 +462,9 @@ export default async function Profile({ params }: ProfileProps) {
                     </section>
                 </div>
             </div>
+            <footer>
+                <Footer />
+            </footer>
         </div>
     )
 }
