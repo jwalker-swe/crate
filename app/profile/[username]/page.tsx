@@ -5,7 +5,7 @@ import NavBar from "@/components/NavBar";
 import ProfileStat from "@/components/ProfileStat";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/lib/supabase/server";
 import RecentlyListened from "@/components/RecentlyListened";
 import Link from "next/link";
@@ -23,12 +23,12 @@ export default async function Profile({ params }: ProfileProps) {
 
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
-    
+
     // Get profile user's data
     const { data: profileUserData, error: profileUserError } = await supabase
-        .from('users')
-        .select('id, username, display_name, bio, avatar_url')
-        .eq('username', username)
+			.from('users')
+        .select('id, username, display_name, bio, avatar_url, created_at, is_vip')
+			.eq('username', username)
         .single();
 
     // If user doesn't exist, return 404
@@ -216,7 +216,7 @@ export default async function Profile({ params }: ProfileProps) {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
+                            <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
                             )}
                         </div>
                         <div className={`
@@ -266,18 +266,28 @@ export default async function Profile({ params }: ProfileProps) {
                                     )}
                                 </div>
                             </div>
+                            <div className={`
+                                flex items-center gap-2
+                                mb-4
+                            `}>
                             <h2 className={`
                                 username
                                 text-secondaryText text-lg
-                                mb-4
                             `}>
                                 @{username}
                             </h2>
+                                {profileUserData?.is_vip && (
+                                    <CheckBadgeIcon 
+                                        className="w-5 h-5 text-amber-400"
+                                        title="VIP"
+                                    />
+                                )}
+                            </div>
                             {profileUserData?.bio && (
-                                <p className={`
-                                    user-bio
-                                    text-secondaryText text-sm
-                                    line-clamp-2
+                            <p className={`
+                                user-bio
+                                text-secondaryText text-sm
+                                line-clamp-2
                                     whitespace-pre-wrap
                                     text-center
                                     md:text-left
@@ -349,9 +359,9 @@ export default async function Profile({ params }: ProfileProps) {
                                 w-full
                             `}>
                                 {favoriteAlbumsData && favoriteAlbumsData.length > 0 ? (
-                                    <ul className={`
-                                        grid-container
-                                        mx-auto
+                                <ul className={`
+                                    grid-container
+                                    mx-auto
                                         grid grid-cols-2 gap-4
                                         sm:grid-cols-6 sm:gap-4
                                         lg:grid-cols-5 lg:gap-5
@@ -413,7 +423,7 @@ export default async function Profile({ params }: ProfileProps) {
                                                 </li>
                                             );
                                         })}
-                                    </ul>
+                                </ul>
                                 ) : (
                                     <p className={`
                                         text-secondaryText text-sm
