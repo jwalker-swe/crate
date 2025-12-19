@@ -20,6 +20,9 @@ export default function Auth() {
     const [showForgotPassword, setShowForgotPassword] = useState(false)
     const [resetEmailSent, setResetEmailSent] = useState(false)
     const [resetError, setResetError] = useState<string | null>(null)
+    const [showResendVerification, setShowResendVerification] = useState(false)
+    const [verificationEmailSent, setVerificationEmailSent] = useState(false)
+    const [resendVerificationError, setResendVerificationError] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -123,7 +126,23 @@ export default function Auth() {
                 })
 
                 if (error) {
-                    setMessage({ type: 'error', text: error.message || 'Invalid email or password.' })
+                    // Check if error is about email not being verified
+                    const errorMessage = error.message?.toLowerCase() || '';
+                    if (
+                        errorMessage.includes('email not confirmed') ||
+                        errorMessage.includes('email not verified') ||
+                        errorMessage.includes('confirm your email') ||
+                        errorMessage.includes('verification') ||
+                        error.code === 'email_not_confirmed'
+                    ) {
+                        setMessage({ 
+                            type: 'error', 
+                            text: 'Please verify your email address before signing in. Check your inbox for the verification email.' 
+                        });
+                        setShowResendVerification(true);
+                    } else {
+                        setMessage({ type: 'error', text: error.message || 'Invalid email or password.' })
+                    }
                 } else if (data) {
                     // Get signed-in user's info from Supabase
                     const { data: { user } } = await supabase.auth.getUser();
@@ -224,6 +243,40 @@ export default function Auth() {
         }
     }
 
+    const handleResendVerification = async function(e: React.FormEvent) {
+        e.preventDefault()
+        setResendVerificationError(null)
+        setLoading(true)
+
+        if (!formData.email) {
+            setResendVerificationError('Please enter your email address')
+            setLoading(false)
+            return
+        }
+
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: formData.email,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth/sign-in`
+                }
+            })
+
+            if (error) {
+                setResendVerificationError(error.message || 'Failed to send verification email.')
+                setLoading(false)
+            } else {
+                setVerificationEmailSent(true)
+                setLoading(false)
+            }
+        } catch (error: any) {
+            console.error('Error sending verification email:', error)
+            setResendVerificationError(error.message || 'An error occurred. Please try again.')
+            setLoading(false)
+        }
+    }
+
     return (
         <div className={`
             w-full max-w-[1200px] h-screen
@@ -259,6 +312,7 @@ export default function Auth() {
                         text-3xl text-center
                     `}>
                         {showForgotPassword ? 'Reset your password' :
+                         showResendVerification ? 'Resend verification email' :
                          mode === 'sign-in' ? 'Log in to your account' : 
                          mode === 'forgot-password' ? 'Reset your password' : 
                          'Sign up for an account'}
@@ -270,6 +324,15 @@ export default function Auth() {
                             mt-2
                         `}>
                             Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                    )}
+                    {showResendVerification && !verificationEmailSent && (
+                        <p className={`
+                            text-sm text-secondaryText
+                            text-center
+                            mt-2
+                        `}>
+                            Enter your email address and we'll send you a new verification email.
                         </p>
                     )}
                     {message && (
@@ -351,13 +414,17 @@ export default function Auth() {
                                     block
                                     text-sm text-secondaryText
                                 `}>
-                                    {showForgotPassword ? 'Email address for password reset' : 'Email address'}
+                                    {showForgotPassword ? 'Email address for password reset' : 
+                                     showResendVerification ? 'Email address for verification' :
+                                     'Email address'}
                                 </label>
                                 <input
                                     type='email'
                                     id='email'
                                     name='email'
-                                    placeholder={showForgotPassword ? 'Enter the email associated with your account...' : 'Enter your email...'}
+                                    placeholder={showForgotPassword ? 'Enter the email associated with your account...' : 
+                                                  showResendVerification ? 'Enter the email you used to sign up...' :
+                                                  'Enter your email...'}
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
@@ -392,6 +459,7 @@ export default function Auth() {
                                                     setShowForgotPassword(true)
                                                     setResetEmailSent(false)
                                                     setResetError(null)
+                                                    setShowResendVerification(false)
                                                 }}
                                                 className={`
                                                     text-xs text-accentText
@@ -534,6 +602,119 @@ export default function Auth() {
                                         </>
                                     )}
                                 </>
+                            ) : showResendVerification ? (
+                                <>
+                                    {verificationEmailSent ? (
+                                        <div className={`
+                                            w-full
+                                            mt-4 p-4
+                                            bg-accentText/10
+                                            border border-accentText/30
+                                            rounded-sm
+                                        `}>
+                                            <p className={`
+                                                text-sm text-primaryText
+                                                text-center
+                                                font-medium
+                                            `}>
+                                                Verification email sent!
+                                            </p>
+                                            <p className={`
+                                                text-xs text-secondaryText
+                                                text-center
+                                                mt-2
+                                            `}>
+                                                Check your inbox and click the verification link to verify your account. The link will expire in 1 hour.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowResendVerification(false)
+                                                    setVerificationEmailSent(false)
+                                                    setResendVerificationError(null)
+                                                    setFormData(prev => ({ ...prev, email: '' }))
+                                                }}
+                                                className={`
+                                                    w-full
+                                                    mt-4 p-2
+                                                    text-sm
+                                                    text-center
+                                                    bg-secondaryBackground
+                                                    rounded-sm
+                                                    hover:bg-tertiaryBackground
+                                                    transition-colors
+                                                `}
+                                            >
+                                                Back to Sign In
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className={`
+                                                w-full
+                                                mt-2
+                                                p-3
+                                                bg-accentText/5
+                                                border border-accentText/20
+                                                rounded-sm
+                                            `}>
+                                                <p className={`
+                                                    text-xs text-secondaryText
+                                                    text-center
+                                                `}>
+                                                    We'll send a new verification email to the address you enter below.
+                                                </p>
+                                            </div>
+                                            <button 
+                                                type='button'
+                                                onClick={handleResendVerification}
+                                                disabled={loading}
+                                                className={`
+                                                    w-full
+                                                    mt-4 p-3
+                                                    text-center
+                                                    bg-accentText
+                                                    rounded-sm
+                                                    hover:cursor-pointer
+                                                    hover:bg-primaryButtonHover
+                                                    hover:text-primaryTextHover
+                                                    disabled:opacity-50
+                                                    disabled:cursor-not-allowed
+                                                `}
+                                            >
+                                                {loading ? 'Sending verification email...' : 'Resend Verification Email'}
+                                            </button>
+                                            {resendVerificationError && (
+                                                <p className={`
+                                                    mt-2
+                                                    text-sm text-red-500
+                                                    text-center
+                                                `}>
+                                                    {resendVerificationError}
+                                                </p>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowResendVerification(false)
+                                                    setResendVerificationError(null)
+                                                    setMessage(null)
+                                                }}
+                                                className={`
+                                                    w-full
+                                                    mt-2 p-2
+                                                    text-sm
+                                                    text-center
+                                                    text-secondaryText
+                                                    hover:text-primaryText
+                                                    transition-colors
+                                                `}
+                                            >
+                                                Cancel - Back to Sign In
+                                            </button>
+                                        </>
+                                    )}
+                                </>
                             ) : (
                                 <button 
                                     type='submit' 
@@ -561,7 +742,7 @@ export default function Auth() {
                                 </button>
                             )}
                     </form>
-                    {mode !== 'forgot-password' && !showForgotPassword && (
+                    {mode !== 'forgot-password' && !showForgotPassword && !showResendVerification && (
                         <div className={`
                             w-full
                             mt-4
@@ -576,6 +757,7 @@ export default function Auth() {
                                 const newMode = mode === 'sign-in' ? 'sign-up' : 'sign-in'
                                 setMode(newMode)
                                 setMessage(null)
+                                setShowResendVerification(false)
                                 router.push(`/auth/${newMode}`)
                             }} className={`
                                 text-accentText
@@ -583,6 +765,59 @@ export default function Auth() {
                                 hover:text-primaryButtonHover
                             `}>
                                 {mode === 'sign-in' ? `Sign up` : `Log in`}
+                            </button>
+                        </div>
+                    )}
+                    {mode === 'sign-in' && !showForgotPassword && !showResendVerification && (
+                        <div className={`
+                            w-full
+                            mt-4
+                            flex flex-wrap justify-center items-center gap-2
+                        `}>
+                            <p className={`
+                                text-secondaryText
+                            `}>
+                                Didn't receive a verification email?
+                            </p>
+                            <button 
+                                onClick={() => {
+                                    setShowResendVerification(true)
+                                    setVerificationEmailSent(false)
+                                    setResendVerificationError(null)
+                                    setShowForgotPassword(false)
+                                    setMessage(null)
+                                }} 
+                                className={`
+                                    text-accentText
+                                    hover:cursor-pointer
+                                    hover:text-primaryButtonHover
+                                `}
+                            >
+                                Resend verification email
+                            </button>
+                        </div>
+                    )}
+                    {showResendVerification && !verificationEmailSent && (
+                        <div className={`
+                            w-full
+                            mt-4
+                            flex flex-wrap justify-center items-center gap-2
+                        `}>
+                            <p className={`
+                                text-secondaryText
+                            `}>
+                                Remember your password?
+                            </p>
+                            <button onClick={() => {
+                                setShowResendVerification(false)
+                                setResendVerificationError(null)
+                                setMessage(null)
+                            }} className={`
+                                text-accentText
+                                hover:cursor-pointer
+                                hover:text-primaryButtonHover
+                            `}>
+                                Back to sign in
                             </button>
                         </div>
                     )}
