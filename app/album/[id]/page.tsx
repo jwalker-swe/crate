@@ -459,7 +459,7 @@ export default async function Home({ params }: AlbumPageParams) {
                         //Desktop Styling
                     `}>
                         <SectionTitle title="Popular Reviews" />
-                        <ViewAll pageLink="reviews" />
+                        <ViewAll pageLink={`album/${urlId}/reviews`} />
                     </div>
                     <div className={`
                         //General Styling

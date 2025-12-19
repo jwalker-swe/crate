@@ -27,7 +27,8 @@ export default function ReviewsList({
     user,
     initialSortType = 'popular',
     hideFollowing = false,
-    username
+    username,
+    albumId
 }: { 
     popularData: any;
     recentData: any;
@@ -38,6 +39,7 @@ export default function ReviewsList({
     initialSortType?: SortType;
     hideFollowing?: boolean;
     username?: string;
+    albumId?: string;
 }) {
     const [sortType, setSortType] = useState<SortType>(initialSortType);
     const router = useRouter();
@@ -123,13 +125,21 @@ export default function ReviewsList({
                 limit: '20'
             });
             
-            if (username) {
+            if (albumId) {
+                params.append('albumId', albumId);
+            } else if (username) {
                 params.append('username', username);
             } else if (sortType === 'following' && user) {
                 params.append('userId', user.id);
             }
 
-            const apiEndpoint = username ? '/api/user-reviews' : '/api/reviews';
+            let apiEndpoint = '/api/reviews';
+            if (albumId) {
+                apiEndpoint = '/api/album-reviews';
+            } else if (username) {
+                apiEndpoint = '/api/user-reviews';
+            }
+            
             const response = await fetch(`${apiEndpoint}?${params.toString()}`);
             const newData = await response.json();
 
@@ -151,7 +161,7 @@ export default function ReviewsList({
         } finally {
             setLoadingMore(false);
         }
-    }, [sortType, page, currentData.hasMore, loadingMore, user, username]);
+    }, [sortType, page, currentData.hasMore, loadingMore, user, username, albumId]);
 
     // Intersection Observer for infinite scroll
     useEffect(() => {
