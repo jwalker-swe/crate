@@ -32,24 +32,64 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
 
+        // Get user_albums interactions (ratings, reviews, likes)
         const { data: userAlbumsData, error: userAlbumsError } = await supabase
             .from('user_albums')
             .select('album_id')
             .in('user_id', followingIds)
             .gte('created_at', thirtyDaysAgoISO)
-            .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true');
+            .or('rating.not.is.null, review_text.not.is.null, liked.not.is.null');
+
+        // Get favorites interactions
+        const { data: favoritesData, error: favoritesError } = await supabase
+            .from('favorites')
+            .select('album_id')
+            .in('user_id', followingIds)
+            .gte('created_at', thirtyDaysAgoISO);
+
+        // Get queue interactions
+        const { data: queueData, error: queueError } = await supabase
+            .from('queue')
+            .select('album_id')
+            .in('user_id', followingIds)
+            .gte('created_at', thirtyDaysAgoISO);
 
         if (userAlbumsError) {
             console.error('Error fetching following albums:', userAlbumsError);
+        }
+
+        if (favoritesError) {
+            console.error('Error fetching favorites:', favoritesError);
+        }
+
+        if (queueError) {
+            console.error('Error fetching queue:', queueError);
+        }
+
+        // Combine all interactions and count per album
+        const allInteractions: string[] = [];
+        if (userAlbumsData) {
+            allInteractions.push(...userAlbumsData.map(ua => ua.album_id));
+        }
+        if (favoritesData) {
+            allInteractions.push(...favoritesData.map(f => f.album_id));
+        }
+        if (queueData) {
+            allInteractions.push(...queueData.map(q => q.album_id));
+        }
+
+        if (allInteractions.length === 0) {
             return null;
         }
 
-        if (!userAlbumsData || userAlbumsData.length === 0) {
-            return null;
-        }
+        // Count interactions per album
+        const interactionCounts = new Map<string, number>();
+        allInteractions.forEach(albumId => {
+            interactionCounts.set(albumId, (interactionCounts.get(albumId) || 0) + 1);
+        });
 
         // Get unique album IDs
-        const uniqueAlbumIds = [...new Set(userAlbumsData.map(ua => ua.album_id))];
+        const uniqueAlbumIds = Array.from(interactionCounts.keys());
 
         // Fetch album data from database
         const { data: albumsData, error: albumsError } = await supabase
@@ -66,8 +106,8 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
             return null;
         }
 
-        // Fetch Spotify popularity for each album and sort by popularity
-        const albumsWithPopularity = await Promise.all(
+        // Fetch Spotify popularity for each album and include interaction count
+        const albumsWithData = await Promise.all(
             albumsData.map(async (album) => {
                 if (!album.spotify_id) {
                     return null;
@@ -86,7 +126,8 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
                             id: spotifyAlbum.id,
                             images: spotifyAlbum.images
                         },
-                        popularity: spotifyAlbum.popularity
+                        popularity: spotifyAlbum.popularity,
+                        interactionCount: interactionCounts.get(album.id) || 0
                     };
                 } catch (error) {
                     console.error(`Error fetching Spotify data for album ${album.spotify_id}:`, error);
@@ -95,10 +136,17 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
             })
         );
 
-        // Filter out null values and sort by popularity (highest first)
-        const validAlbums = albumsWithPopularity
-            .filter((item): item is { album: any; popularity: number } => item !== null)
-            .sort((a, b) => b.popularity - a.popularity)
+        // Filter out null values and sort by interaction count first, then by Spotify popularity
+        const validAlbums = albumsWithData
+            .filter((item): item is { album: any; popularity: number; interactionCount: number } => item !== null)
+            .sort((a, b) => {
+                // First sort by interaction count (highest first)
+                if (b.interactionCount !== a.interactionCount) {
+                    return b.interactionCount - a.interactionCount;
+                }
+                // If interaction counts are equal, sort by Spotify popularity (highest first)
+                return b.popularity - a.popularity;
+            })
             .slice(0, limit)
             .map(item => item.album);
 
