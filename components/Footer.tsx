@@ -74,7 +74,7 @@ export default function Footer() {
                         //Desktop Styling
                     `}>
                         <li>
-                            <Link href='#' className={`
+                            <Link href='/' className={`
                                 //General Styling
                                 text-secondaryText
                                 hover:text-primaryText
@@ -85,7 +85,7 @@ export default function Footer() {
                             </Link>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <Link href='/albums' className={`
                                 //General Styling
                                 text-secondaryText
                                 hover:text-primaryText
@@ -96,26 +96,28 @@ export default function Footer() {
                             </Link>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Lists
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 News
-                            </Link>
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -142,48 +144,52 @@ export default function Footer() {
                         //Desktop Styling
                     `}>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Help Center
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Community Guidelines
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 API Documentation
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Mobile Apps
-                            </Link>
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -210,48 +216,52 @@ export default function Footer() {
                         //Desktop Styling
                     `}>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Terms of Service
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Privacy Policy
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 Cookie Policy
-                            </Link>
+                            </span>
                         </li>
                         <li>
-                            <Link href='#' className={`
+                            <span className={`
                                 //General Styling
                                 text-secondaryText
-                                hover:text-primaryText
+                                opacity-50
+                                cursor-not-allowed
                                 //Mobile Styling
                                 //Desktop Styling
                             `}>
                                 DMCA Notice
-                            </Link>
+                            </span>
                         </li>
                     </ul>
                 </div>

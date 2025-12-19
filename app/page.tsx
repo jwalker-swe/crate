@@ -26,6 +26,9 @@ import TopAlbumsFromFollowing from "@/components/TopAlbumsFromFollowing";
 
 //Create function to get Album data
 
+// Revalidate the page every 24 hours to ensure albums update
+export const revalidate = 86400;
+
 export default async function Home() {
 
   const supabase = await createClient();

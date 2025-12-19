@@ -25,7 +25,7 @@ export default async function getTopAlbums() {
                 Authorization: `Bearer ${token}`,
             },
             next: {
-                revalidate: 86400 // Revalidate every week
+                revalidate: 86400 // Revalidate every day
             }
         });
 
@@ -49,7 +49,7 @@ export default async function getTopAlbums() {
                 Authorization: `Bearer ${token}`,
             },
             next: {
-                revalidate: 604800 // Revalidate every week
+                revalidate: 86400 // Revalidate every day
             }
         });
 
