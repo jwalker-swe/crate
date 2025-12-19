@@ -103,7 +103,7 @@ export default function ResultsList ({ results, userResults, searchType, sk }: {
                 
                 if (filteredAlbums.length > 0) {
                     // Check against existing albums in state - prevent duplicates and prefer explicit
-                    setAlbums(prev => {
+                    setAlbums((prev: any[]) => {
                         const existingIds = new Set(prev.map(album => album.id));
                         
                         // Create a map of existing albums by name+artist for duplicate checking
