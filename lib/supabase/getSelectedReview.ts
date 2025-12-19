@@ -37,11 +37,17 @@ export default async function getSelectedReview(reviewId: string) {
 
 		// Format Spotify-like data from database
 		// Format artists from database (handle both string and array formats)
-		const artists = albumData.artist 
-			? (typeof albumData.artist === 'string' 
-				? [{ name: albumData.artist }] 
-				: Array.isArray(albumData.artist) 
-					? albumData.artist.map((a: any) => typeof a === 'string' ? { name: a } : a)
+		// Check both 'artist' (singular) and 'artists' (plural) to handle schema differences
+		const artistData = (albumData as any).artists || albumData.artist;
+		const artists = artistData 
+			? (typeof artistData === 'string' 
+				? [{ name: artistData }] 
+				: Array.isArray(artistData) 
+					? artistData.map((a: any) => 
+						typeof a === 'string' 
+							? { name: a } 
+							: (a && typeof a === 'object' && 'name' in a ? a : { name: String(a) })
+					  ).filter((a: any) => a && a.name)
 					: [])
 			: [];
 

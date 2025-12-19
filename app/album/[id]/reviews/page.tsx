@@ -43,11 +43,13 @@ export default async function AlbumReviewsPage({ params, searchParams }: AlbumRe
     }
     
     // Format artist names from database
-    const artistNames = albumData.artist 
-        ? (typeof albumData.artist === 'string' 
-            ? albumData.artist 
-            : Array.isArray(albumData.artist) 
-                ? albumData.artist.map((a: any) => typeof a === 'string' ? a : a.name).join(', ')
+    // Check both 'artist' (singular) and 'artists' (plural) to handle schema differences
+    const artistData = (albumData as any).artists || albumData.artist;
+    const artistNames = artistData 
+        ? (typeof artistData === 'string' 
+            ? artistData 
+            : Array.isArray(artistData) 
+                ? artistData.map((a: any) => typeof a === 'string' ? a : (a?.name || String(a))).join(', ')
                 : 'Unknown Artist')
         : 'Unknown Artist';
     

@@ -157,11 +157,17 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
                 }
 
                 // Format album data for the component
-                const artists = album.artist 
-                    ? (typeof album.artist === 'string' 
-                        ? [{ name: album.artist }] 
-                        : Array.isArray(album.artist) 
-                            ? album.artist 
+                // Check both 'artist' (singular) and 'artists' (plural) to handle schema differences
+                const artistData = (album as any).artists || album.artist;
+                const artists = artistData 
+                    ? (typeof artistData === 'string' 
+                        ? [{ name: artistData }] 
+                        : Array.isArray(artistData) 
+                            ? artistData.map((a: any) => 
+                                typeof a === 'string' 
+                                    ? { name: a } 
+                                    : (a && typeof a === 'object' && 'name' in a ? a : { name: String(a) })
+                              ).filter((a: any) => a && a.name)
                             : [])
                     : [];
                 

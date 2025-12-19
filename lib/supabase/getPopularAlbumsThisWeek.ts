@@ -136,11 +136,13 @@ export default async function getPopularAlbumsThisWeek(limit: number = 4) {
                 }
 
                 // Format artists from database (handle both string and array formats)
-                const artists = album.artist 
-                    ? (typeof album.artist === 'string' 
-                        ? [{ name: album.artist }] 
-                        : Array.isArray(album.artist) 
-                            ? album.artist.map((a: any) => 
+                // Check both 'artist' (singular) and 'artists' (plural) to handle schema differences
+                const artistData = (album as any).artists || album.artist;
+                const artists = artistData 
+                    ? (typeof artistData === 'string' 
+                        ? [{ name: artistData }] 
+                        : Array.isArray(artistData) 
+                            ? artistData.map((a: any) => 
                                 typeof a === 'string' 
                                     ? { name: a } 
                                     : (a && typeof a === 'object' && 'name' in a ? a : { name: String(a) })

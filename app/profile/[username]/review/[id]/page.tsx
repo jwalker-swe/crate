@@ -178,7 +178,7 @@ export default async function Home({ params }: { params: Promise<{ id: string; u
 												md:text-xl
 												lg:text-3xl
 											`}>
-												{review_data?.spotify.artists[0].name}
+												{review_data?.spotify.artists?.[0]?.name || 'Unknown Artist'}
 											</h2>
 											<div className={`
 												album-info-container
