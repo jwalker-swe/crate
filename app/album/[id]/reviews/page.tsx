@@ -8,7 +8,6 @@ import getAlbumTrendingReviews from "@/lib/supabase/getAlbumTrendingReviews";
 import ReviewsList from "@/components/ReviewsList";
 import { notFound } from "next/navigation";
 import getAlbumIdBySpotifyId from "@/lib/supabase/getAlbumIdBySpotifyId";
-import getAlbumById from "@/lib/spotify/getAlbumById";
 import Link from "next/link";
 
 type AlbumReviewsPageProps = {
@@ -43,8 +42,14 @@ export default async function AlbumReviewsPage({ params, searchParams }: AlbumRe
         notFound();
     }
     
-    // Fetch Spotify album info for artist names
-    const spotifyAlbumInfo = await getAlbumById(albumData.spotify_id);
+    // Format artist names from database
+    const artistNames = albumData.artist 
+        ? (typeof albumData.artist === 'string' 
+            ? albumData.artist 
+            : Array.isArray(albumData.artist) 
+                ? albumData.artist.map((a: any) => typeof a === 'string' ? a : a.name).join(', ')
+                : 'Unknown Artist')
+        : 'Unknown Artist';
     
     // Fetch user data for NavBar
     let userData = null;
@@ -93,7 +98,7 @@ export default async function AlbumReviewsPage({ params, searchParams }: AlbumRe
                                 {albumData.title}
                             </h2>
                             <p className="text-secondaryText text-sm truncate">
-                                {spotifyAlbumInfo?.artists?.map((artist: any) => artist.name).join(', ') || albumData.artist || 'Unknown Artist'}
+                                {artistNames}
                             </p>
                         </div>
                     </Link>

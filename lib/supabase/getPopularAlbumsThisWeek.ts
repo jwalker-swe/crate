@@ -1,5 +1,4 @@
 import { createClient } from "./server";
-import getAlbumById from "@/lib/spotify/getAlbumById";
 
 export default async function getPopularAlbumsThisWeek(limit: number = 4) {
     const supabase = await createClient();
@@ -128,41 +127,46 @@ export default async function getPopularAlbumsThisWeek(limit: number = 4) {
         // Create a map for quick lookup
         const albumsMap = new Map(albumsData.map(album => [album.id, album]));
 
-        // Fetch full Spotify data for each album and format for TopAlbums component
-        const albumsWithSpotifyData = await Promise.all(
-            topAlbumIds.map(async (albumId) => {
+        // Format album data from database for TopAlbums component
+        const formattedAlbums = topAlbumIds
+            .map((albumId) => {
                 const album = albumsMap.get(albumId);
                 if (!album || !album.spotify_id) {
                     return null;
                 }
 
-                try {
-                    const spotifyAlbum = await getAlbumById(album.spotify_id);
-                    if (!spotifyAlbum) {
-                        return null;
-                    }
+                // Format artists from database (handle both string and array formats)
+                const artists = album.artist 
+                    ? (typeof album.artist === 'string' 
+                        ? [{ name: album.artist }] 
+                        : Array.isArray(album.artist) 
+                            ? album.artist.map((a: any) => 
+                                typeof a === 'string' 
+                                    ? { name: a } 
+                                    : (a && typeof a === 'object' && 'name' in a ? a : { name: String(a) })
+                              ).filter((a: any) => a && a.name)
+                            : [])
+                    : [];
 
-                    return {
-                        id: spotifyAlbum.id,
-                        name: spotifyAlbum.name,
-                        artists: spotifyAlbum.artists,
-                        images: spotifyAlbum.images
-                    };
-                } catch (error) {
-                    console.error(`Error fetching Spotify data for album ${album.spotify_id}:`, error);
-                    return null;
-                }
+                // Format images from cover_image_url
+                const images = album.cover_image_url 
+                    ? [{ url: album.cover_image_url }] 
+                    : [];
+
+                return {
+                    id: album.spotify_id,
+                    name: album.title,
+                    artists: artists,
+                    images: images
+                };
             })
-        );
+            .filter((album): album is NonNullable<typeof album> => album !== null);
 
-        // Filter out null values
-        const validAlbums = albumsWithSpotifyData.filter((album): album is NonNullable<typeof album> => album !== null);
-
-        if (validAlbums.length === 0) {
+        if (formattedAlbums.length === 0) {
             return null;
         }
 
-        return validAlbums;
+        return formattedAlbums;
     } catch (error) {
         console.error('Error in getPopularAlbumsThisWeek:', error);
         return null;

@@ -46,7 +46,9 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
                             >
                                 <div className="relative">
                                     <img 
-                                        src={album.images[0].url}
+                                        src={album.images && album.images.length > 0 && album.images[0]?.url 
+                                            ? album.images[0].url 
+                                            : '/images/album-covers/test-album-cover.png'}
                                         className={`
                                             rounded-ss-lg rounded-se-lg
                                             ${loading[index] ? 'filter brightness-50' : ''}
@@ -80,7 +82,9 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
                                             overflow-hidden
                                         `}
                                     >
-                                        {album.artists[0].name}
+                                        {album.artists && album.artists.length > 0 && album.artists[0]?.name 
+                                            ? album.artists[0].name 
+                                            : 'Unknown Artist'}
                                     </h3>
                                 </div>
                             </div>

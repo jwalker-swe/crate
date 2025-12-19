@@ -1,12 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import getAlbumById from "@/lib/spotify/getAlbumById";
-import getAccessToken from "@/lib/spotify/getAccessToken";
 // Create function to get selected review information
 // Now accepts the UUID of the user_albums row instead of spotify_id and username
 export default async function getSelectedReview(reviewId: string) {
 
 	const supabase = await createClient();
-	const token = await getAccessToken();
 
 	try {
 		// Fetch the review (user_albums row) by its UUID
@@ -38,36 +35,42 @@ export default async function getSelectedReview(reviewId: string) {
 			return null;
 		}
 
-		// Fetch Spotify data
-		try {
-			const spotify_response = await fetch(`https://api.spotify.com/v1/albums/${albumData.spotify_id}`, {
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			});
+		// Format Spotify-like data from database
+		// Format artists from database (handle both string and array formats)
+		const artists = albumData.artist 
+			? (typeof albumData.artist === 'string' 
+				? [{ name: albumData.artist }] 
+				: Array.isArray(albumData.artist) 
+					? albumData.artist.map((a: any) => typeof a === 'string' ? { name: a } : a)
+					: [])
+			: [];
 
-			if (!spotify_response || !spotify_response.ok) {
-				console.error("Error fetching Spotify data");
-				return null;
-			}
+		// Format images from cover_image_url
+		const images = albumData.cover_image_url 
+			? [{ url: albumData.cover_image_url }] 
+			: [];
 
-			const spotify = await spotify_response.json();
+		// Create Spotify-like object from database data
+		const spotify = {
+			id: albumData.spotify_id,
+			name: albumData.title,
+			artists: artists,
+			images: images,
+			release_date: albumData.release_date || null,
+			tracks: albumData.tracks || null,
+			total_tracks: albumData.total_tracks || null
+		};
 
-			const review_text = reviewData.review_text;
-			const date_review_written = new Date(reviewData.created_at);
-			const album_rating = reviewData.rating;
-			const album_liked = reviewData.liked;
-			const album_cover_art = albumData.cover_image_url;
-			const album_review_id = albumData.id;
+		const review_text = reviewData.review_text;
+		const date_review_written = new Date(reviewData.created_at);
+		const album_rating = reviewData.rating;
+		const album_liked = reviewData.liked;
+		const album_cover_art = albumData.cover_image_url;
+		const album_review_id = albumData.id;
 
-			const review = { review_text, date_review_written, album_rating, album_liked, album_cover_art, album_review_id };
+		const review = { review_text, date_review_written, album_rating, album_liked, album_cover_art, album_review_id };
 
-			return {review, spotify};
-
-		} catch (err) {
-			console.error("Spotify API error: ", err);
-			return null;
-		}
+		return {review, spotify};
 
 	} catch (err) {
 		console.error("Error: ", err);
