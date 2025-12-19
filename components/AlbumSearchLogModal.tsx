@@ -41,6 +41,15 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
     const [rating, setRating] = useState<number>(0)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+    const [existingLog, setExistingLog] = useState<{
+        id: string;
+        rating: number | null;
+        review_text: string | null;
+        is_favorite: boolean | null;
+        liked: boolean | null;
+    } | null>(null)
+    const [showEditChoice, setShowEditChoice] = useState(false)
+    const [isEditMode, setIsEditMode] = useState(false)
     const [formData, setFormData] = useState<FormData>({
         rating: null,
         liked: false,
@@ -76,12 +85,61 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
         }
     }, [isOpen])
 
-    // Check if album is in queue when selected
+    // Check if album is in queue and if user has logged it before when selected
     useEffect(() => {
         if (selectedAlbum && userId) {
             checkQueueStatus()
+            checkExistingLog()
         }
     }, [selectedAlbum, userId])
+
+    const checkExistingLog = async () => {
+        if (!selectedAlbum || !userId) return
+
+        try {
+            // Check if album exists in database
+            const { data: existingAlbum } = await supabase
+                .from('albums')
+                .select('id')
+                .eq('spotify_id', selectedAlbum.spotify_id)
+                .maybeSingle()
+
+            if (existingAlbum) {
+                // Check if user has logged this album before
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                    const { data: existingEntry } = await supabase
+                        .from('user_albums')
+                        .select('id, rating, review_text, is_favorite, liked, created_at')
+                        .eq('user_id', user.id)
+                        .eq('album_id', existingAlbum.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle()
+
+                    if (existingEntry) {
+                        setExistingLog({
+                            id: existingEntry.id,
+                            rating: existingEntry.rating,
+                            review_text: existingEntry.review_text,
+                            is_favorite: existingEntry.is_favorite,
+                            liked: existingEntry.liked
+                        })
+                        // Show choice dialog when existing log is found
+                        setShowEditChoice(true)
+                    } else {
+                        setExistingLog(null)
+                        setShowEditChoice(false)
+                    }
+                }
+            } else {
+                setExistingLog(null)
+                setShowEditChoice(false)
+            }
+        } catch (error) {
+            console.error('Error checking for existing log:', error)
+        }
+    }
 
     const searchAlbums = async (query: string) => {
         if (!query.trim()) {
@@ -366,8 +424,8 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
 
             if (user) {
                 // Check if user recently submitted a review for this album (spam prevention only for reviews)
-                // Only check if they're submitting a review (review_text is not null/empty)
-                if (formData.review && formData.review.trim()) {
+                // Only check if they're submitting a NEW review (not editing)
+                if (!isEditMode && formData.review && formData.review.trim()) {
                     const fiveMinutesAgo = new Date();
                     fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
                     const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
@@ -394,18 +452,36 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                     }
                 }
 
-                // Always insert new entry (allows multiple ratings per user, but rating calculation uses most recent)
-                const { error } = await supabase
-                    .from('user_albums')
-                    .insert([
-                        {
-                            user_id: user.id,
-                            album_id: albumId,
+                let error;
+                
+                if (isEditMode && existingLog) {
+                    // Update existing entry
+                    const { error: updateError } = await supabase
+                        .from('user_albums')
+                        .update({
                             rating: formData.rating,
                             review_text: formData.review,
                             is_favorite: formData.liked
-                        }
-                    ])
+                        })
+                        .eq('id', existingLog.id);
+
+                    error = updateError;
+                } else {
+                    // Insert new entry (allows multiple ratings per user, but rating calculation uses most recent)
+                    const { error: insertError } = await supabase
+                        .from('user_albums')
+                        .insert([
+                            {
+                                user_id: user.id,
+                                album_id: albumId,
+                                rating: formData.rating,
+                                review_text: formData.review,
+                                is_favorite: formData.liked
+                            }
+                        ]);
+                    
+                    error = insertError;
+                }
 
                 // Remove from queue if it was in queue
                 if (albumId) {
@@ -447,8 +523,11 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                     setMessage({ type: 'error', text: 'Error saving. Please try again.' })
                     setIsSubmitting(false)
                 } else {
-                    console.log('Album logged successfully')
-                    setMessage({ type: 'success', text: 'Album logged successfully!' })
+                    const successMessage = isEditMode 
+                        ? 'Album updated successfully!' 
+                        : 'Album logged successfully!';
+                    console.log(successMessage)
+                    setMessage({ type: 'success', text: successMessage })
                     setTimeout(() => {
                         onClose()
                         router.refresh()
@@ -637,6 +716,106 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                     ) : (
                         // Album Selected View
                         <div>
+                            {/* Edit or Log Again Choice Dialog */}
+                            {showEditChoice && existingLog && (
+                                <div className={`
+                                    fixed
+                                    inset-0
+                                    bg-secondarBackground/50
+                                    backdrop-blur-3xl
+                                    z-50
+                                    flex justify-center items-center
+                                    p-4
+                                `}>
+                                    <div className={`
+                                        w-full max-w-lg
+                                        px-8 py-6
+                                        bg-secondaryBackground
+                                        rounded-lg
+                                    `}>
+                                        <h3 className="text-xl font-bold mb-4 text-primaryText">You've logged this album before</h3>
+                                        <p className="text-secondaryText mb-6">
+                                            Would you like to edit your existing log or create a new entry?
+                                        </p>
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => {
+                                                    // Edit mode - pre-populate form
+                                                    setIsEditMode(true);
+                                                    setShowEditChoice(false);
+                                                    if (existingLog) {
+                                                        setFormData({
+                                                            rating: existingLog.rating,
+                                                            liked: existingLog.liked || false,
+                                                            review: existingLog.review_text,
+                                                            addToQueue: false
+                                                        });
+                                                        setRating(existingLog.rating || 0);
+                                                    }
+                                                }}
+                                                className={`
+                                                    flex-1
+                                                    px-4 py-2.5
+                                                    rounded-lg
+                                                    bg-accentText
+                                                    hover:bg-primaryButtonHover
+                                                    hover:text-primaryTextHover
+                                                    transition-colors
+                                                    h-[42px]
+                                                `}
+                                            >
+                                                Edit Existing
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    // New entry mode
+                                                    setIsEditMode(false);
+                                                    setShowEditChoice(false);
+                                                    setExistingLog(null);
+                                                    // Reset form
+                                                    setFormData({
+                                                        rating: null,
+                                                        liked: false,
+                                                        review: null,
+                                                        addToQueue: false
+                                                    });
+                                                    setRating(0);
+                                                    setHoverRating(0);
+                                                }}
+                                                className={`
+                                                    flex-1
+                                                    px-4 py-2.5
+                                                    rounded-lg
+                                                    bg-tertiaryBackground
+                                                    hover:bg-primaryBackground
+                                                    text-primaryText
+                                                    font-medium
+                                                    transition-colors
+                                                    h-[42px]
+                                                `}
+                                            >
+                                                Log Again
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                onClose();
+                                            }}
+                                            className={`
+                                                mt-4
+                                                w-full
+                                                px-4 py-2
+                                                rounded-sm
+                                                text-secondaryText
+                                                hover:text-primaryText
+                                                transition-colors
+                                            `}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             {isLoadingDetails ? (
                                 <div className="text-center py-8 text-secondaryText">
                                     Loading album details...
