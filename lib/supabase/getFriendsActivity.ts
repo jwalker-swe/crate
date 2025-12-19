@@ -59,12 +59,29 @@ export default async function getFriendsActivity(albumId: string, userId: string
             .order('created_at', { ascending: false })
             .limit(10);
 
+        // Get favorited albums from the favorites table (these should appear in activity feed even though they don't count as logged)
+        const { data: favoritedAlbums, error: favoritesError } = await supabase
+            .from('favorites')
+            .select('id, user_id, created_at')
+            .eq('album_id', albumId)
+            .in('user_id', followingIds)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
         if (userAlbumsError) {
             console.error('Error fetching friends activity:', userAlbumsError);
             return [];
         }
 
-        // Combine user_albums and queue entries
+        if (queueError) {
+            console.error('Error fetching queue activity:', queueError);
+        }
+
+        if (favoritesError) {
+            console.error('Error fetching favorites activity:', favoritesError);
+        }
+
+        // Combine user_albums, queue, and favorites entries
         const allActivities: Array<{
             id: string;
             user_id: string;
@@ -73,6 +90,7 @@ export default async function getFriendsActivity(albumId: string, userId: string
             is_favorite: boolean | null;
             liked: boolean | null;
             queue: boolean;
+            favorited: boolean;
             created_at: string | null;
         }> = [];
 
@@ -87,6 +105,7 @@ export default async function getFriendsActivity(albumId: string, userId: string
                     is_favorite: ua.is_favorite,
                     liked: ua.liked,
                     queue: false,
+                    favorited: false,
                     created_at: ua.created_at
                 });
             });
@@ -103,7 +122,25 @@ export default async function getFriendsActivity(albumId: string, userId: string
                     is_favorite: null,
                     liked: null,
                     queue: true,
+                    favorited: false,
                     created_at: qa.created_at
+                });
+            });
+        }
+
+        // Add favorites entries
+        if (favoritedAlbums) {
+            favoritedAlbums.forEach(fa => {
+                allActivities.push({
+                    id: fa.id,
+                    user_id: fa.user_id,
+                    rating: null,
+                    review_text: null,
+                    is_favorite: null,
+                    liked: null,
+                    queue: false,
+                    favorited: true,
+                    created_at: fa.created_at
                 });
             });
         }
@@ -141,8 +178,7 @@ export default async function getFriendsActivity(albumId: string, userId: string
         const activities: FriendActivity[] = limitedActivities.map(activity => {
             const user = usersMap.get(activity.user_id);
             
-            // Determine activity type (prioritize: review > rating > like > queue)
-            // Note: favorites don't log albums, so they won't appear in activity feeds
+            // Determine activity type (prioritize: review > rating > like > favorited > queue)
             let activityType: 'reviewed' | 'rated' | 'liked' | 'favorited' | 'queued' = 'queued';
             if (activity.review_text) {
                 activityType = 'reviewed';
@@ -150,6 +186,8 @@ export default async function getFriendsActivity(albumId: string, userId: string
                 activityType = 'rated';
             } else if (activity.liked) {
                 activityType = 'liked';
+            } else if (activity.favorited) {
+                activityType = 'favorited';
             } else if (activity.queue) {
                 activityType = 'queued';
             }

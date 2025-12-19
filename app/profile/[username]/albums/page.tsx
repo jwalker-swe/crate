@@ -134,7 +134,8 @@ export default async function Home({ params }: ProfileProps ) {
 					loggedAlbums={loggedAlbums || []}
 					queueAlbums={wantToListenAlbums || []}
 					totalColumns={8} 
-					totalRows={4} 
+					totalRows={4}
+					username={username}
 				/>
 			</main>
 			<Footer />

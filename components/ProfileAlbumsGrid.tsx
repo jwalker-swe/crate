@@ -8,6 +8,7 @@ import ReviewRating from "@/components/ReviewRating"
 import Link from "next/link"
 
 type AlbumData = {
+	id?: string // user_albums id for review links
 	albums: {
 		title: string
 		spotify_id: string | null
@@ -24,12 +25,14 @@ export default function ProfileAlbumsGrid({
 	loggedAlbums, 
 	queueAlbums, 
 	totalColumns, 
-	totalRows
+	totalRows,
+	username
 }: {
 	loggedAlbums: AlbumData[]
 	queueAlbums: AlbumData[]
 	totalColumns: number
 	totalRows: number
+	username: string
 }) {
 	const searchParams = useSearchParams();
 	const initialViewMode = searchParams?.get('view') === 'queue' ? 'queue' : 'logged';
@@ -218,9 +221,6 @@ export default function ProfileAlbumsGrid({
 									<div
 										className={`
 											flex items-center gap-2
-											opacity-60
-											group-hover:opacity-100
-											transition-opacity duration-200
 										`}
 									>
 										{/* Liked icon */}
@@ -234,14 +234,25 @@ export default function ProfileAlbumsGrid({
 											/>
 										)}
 										{/* Review icon */}
-										{ album.review_text !== null && (
-											<Bars3BottomLeftIcon 
+										{ album.review_text !== null && album.id && (
+											<Link 
+												href={`/profile/${username}/review/${album.id}`}
+												onClick={(e) => e.stopPropagation()}
 												className={`
-													w-4 h-4 
-													text-secondaryText
-													flex-shrink-0
+													cursor-pointer
+													transition-colors
 												`}
-											/>	
+											>
+												<Bars3BottomLeftIcon 
+													className={`
+														w-4 h-4 
+														text-secondaryText
+														flex-shrink-0
+														hover:text-accentText
+														transition-colors
+													`}
+												/>	
+											</Link>
 										)}
 									</div>
 								)}
