@@ -6,8 +6,10 @@ import { SpotifyAlbum } from '@/types/spotify'
 import { HeartIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import React, {useState, useEffect, MouseEvent } from 'react'
+import { useRouter } from 'next/navigation'
 import StarRating from './StarRating'
 import { createClient } from '@/lib/supabase/client'
+import calculateAlbumRatingClient from '@/lib/supabase/calculateAlbumRatingClient'
 
 interface FormData {
     rating: number | null,
@@ -38,12 +40,14 @@ const supabase = createClient();
 
 
 export default function LogOptions({ album, session }: {album: AlbumProps, session: any}) {
+    const router = useRouter();
 
     const [activeSession, setActiveSession] = useState<boolean>(session);
     const [logging, setLogging] = useState<boolean>(false);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [rating, setRating] = useState<number>(0);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [formData, setFormData] = useState<FormData>({
         rating: null,
         liked: false,
@@ -81,6 +85,7 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
 
     const handleClose = function() {
         setLogging(false);
+        setMessage(null);
     };
 
     const getAlbum = async function() {
@@ -142,31 +147,36 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
             console.log('AlbumId: ', albumId);
 
             if (user) {
-                // Check if user recently logged this album (within last 5 minutes to prevent spam)
-                const fiveMinutesAgo = new Date();
-                fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-                const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
+                // Check if user recently submitted a review for this album (spam prevention only for reviews)
+                // Only check if they're submitting a review (review_text is not null/empty)
+                if (formData.review && formData.review.trim()) {
+                    const fiveMinutesAgo = new Date();
+                    fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+                    const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
 
-                const { data: recentLog, error: checkError } = await supabase
-                    .from('user_albums')
-                    .select('created_at')
-                    .eq('user_id', user.id)
-                    .eq('album_id', albumId)
-                    .gte('created_at', fiveMinutesAgoISO)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
+                    const { data: recentReview, error: checkError } = await supabase
+                        .from('user_albums')
+                        .select('created_at')
+                        .eq('user_id', user.id)
+                        .eq('album_id', albumId)
+                        .not('review_text', 'is', null)
+                        .gte('created_at', fiveMinutesAgoISO)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
 
-                if (checkError && checkError.code !== 'PGRST116') {
-                    console.error('Error checking for recent log: ', checkError);
+                    if (checkError && checkError.code !== 'PGRST116') {
+                        console.error('Error checking for recent review: ', checkError);
+                    }
+
+                    if (recentReview) {
+                        setMessage({ type: 'error', text: 'You recently submitted a review for this album. Please wait a few minutes before submitting another review.' })
+                        setIsSubmitting(false);
+                        return;
+                    }
                 }
 
-                if (recentLog) {
-                    alert('You recently logged this album. Please wait a few minutes before logging it again.');
-                    setIsSubmitting(false);
-                    return;
-                }
-
+                // Always insert new entry (allows multiple ratings per user, but rating calculation uses most recent)
                 const { error } = await supabase
                     .from('user_albums')
                     .insert([
@@ -178,28 +188,54 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                             is_favorite: formData.liked
                         }
                     ])
-                    if (error) {
-                        console.error('Error inserting data: ', error)
-                    } else {
-                        // Remove from queue if it was in queue
-                        if (albumId) {
-                            const { data: queueEntry } = await supabase
-                                .from('queue')
-                                .select('id')
-                                .eq('user_id', user.id)
-                                .eq('album_id', albumId)
-                                .maybeSingle()
 
-                            if (queueEntry) {
-                                await supabase
-                                    .from('queue')
-                                    .delete()
-                                    .eq('id', queueEntry.id)
-                            }
-                        }
-                        console.log('Review submitted successfully')
-                        handleClose()
+                // Remove from queue if it was in queue
+                if (albumId) {
+                    const { data: queueEntry } = await supabase
+                        .from('queue')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .eq('album_id', albumId)
+                        .maybeSingle()
+
+                    if (queueEntry) {
+                        await supabase
+                            .from('queue')
+                            .delete()
+                            .eq('id', queueEntry.id)
                     }
+                }
+
+                // Update album rating using most recent rating per user
+                if (!error && formData.rating !== null && albumId) {
+                    // Calculate the new rating using only the most recent rating per user
+                    const newRating = await calculateAlbumRatingClient(albumId);
+                    
+                    // Update the albums table with the calculated rating
+                    if (newRating !== null) {
+                        const { error: ratingError } = await supabase
+                            .from('albums')
+                            .update({ rating: newRating })
+                            .eq('id', albumId);
+                        
+                        if (ratingError) {
+                            console.error('Error updating album rating: ', ratingError);
+                        }
+                    }
+                }
+
+                if (error) {
+                    console.error('Error inserting data: ', error)
+                    setMessage({ type: 'error', text: 'Error saving. Please try again.' })
+                    setIsSubmitting(false)
+                } else {
+                    console.log('Album logged successfully')
+                    setMessage({ type: 'success', text: 'Album logged successfully!' })
+                    setTimeout(() => {
+                        handleClose()
+                        router.refresh()
+                    }, 500)
+                }
             }
         } catch (err) {
             console.error('An unexpected error occurred while fetching user data: ', err)
@@ -469,6 +505,19 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                                             }
                                         ))}
                                     />
+                                    {message && (
+                                        <div className={`
+                                            w-[90%]
+                                            mt-3 px-4 py-3
+                                            rounded-sm
+                                            ${message.type === 'success' 
+                                                ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                                                : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                                            }
+                                        `}>
+                                            {message.text}
+                                        </div>
+                                    )}
                                     <div className={`
                                         flex justify-end items-center
                                         w-full

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, MouseEvent } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import calculateAlbumRatingClient from '@/lib/supabase/calculateAlbumRatingClient'
 import { XMarkIcon, StarIcon, HeartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import { BookmarkIcon } from '@heroicons/react/24/outline'
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid'
@@ -27,6 +29,7 @@ interface FormData {
 }
 
 export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSearchLogModalProps) {
+    const router = useRouter()
     const supabase = createClient()
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<SearchAlbum[]>([])
@@ -37,6 +40,7 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
     const [hoverRating, setHoverRating] = useState<number>(0)
     const [rating, setRating] = useState<number>(0)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [formData, setFormData] = useState<FormData>({
         rating: null,
         liked: false,
@@ -65,6 +69,7 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
             setRating(0)
             setHoverRating(0)
             setIsInQueue(false)
+            setMessage(null)
         }
         return () => {
             document.body.style.overflow = ''
@@ -354,124 +359,105 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
 
             const albumId = await getAlbum()
             if (!albumId) {
-                alert('Error: Could not save album. Please try again.')
+                setMessage({ type: 'error', text: 'Error: Could not save album. Please try again.' })
                 setIsSubmitting(false)
                 return
             }
 
             if (user) {
-                // Check if entry already exists
-                const { data: existingUserAlbum } = await supabase
-                    .from('user_albums')
-                    .select('id, queue, created_at')
-                    .eq('user_id', user.id)
-                    .eq('album_id', albumId)
-                    .maybeSingle()
-
-                if (existingUserAlbum) {
-                    // Update existing entry (allow updates to prevent blocking legitimate edits)
-                    const { error } = await supabase
-                        .from('user_albums')
-                        .update({
-                            rating: formData.rating,
-                            review_text: formData.review,
-                            is_favorite: formData.liked
-                        })
-                        .eq('id', existingUserAlbum.id)
-
-                    // Remove from queue if it was in queue
-                    if (albumId) {
-                        const { data: queueEntry } = await supabase
-                            .from('queue')
-                            .select('id')
-                            .eq('user_id', user.id)
-                            .eq('album_id', albumId)
-                            .maybeSingle()
-
-                        if (queueEntry) {
-                            await supabase
-                                .from('queue')
-                                .delete()
-                                .eq('id', queueEntry.id)
-                        }
-                    }
-
-                    if (error) {
-                        console.error('Error updating data: ', error)
-                        alert('Error saving. Please try again.')
-                    } else {
-                        console.log('Album logged successfully')
-                        onClose()
-                    }
-                } else {
-                    // Check if user recently logged this album (within last 5 minutes to prevent spam)
+                // Check if user recently submitted a review for this album (spam prevention only for reviews)
+                // Only check if they're submitting a review (review_text is not null/empty)
+                if (formData.review && formData.review.trim()) {
                     const fiveMinutesAgo = new Date();
                     fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
                     const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
 
-                    const { data: recentLog, error: checkError } = await supabase
+                    const { data: recentReview, error: checkError } = await supabase
                         .from('user_albums')
                         .select('created_at')
                         .eq('user_id', user.id)
                         .eq('album_id', albumId)
+                        .not('review_text', 'is', null)
                         .gte('created_at', fiveMinutesAgoISO)
                         .order('created_at', { ascending: false })
                         .limit(1)
                         .maybeSingle();
 
                     if (checkError && checkError.code !== 'PGRST116') {
-                        console.error('Error checking for recent log: ', checkError);
+                        console.error('Error checking for recent review: ', checkError);
                     }
 
-                    if (recentLog) {
-                        alert('You recently logged this album. Please wait a few minutes before logging it again.');
+                    if (recentReview) {
+                        setMessage({ type: 'error', text: 'You recently submitted a review for this album. Please wait a few minutes before submitting another review.' })
                         setIsSubmitting(false);
                         return;
                     }
+                }
 
-                    // Insert new entry
-                    const { error } = await supabase
-                        .from('user_albums')
-                        .insert([
-                            {
-                                user_id: user.id,
-                                album_id: albumId,
-                                rating: formData.rating,
-                                review_text: formData.review,
-                                is_favorite: formData.liked
-                            }
-                        ])
+                // Always insert new entry (allows multiple ratings per user, but rating calculation uses most recent)
+                const { error } = await supabase
+                    .from('user_albums')
+                    .insert([
+                        {
+                            user_id: user.id,
+                            album_id: albumId,
+                            rating: formData.rating,
+                            review_text: formData.review,
+                            is_favorite: formData.liked
+                        }
+                    ])
 
-                    // Remove from queue if it was in queue
-                    if (albumId) {
-                        const { data: queueEntry } = await supabase
+                // Remove from queue if it was in queue
+                if (albumId) {
+                    const { data: queueEntry } = await supabase
+                        .from('queue')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .eq('album_id', albumId)
+                        .maybeSingle()
+
+                    if (queueEntry) {
+                        await supabase
                             .from('queue')
-                            .select('id')
-                            .eq('user_id', user.id)
-                            .eq('album_id', albumId)
-                            .maybeSingle()
+                            .delete()
+                            .eq('id', queueEntry.id)
+                    }
+                }
 
-                        if (queueEntry) {
-                            await supabase
-                                .from('queue')
-                                .delete()
-                                .eq('id', queueEntry.id)
+                // Update album rating using most recent rating per user
+                if (!error && formData.rating !== null && albumId) {
+                    // Calculate the new rating using only the most recent rating per user
+                    const newRating = await calculateAlbumRatingClient(albumId);
+                    
+                    // Update the albums table with the calculated rating
+                    if (newRating !== null) {
+                        const { error: ratingError } = await supabase
+                            .from('albums')
+                            .update({ rating: newRating })
+                            .eq('id', albumId);
+                        
+                        if (ratingError) {
+                            console.error('Error updating album rating: ', ratingError);
                         }
                     }
+                }
 
-                    if (error) {
-                        console.error('Error inserting data: ', error)
-                        alert('Error saving. Please try again.')
-                    } else {
-                        console.log('Album logged successfully')
+                if (error) {
+                    console.error('Error inserting data: ', error)
+                    setMessage({ type: 'error', text: 'Error saving. Please try again.' })
+                    setIsSubmitting(false)
+                } else {
+                    console.log('Album logged successfully')
+                    setMessage({ type: 'success', text: 'Album logged successfully!' })
+                    setTimeout(() => {
                         onClose()
-                    }
+                        router.refresh()
+                    }, 500)
                 }
             }
         } catch (err) {
             console.error('An unexpected error occurred while fetching user data: ', err)
-            alert('An error occurred. Please try again.')
-        } finally {
+            setMessage({ type: 'error', text: 'An error occurred. Please try again.' })
             setIsSubmitting(false)
         }
     }
@@ -858,6 +844,19 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                                                         review: e.target.value
                                                     }))}
                                                 />
+                                                {message && (
+                                                    <div className={`
+                                                        w-full
+                                                        mt-3 px-4 py-3
+                                                        rounded-sm
+                                                        ${message.type === 'success' 
+                                                            ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                                                            : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                                                        }
+                                                    `}>
+                                                        {message.text}
+                                                    </div>
+                                                )}
                                                 <div className={`
                                                     flex justify-end items-center
                                                     w-full

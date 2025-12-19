@@ -23,6 +23,7 @@ import PopularReviewPreview from "@/components/PopularReviewPreview";
 import getAlbumIdBySpotifyId from "@/lib/supabase/getAlbumIdBySpotifyId";
 import WantToListenButton from "@/components/WantToListenButton"
 import getFriendsActivity from "@/lib/supabase/getFriendsActivity";
+import calculateAlbumRating from "@/lib/supabase/calculateAlbumRating";
 
 
 type StateType = string;
@@ -239,6 +240,24 @@ export default async function Home({ params }: AlbumPageParams) {
 
     // Get friends' activity for this album
     const friendsActivity = user && albumId ? await getFriendsActivity(albumId, user.id) : [];
+
+    // Calculate album rating using only the most recent rating per user
+    let calculatedRating: number | null = null;
+    if (albumId) {
+        calculatedRating = await calculateAlbumRating(albumId);
+        
+        // Update the albums.rating field for caching if it's different
+        if (calculatedRating !== albumInfo.rating) {
+            await supabase
+                .from('albums')
+                .update({ rating: calculatedRating })
+                .eq('id', albumId);
+            albumInfo.rating = calculatedRating;
+        } else if (calculatedRating !== null) {
+            // Use calculated rating even if albums.rating is already set
+            albumInfo.rating = calculatedRating;
+        }
+    }
 
     return (
         <div className={`
