@@ -513,7 +513,7 @@ export default async function Home() {
           //Mobile Styling
           //Desktop Styling
         `}>
-          <Link href='#'>
+          <Link href='/auth/sign-up'>
             <div className={`
               //General Styling
                px-4 py-2
