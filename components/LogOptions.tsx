@@ -142,6 +142,31 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
             console.log('AlbumId: ', albumId);
 
             if (user) {
+                // Check if user recently logged this album (within last 5 minutes to prevent spam)
+                const fiveMinutesAgo = new Date();
+                fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+                const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
+
+                const { data: recentLog, error: checkError } = await supabase
+                    .from('user_albums')
+                    .select('created_at')
+                    .eq('user_id', user.id)
+                    .eq('album_id', albumId)
+                    .gte('created_at', fiveMinutesAgoISO)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    console.error('Error checking for recent log: ', checkError);
+                }
+
+                if (recentLog) {
+                    alert('You recently logged this album. Please wait a few minutes before logging it again.');
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 const { error } = await supabase
                     .from('user_albums')
                     .insert([
@@ -150,13 +175,28 @@ export default function LogOptions({ album, session }: {album: AlbumProps, sessi
                             album_id: albumId,
                             rating: formData.rating,
                             review_text: formData.review,
-                            is_favorite: formData.liked,
-                            queue: false  // Add this - album is no longer in queue when logged
+                            is_favorite: formData.liked
                         }
                     ])
                     if (error) {
                         console.error('Error inserting data: ', error)
                     } else {
+                        // Remove from queue if it was in queue
+                        if (albumId) {
+                            const { data: queueEntry } = await supabase
+                                .from('queue')
+                                .select('id')
+                                .eq('user_id', user.id)
+                                .eq('album_id', albumId)
+                                .maybeSingle()
+
+                            if (queueEntry) {
+                                await supabase
+                                    .from('queue')
+                                    .delete()
+                                    .eq('id', queueEntry.id)
+                            }
+                        }
                         console.log('Review submitted successfully')
                         handleClose()
                     }

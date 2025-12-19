@@ -30,6 +30,24 @@ export default function WantToListenButton({ album, albumId, userId, initialIsIn
         setIsInWantToListen(initialIsInQueue)
     }, [initialIsInQueue])
 
+    // Check if album is in queue when component mounts
+    useEffect(() => {
+        if (userId && albumId) {
+            const checkQueueStatus = async () => {
+                const { data: queueEntry } = await supabase
+                    .from('queue')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('album_id', albumId)
+                    .maybeSingle()
+
+                setIsInWantToListen(!!queueEntry)
+            }
+
+            checkQueueStatus()
+        }
+    }, [userId, albumId])
+
     const handleToggle = async () => {
         if (!userId || isLoading) return
 
@@ -85,20 +103,13 @@ export default function WantToListenButton({ album, albumId, userId, initialIsIn
                 return
             }
 
-            // Check if user_albums entry exists
-            const { data: existingUserAlbum, error: checkError } = await supabase
+            // Check if user_albums entry exists (to prevent adding to queue if already logged)
+            const { data: existingUserAlbum } = await supabase
                 .from('user_albums')
-                .select('id, rating, review_text, is_favorite, liked, queue')
+                .select('id, rating, review_text, is_favorite, liked')
                 .eq('user_id', userId)
                 .eq('album_id', dbAlbumId)
                 .maybeSingle()
-
-            if (checkError && checkError.code !== 'PGRST116') {
-                console.error('Error checking user album:', checkError)
-                alert('Error: Could not check album status. Please try again.')
-                setIsLoading(false)
-                return
-            }
 
             if (existingUserAlbum) {
                 // Check if it's logged (has rating, review, favorite, or liked)
@@ -113,50 +124,37 @@ export default function WantToListenButton({ album, albumId, userId, initialIsIn
                     setIsLoading(false)
                     return
                 }
+            }
 
-                // Check current queue status
-                const currentlyInQueue = existingUserAlbum.queue === true
+            // Check if album is already in queue
+            const { data: existingQueueEntry } = await supabase
+                .from('queue')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('album_id', dbAlbumId)
+                .maybeSingle()
 
-                if (currentlyInQueue) {
-                    // Remove from queue - delete the entry since it's only for queue
-                    const { error: deleteError } = await supabase
-                        .from('user_albums')
-                        .delete()
-                        .eq('id', existingUserAlbum.id)
+            if (existingQueueEntry) {
+                // Remove from queue
+                const { error: deleteError } = await supabase
+                    .from('queue')
+                    .delete()
+                    .eq('id', existingQueueEntry.id)
 
-                    if (deleteError) {
-                        console.error('Error removing from queue:', deleteError)
-                        alert('Error: Could not remove from queue. Please try again.')
-                    } else {
-                        setIsInWantToListen(false)
-                    }
+                if (deleteError) {
+                    console.error('Error removing from queue:', deleteError)
+                    alert('Error: Could not remove from queue. Please try again.')
                 } else {
-                    // Add to queue - update existing entry
-                    const { error: updateError } = await supabase
-                        .from('user_albums')
-                        .update({ queue: true })
-                        .eq('id', existingUserAlbum.id)
-
-                    if (updateError) {
-                        console.error('Error adding to queue:', updateError)
-                        alert('Error: Could not add to queue. Please try again.')
-                    } else {
-                        setIsInWantToListen(true)
-                    }
+                    setIsInWantToListen(false)
                 }
             } else {
-                // Add to queue (insert new entry with queue = true)
+                // Add to queue
                 const { error: insertError } = await supabase
-                    .from('user_albums')
+                    .from('queue')
                     .insert([
                         {
                             user_id: userId,
-                            album_id: dbAlbumId,
-                            rating: null,
-                            review_text: null,
-                            is_favorite: null,
-                            liked: null,
-                            queue: true
+                            album_id: dbAlbumId
                         }
                     ])
 

@@ -11,30 +11,48 @@ export default async function getPopularAlbumsThisWeek(limit: number = 4) {
         const oneWeekAgoISO = oneWeekAgo.toISOString();
 
         // Get all user interactions from this week
-        // This includes: ratings, reviews, favorites, likes, queue
+        // This includes: ratings, reviews, likes (favorites and queue are in separate tables and don't count as interactions)
         const { data: weekInteractions, error: weekError } = await supabase
             .from('user_albums')
-            .select('album_id')
+            .select('album_id, created_at')
             .gte('created_at', oneWeekAgoISO)
-            .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true');
+            .or('rating.not.is.null, review_text.not.is.null, liked.not.is.null');
 
         if (weekError) {
             console.error('Error fetching week interactions:', weekError);
             return null;
         }
 
-        // Count interactions per album
-        const albumCounts = new Map<string, number>();
+        // Count interactions per album AND track the most recent interaction timestamp
+        const albumCounts = new Map<string, { count: number; mostRecent: string }>();
         if (weekInteractions) {
             weekInteractions.forEach((interaction) => {
-                const count = albumCounts.get(interaction.album_id) || 0;
-                albumCounts.set(interaction.album_id, count + 1);
+                const existing = albumCounts.get(interaction.album_id);
+                if (existing) {
+                    existing.count += 1;
+                    // Update mostRecent if this interaction is newer
+                    if (new Date(interaction.created_at) > new Date(existing.mostRecent)) {
+                        existing.mostRecent = interaction.created_at;
+                    }
+                } else {
+                    albumCounts.set(interaction.album_id, {
+                        count: 1,
+                        mostRecent: interaction.created_at
+                    });
+                }
             });
         }
 
-        // Sort by count and get top album IDs
+        // Sort by count (descending), then by most recent interaction (descending) as tiebreaker
         const sortedAlbums = Array.from(albumCounts.entries())
-            .sort((a, b) => b[1] - a[1])
+            .sort((a, b) => {
+                // First sort by count
+                if (b[1].count !== a[1].count) {
+                    return b[1].count - a[1].count;
+                }
+                // If counts are equal, sort by most recent interaction (newer = higher priority)
+                return new Date(b[1].mostRecent).getTime() - new Date(a[1].mostRecent).getTime();
+            })
             .map(([albumId]) => albumId);
 
         let topAlbumIds = sortedAlbums.slice(0, limit);
@@ -43,28 +61,43 @@ export default async function getPopularAlbumsThisWeek(limit: number = 4) {
         if (topAlbumIds.length < limit) {
             const { data: olderInteractions, error: olderError } = await supabase
                 .from('user_albums')
-                .select('album_id')
+                .select('album_id, created_at')
                 .lt('created_at', oneWeekAgoISO)
-                .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true')
+                .or('rating.not.is.null, review_text.not.is.null, liked.not.is.null')
                 .order('created_at', { ascending: false })
                 .limit(1000); // Get a large batch to count from
 
             if (olderError) {
                 console.error('Error fetching older interactions:', olderError);
             } else if (olderInteractions) {
-                // Count older interactions
-                const olderAlbumCounts = new Map<string, number>();
+                // Count older interactions AND track most recent
+                const olderAlbumCounts = new Map<string, { count: number; mostRecent: string }>();
                 olderInteractions.forEach((interaction) => {
                     // Skip albums we already have
                     if (!topAlbumIds.includes(interaction.album_id)) {
-                        const count = olderAlbumCounts.get(interaction.album_id) || 0;
-                        olderAlbumCounts.set(interaction.album_id, count + 1);
+                        const existing = olderAlbumCounts.get(interaction.album_id);
+                        if (existing) {
+                            existing.count += 1;
+                            if (new Date(interaction.created_at) > new Date(existing.mostRecent)) {
+                                existing.mostRecent = interaction.created_at;
+                            }
+                        } else {
+                            olderAlbumCounts.set(interaction.album_id, {
+                                count: 1,
+                                mostRecent: interaction.created_at
+                            });
+                        }
                     }
                 });
 
-                // Sort older albums by count and add to our list
+                // Sort older albums by count, then by most recent
                 const sortedOlderAlbums = Array.from(olderAlbumCounts.entries())
-                    .sort((a, b) => b[1] - a[1])
+                    .sort((a, b) => {
+                        if (b[1].count !== a[1].count) {
+                            return b[1].count - a[1].count;
+                        }
+                        return new Date(b[1].mostRecent).getTime() - new Date(a[1].mostRecent).getTime();
+                    })
                     .map(([albumId]) => albumId);
 
                 // Add older albums until we have enough

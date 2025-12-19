@@ -41,18 +41,17 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
     // Fetch current favorite albums
     let initialFavorites: any[] = [];
     try {
-        // First, get the user_albums entries that are favorites
-        const { data: userAlbumsData } = await supabase
-            .from('user_albums')
+        // Get favorites from the favorites table
+        const { data: favoritesData } = await supabase
+            .from('favorites')
             .select('album_id, created_at')
             .eq('user_id', user.id)
-            .eq('is_favorite', true)
             .order('created_at', { ascending: true })
             .limit(5);
 
-        if (userAlbumsData && userAlbumsData.length > 0) {
+        if (favoritesData && favoritesData.length > 0) {
             // Get the album IDs in order
-            const albumIds = userAlbumsData.map(ua => ua.album_id);
+            const albumIds = favoritesData.map(f => f.album_id);
             
             // Fetch the albums
             const { data: albumsData } = await supabase
@@ -64,12 +63,12 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
                 // Create a map for quick lookup
                 const albumMap = new Map(albumsData.map((album: any) => [album.id, album]));
                 
-                // Map to the format expected by FavoriteAlbumsSelector, preserving the order from userAlbumsData
+                // Map to the format expected by FavoriteAlbumsSelector, preserving the order from favoritesData
                 // Also remove duplicates by spotify_id (keep first occurrence)
                 const seenSpotifyIds = new Set<string>();
-                initialFavorites = userAlbumsData
-                    .map(ua => {
-                        const album = albumMap.get(ua.album_id);
+                initialFavorites = favoritesData
+                    .map(f => {
+                        const album = albumMap.get(f.album_id);
                         if (!album) return null;
                         
                         // Skip if we've already seen this spotify_id (duplicate)

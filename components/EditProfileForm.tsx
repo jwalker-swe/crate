@@ -358,6 +358,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
     };
 
     // Function to save favorite albums to database
+    // Uses the new favorites table instead of user_albums.is_favorite
     const saveFavoriteAlbums = async (userId: string, albums: Album[]) => {
         console.log('Saving favorite albums:', { userId, albumsCount: albums.length, albums });
         try {
@@ -370,17 +371,16 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 console.log('Removed duplicates from favorites list');
             }
 
-            // First, get all current favorite albums for this user to check for duplicates
+            // Get all current favorites from the favorites table
             const { data: currentFavorites } = await supabase
-                .from('user_albums')
+                .from('favorites')
                 .select(`
                     album_id,
                     albums (
                         spotify_id
                     )
                 `)
-                .eq('user_id', userId)
-                .eq('is_favorite', true);
+                .eq('user_id', userId);
 
             const currentSpotifyIds = new Set(
                 currentFavorites?.map((item: any) => {
@@ -389,70 +389,29 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 }).filter(Boolean) || []
             );
 
-            // Remove duplicates from database - if there are multiple entries for the same album, keep only one
-            if (currentFavorites && currentFavorites.length > 0) {
-                // Group favorites by album_id to find duplicates
-                const albumIdSet = new Set<string>();
-                const duplicateAlbumIds: string[] = [];
-                
-                for (const fav of currentFavorites) {
-                    if (albumIdSet.has(fav.album_id)) {
-                        // This album_id appears multiple times
-                        if (!duplicateAlbumIds.includes(fav.album_id)) {
-                            duplicateAlbumIds.push(fav.album_id);
-                        }
-                    } else {
-                        albumIdSet.add(fav.album_id);
-                    }
-                }
-
-                // For each duplicate album_id, get all entries and keep only one (most recent)
-                for (const albumId of duplicateAlbumIds) {
-                    const { data: duplicateEntries } = await supabase
-                        .from('user_albums')
-                        .select('id, created_at')
-                        .eq('user_id', userId)
-                        .eq('album_id', albumId)
-                        .eq('is_favorite', true)
-                        .order('created_at', { ascending: false });
-
-                    if (duplicateEntries && duplicateEntries.length > 1) {
-                        // Keep the first (most recent) and remove the rest
-                        const idsToDelete = duplicateEntries.slice(1).map((e: any) => e.id);
-                        if (idsToDelete.length > 0) {
-                            await supabase
-                                .from('user_albums')
-                                .delete()
-                                .in('id', idsToDelete);
-                        }
-                    }
-                }
-            }
-
             // Get the spotify_ids of albums we want to keep as favorites
             const newSpotifyIds = new Set(uniqueAlbums.map(album => album.spotify_id));
 
             // Remove favorites that are no longer in the list
             const toRemove = Array.from(currentSpotifyIds).filter(id => !newSpotifyIds.has(id));
             if (toRemove.length > 0) {
-                const { data: albumsToUpdate } = await supabase
+                const { data: albumsToRemove } = await supabase
                     .from('albums')
                     .select('id')
                     .in('spotify_id', toRemove);
 
-                if (albumsToUpdate && albumsToUpdate.length > 0) {
-                    const albumIdsToUpdate = albumsToUpdate.map(a => a.id);
+                if (albumsToRemove && albumsToRemove.length > 0) {
+                    const albumIdsToRemove = albumsToRemove.map(a => a.id);
                     await supabase
-                        .from('user_albums')
-                        .update({ is_favorite: false })
+                        .from('favorites')
+                        .delete()
                         .eq('user_id', userId)
-                        .in('album_id', albumIdsToUpdate);
+                        .in('album_id', albumIdsToRemove);
                 }
             }
 
-            // Process albums to add/update as favorites
-            // IMPORTANT: Only update is_favorite on existing user_albums entries
-            // Do NOT create new entries - favorites should not log albums
+            // Process albums to add as favorites
+            // Favorites are stored in a separate table and don't log albums
             for (let i = 0; i < uniqueAlbums.length; i++) {
                 const album = uniqueAlbums[i];
                 // Validate album data
@@ -480,8 +439,7 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                 if (existingAlbum) {
                     albumId = existingAlbum.id;
                 } else {
-                    // Album doesn't exist in database - we need to create it
-                    // But we still won't create a user_albums entry for favorites
+                    // Album doesn't exist in database - create it
                     // Fetch full album data from Spotify via API route
                     let spotifyAlbumData = null;
                     try {
@@ -549,42 +507,33 @@ export default function EditProfileForm({ initialData }: EditProfileFormProps) {
                     albumId = newAlbum.id;
                 }
 
-                // Check if user_album relationship exists
-                // IMPORTANT: Only update existing entries - do NOT create new ones for favorites
-                const { data: existingUserAlbum, error: userAlbumCheckError } = await supabase
-                    .from('user_albums')
-                    .select('id, rating, review_text, liked')
+                // Check if favorite already exists
+                const { data: existingFavorite } = await supabase
+                    .from('favorites')
+                    .select('id')
                     .eq('user_id', userId)
                     .eq('album_id', albumId)
                     .maybeSingle();
 
-                if (userAlbumCheckError && userAlbumCheckError.code !== 'PGRST116') {
-                    console.error('Error checking for existing user_album:', userAlbumCheckError);
-                    continue;
-                }
+                if (!existingFavorite) {
+                    // Add to favorites table (this doesn't create a user_albums entry)
+                    const { error: insertError } = await supabase
+                        .from('favorites')
+                        .insert({
+                            user_id: userId,
+                            album_id: albumId
+                        });
 
-                if (existingUserAlbum) {
-                    // Entry exists - just update is_favorite to true
-                    // This won't create a new log entry since the entry already exists
-                    const { error: updateError } = await supabase
-                        .from('user_albums')
-                        .update({ is_favorite: true })
-                        .eq('id', existingUserAlbum.id);
-
-                    if (updateError) {
-                        console.error('Error updating favorite status:', {
-                            error: updateError,
+                    if (insertError) {
+                        console.error('Error adding favorite:', {
+                            error: insertError,
                             userId,
                             albumId
                         });
                         continue;
                     }
-                } else {
-                    // No user_albums entry exists - do NOT create one
-                    // Favorites should not log albums - only rating, review, or like should create entries
-                    console.log('Skipping favorite for album without existing user_albums entry:', album.spotify_id);
-                    continue;
                 }
+                // If favorite already exists, no need to do anything (UNIQUE constraint handles it)
             }
         } catch (err) {
             console.error('Error saving favorite albums:', err);

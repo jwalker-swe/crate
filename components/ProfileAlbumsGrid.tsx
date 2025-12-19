@@ -206,43 +206,45 @@ export default function ProfileAlbumsGrid({
 									min-h-[24px]
 								`}
 							>
-								{/* Star rating - conditionally shown if rating is not null */}
+								{/* Star rating - conditionally shown if rating is not null and not in queue view */}
 								<div className="flex-1 min-w-0">
-									{album.rating !== null && (
+									{album.rating !== null && viewMode === 'logged' && (
 										<ReviewRating rating={album.rating} showNumber={false} />
 									)}
 								</div>
 								
-								{/* Icons - conditionally shown */}
-								<div
-									className={`
-										flex items-center gap-2
-										opacity-60
-										group-hover:opacity-100
-										transition-opacity duration-200
-									`}
-								>
-									{/* Liked icon */}
-									{ album.liked && (
-										<HeartIcon 
-											className={`
-												w-4 h-4 
-												text-accentText
-												flex-shrink-0
-											`}
-										/>
-									)}
-									{/* Review icon */}
-									{ album.review_text !== null && (
-										<Bars3BottomLeftIcon 
-											className={`
-												w-4 h-4 
-												text-secondaryText
-												flex-shrink-0
-											`}
-										/>	
-									)}
-								</div>
+								{/* Icons - conditionally shown (only in logged view) */}
+								{viewMode === 'logged' && (
+									<div
+										className={`
+											flex items-center gap-2
+											opacity-60
+											group-hover:opacity-100
+											transition-opacity duration-200
+										`}
+									>
+										{/* Liked icon */}
+										{ album.liked && (
+											<HeartIcon 
+												className={`
+													w-4 h-4 
+													text-accentText
+													flex-shrink-0
+												`}
+											/>
+										)}
+										{/* Review icon */}
+										{ album.review_text !== null && (
+											<Bars3BottomLeftIcon 
+												className={`
+													w-4 h-4 
+													text-secondaryText
+													flex-shrink-0
+												`}
+											/>	
+										)}
+									</div>
+								)}
 							</div>
 						</div>
 					)	

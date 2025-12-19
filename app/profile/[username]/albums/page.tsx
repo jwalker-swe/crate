@@ -39,12 +39,11 @@ export default async function Home({ params }: ProfileProps ) {
 	console.log('logged album data: ', loggedAlbums)
 
 
-	// For queue albums - only get albums where queue = true
+	// For queue albums - query the queue table
 	const { data: wantToListenAlbums } = await supabase
-		.from('user_albums')
+		.from('queue')
 		.select('*, albums(id, spotify_id, title, cover_image_url)')
 		.eq('user_id', userData?.id)
-		.eq('queue', true)
 		.order('created_at', { ascending: false })
 
 	console.log('want to listen album data: ', wantToListenAlbums)

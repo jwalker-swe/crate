@@ -74,26 +74,25 @@ export default async function Profile({ params }: ProfileProps) {
     let favoriteAlbumsData: any[] = [];
     if (profileUserData?.id) {
         try {
-            // First, get the user_albums entries that are favorites
-            const { data: userAlbumsData, error: userAlbumsError } = await supabase
-                .from('user_albums')
+            // Get favorites from the favorites table
+            const { data: favoritesData, error: favoritesError } = await supabase
+                .from('favorites')
                 .select('album_id, created_at')
                 .eq('user_id', profileUserData.id)
-                .eq('is_favorite', true)
                 .order('created_at', { ascending: true })
                 .limit(5);
 
-            if (userAlbumsError) {
-                console.error('Error fetching user_albums:', {
-                    message: userAlbumsError.message,
-                    code: userAlbumsError.code,
-                    details: userAlbumsError.details,
-                    hint: userAlbumsError.hint,
+            if (favoritesError) {
+                console.error('Error fetching favorites:', {
+                    message: favoritesError.message,
+                    code: favoritesError.code,
+                    details: favoritesError.details,
+                    hint: favoritesError.hint,
                     userId: profileUserData.id
                 });
-            } else if (userAlbumsData && userAlbumsData.length > 0) {
+            } else if (favoritesData && favoritesData.length > 0) {
                 // Get the album IDs in order
-                const albumIds = userAlbumsData.map(ua => ua.album_id);
+                const albumIds = favoritesData.map(f => f.album_id);
                 
                 // Fetch the albums
                 const { data: albumsData, error: albumsError } = await supabase
@@ -112,10 +111,10 @@ export default async function Profile({ params }: ProfileProps) {
                     // Create a map for quick lookup
                     const albumMap = new Map(albumsData.map(album => [album.id, album]));
                     
-                    // Combine the data in the expected format, preserving the order from userAlbumsData
-                    favoriteAlbumsData = userAlbumsData
-                        .map(ua => {
-                            const album = albumMap.get(ua.album_id);
+                    // Combine the data in the expected format, preserving the order from favoritesData
+                    favoriteAlbumsData = favoritesData
+                        .map(f => {
+                            const album = albumMap.get(f.album_id);
                             if (!album) return null;
                             return {
                                 album_id: album.id,

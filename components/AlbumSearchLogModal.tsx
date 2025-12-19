@@ -150,14 +150,14 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
 
             if (existingAlbum) {
                 // Check if in queue
-                const { data: userAlbum } = await supabase
-                    .from('user_albums')
-                    .select('queue')
+                const { data: queueEntry } = await supabase
+                    .from('queue')
+                    .select('id')
                     .eq('user_id', userId)
                     .eq('album_id', existingAlbum.id)
                     .maybeSingle()
 
-                setIsInQueue(userAlbum?.queue === true)
+                setIsInQueue(!!queueEntry)
             } else {
                 setIsInQueue(false)
             }
@@ -220,10 +220,10 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                 return
             }
 
-            // Check if user_albums entry exists
+            // Check if user_albums entry exists (to prevent adding to queue if already logged)
             const { data: existingUserAlbum } = await supabase
                 .from('user_albums')
-                .select('id, rating, review_text, is_favorite, liked, queue')
+                .select('id, rating, review_text, is_favorite, liked')
                 .eq('user_id', userId)
                 .eq('album_id', dbAlbumId)
                 .maybeSingle()
@@ -239,51 +239,38 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                     setIsLoadingQueue(false)
                     return
                 }
+            }
 
-                const currentlyInQueue = existingUserAlbum.queue === true
+            // Check if album is already in queue
+            const { data: existingQueueEntry } = await supabase
+                .from('queue')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('album_id', dbAlbumId)
+                .maybeSingle()
 
-                if (currentlyInQueue) {
-                    // Remove from queue
-                    const { error: deleteError } = await supabase
-                        .from('user_albums')
-                        .delete()
-                        .eq('id', existingUserAlbum.id)
+            if (existingQueueEntry) {
+                // Remove from queue
+                const { error: deleteError } = await supabase
+                    .from('queue')
+                    .delete()
+                    .eq('id', existingQueueEntry.id)
 
-                    if (deleteError) {
-                        console.error('Error removing from queue:', deleteError)
-                        alert('Error: Could not remove from queue. Please try again.')
-                    } else {
-                        setIsInQueue(false)
-                        setFormData(prev => ({ ...prev, addToQueue: false }))
-                    }
+                if (deleteError) {
+                    console.error('Error removing from queue:', deleteError)
+                    alert('Error: Could not remove from queue. Please try again.')
                 } else {
-                    // Add to queue
-                    const { error: updateError } = await supabase
-                        .from('user_albums')
-                        .update({ queue: true })
-                        .eq('id', existingUserAlbum.id)
-
-                    if (updateError) {
-                        console.error('Error adding to queue:', updateError)
-                        alert('Error: Could not add to queue. Please try again.')
-                    } else {
-                        setIsInQueue(true)
-                        setFormData(prev => ({ ...prev, addToQueue: true }))
-                    }
+                    setIsInQueue(false)
+                    setFormData(prev => ({ ...prev, addToQueue: false }))
                 }
             } else {
-                // Add to queue (insert new entry)
+                // Add to queue
                 const { error: insertError } = await supabase
-                    .from('user_albums')
+                    .from('queue')
                     .insert([
                         {
                             user_id: userId,
-                            album_id: dbAlbumId,
-                            rating: null,
-                            review_text: null,
-                            is_favorite: null,
-                            liked: null,
-                            queue: true
+                            album_id: dbAlbumId
                         }
                     ])
 
@@ -376,22 +363,38 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                 // Check if entry already exists
                 const { data: existingUserAlbum } = await supabase
                     .from('user_albums')
-                    .select('id, queue')
+                    .select('id, queue, created_at')
                     .eq('user_id', user.id)
                     .eq('album_id', albumId)
                     .maybeSingle()
 
                 if (existingUserAlbum) {
-                    // Update existing entry
+                    // Update existing entry (allow updates to prevent blocking legitimate edits)
                     const { error } = await supabase
                         .from('user_albums')
                         .update({
                             rating: formData.rating,
                             review_text: formData.review,
-                            is_favorite: formData.liked,
-                            queue: false // Remove from queue when logged
+                            is_favorite: formData.liked
                         })
                         .eq('id', existingUserAlbum.id)
+
+                    // Remove from queue if it was in queue
+                    if (albumId) {
+                        const { data: queueEntry } = await supabase
+                            .from('queue')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .eq('album_id', albumId)
+                            .maybeSingle()
+
+                        if (queueEntry) {
+                            await supabase
+                                .from('queue')
+                                .delete()
+                                .eq('id', queueEntry.id)
+                        }
+                    }
 
                     if (error) {
                         console.error('Error updating data: ', error)
@@ -401,6 +404,31 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                         onClose()
                     }
                 } else {
+                    // Check if user recently logged this album (within last 5 minutes to prevent spam)
+                    const fiveMinutesAgo = new Date();
+                    fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+                    const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
+
+                    const { data: recentLog, error: checkError } = await supabase
+                        .from('user_albums')
+                        .select('created_at')
+                        .eq('user_id', user.id)
+                        .eq('album_id', albumId)
+                        .gte('created_at', fiveMinutesAgoISO)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (checkError && checkError.code !== 'PGRST116') {
+                        console.error('Error checking for recent log: ', checkError);
+                    }
+
+                    if (recentLog) {
+                        alert('You recently logged this album. Please wait a few minutes before logging it again.');
+                        setIsSubmitting(false);
+                        return;
+                    }
+
                     // Insert new entry
                     const { error } = await supabase
                         .from('user_albums')
@@ -410,10 +438,26 @@ export default function AlbumSearchLogModal({ isOpen, onClose, userId }: AlbumSe
                                 album_id: albumId,
                                 rating: formData.rating,
                                 review_text: formData.review,
-                                is_favorite: formData.liked,
-                                queue: false
+                                is_favorite: formData.liked
                             }
                         ])
+
+                    // Remove from queue if it was in queue
+                    if (albumId) {
+                        const { data: queueEntry } = await supabase
+                            .from('queue')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .eq('album_id', albumId)
+                            .maybeSingle()
+
+                        if (queueEntry) {
+                            await supabase
+                                .from('queue')
+                                .delete()
+                                .eq('id', queueEntry.id)
+                        }
+                    }
 
                     if (error) {
                         console.error('Error inserting data: ', error)

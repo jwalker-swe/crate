@@ -227,17 +227,14 @@ export default async function Home({ params }: AlbumPageParams) {
     // Check if album is in user's queue (server-side)
     let isInQueue = false;
     if (user && albumId) {
-        const { data: userAlbum } = await supabase
-            .from('user_albums')
-            .select('id, queue, rating, review_text, is_favorite, liked')
+        const { data: queueEntry } = await supabase
+            .from('queue')
+            .select('id')
             .eq('user_id', user.id)
             .eq('album_id', albumId)
             .maybeSingle();
 
-        if (userAlbum) {
-            // Album is in queue if queue = true
-            isInQueue = userAlbum.queue === true;
-        }
+        isInQueue = !!queueEntry;
     }
 
     // Get friends' activity for this album

@@ -20,7 +20,7 @@ export default async function getFavoriteAlbums(username: string) {
         id = data?.id
 
         const {data: albumData, error: albumError} = await supabase
-            .from('user_albums')
+            .from('favorites')
             .select(`
                 album_id
                 albums (
@@ -32,7 +32,6 @@ export default async function getFavoriteAlbums(username: string) {
                 )
             `)
             .eq('user_id', id)
-            .eq('is_favorite', true)
             .single()
 
         if (albumError) {
