@@ -104,11 +104,11 @@ export default function ResultsList ({ results, userResults, searchType, sk }: {
                 if (filteredAlbums.length > 0) {
                     // Check against existing albums in state - prevent duplicates and prefer explicit
                     setAlbums((prev: any[]) => {
-                        const existingIds = new Set(prev.map(album => album.id));
+                        const existingIds = new Set(prev.map((album: any) => album.id));
                         
                         // Create a map of existing albums by name+artist for duplicate checking
                         const existingAlbumsByKey = new Map();
-                        prev.forEach(album => {
+                        prev.forEach((album: any) => {
                             const key = `${album.name.toLowerCase()}-${album.artists[0]?.name.toLowerCase()}`;
                             if (!existingAlbumsByKey.has(key)) {
                                 existingAlbumsByKey.set(key, album);
@@ -129,7 +129,7 @@ export default function ResultsList ({ results, userResults, searchType, sk }: {
                         });
                         
                         // Filter new albums: exclude by ID and check for duplicates by name+artist
-                        const newAlbums = filteredAlbums.filter(album => {
+                        const newAlbums = filteredAlbums.filter((album: any) => {
                             // Exclude if ID already exists
                             if (existingIds.has(album.id)) {
                                 return false;
@@ -164,9 +164,9 @@ export default function ResultsList ({ results, userResults, searchType, sk }: {
                         });
                         
                         // If we're replacing albums with explicit versions, remove the clean versions
-                        const albumsToKeep = prev.filter(album => {
+                        const albumsToKeep = prev.filter((album: any) => {
                             const key = `${album.name.toLowerCase()}-${album.artists[0]?.name.toLowerCase()}`;
-                            const replacement = newAlbums.find(newAlbum => 
+                            const replacement = newAlbums.find((newAlbum: any) => 
                                 `${newAlbum.name.toLowerCase()}-${newAlbum.artists[0]?.name.toLowerCase()}` === key
                             );
                             
