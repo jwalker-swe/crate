@@ -10,9 +10,16 @@ type CommentWithReplies = {
 	updated_at: string;
 	replies?: CommentWithReplies[];
 	username?: string | null;
+	avatar_url?: string | null;
 };
 
-export default async function getInitialComments(reviewId: string) {
+type CommentsPayload = {
+	data: CommentWithReplies[];
+	flatData?: CommentWithReplies[];
+	usernames: Array<{ username: string | null }>;
+};
+
+export default async function getInitialComments(reviewId: string): Promise<CommentsPayload | null> {
 	const supabase = await createClient();
 
 	try {
@@ -35,10 +42,10 @@ export default async function getInitialComments(reviewId: string) {
 		// Extract unique user IDs from comments
 		const userIds = [...new Set(data.map(comment => comment.user_id))];
 		
-		// Batch fetch all usernames in a single query
+		// Batch fetch all usernames and avatar URLs in a single query
 		const { data: usersData, error: usernameError } = await supabase
 			.from("users")
-			.select("id, username")
+			.select("id, username, avatar_url")
 			.in("id", userIds);
 
 		if (usernameError) {
@@ -49,10 +56,11 @@ export default async function getInitialComments(reviewId: string) {
 		// Create a lookup map for O(1) access
 		const usersMap = new Map(usersData?.map(user => [user.id, user]) || []);
 		
-		// Add username to each comment and organize into tree structure
+		// Add username and avatar_url to each comment and organize into tree structure
 		const commentsWithUsernames: CommentWithReplies[] = data.map(comment => ({
 			...comment,
 			username: usersMap.get(comment.user_id)?.username || null,
+			avatar_url: usersMap.get(comment.user_id)?.avatar_url || null,
 			replies: []
 		}));
 
@@ -105,7 +113,7 @@ export default async function getInitialComments(reviewId: string) {
 			return result;
 		});
 
-		const usernames = flatData.map(comment => ({ username: comment.username }));
+		const usernames = flatData.map(comment => ({ username: comment.username ?? null }));
 
 		return { 
 			data: topLevelComments, // Return tree structure

@@ -16,6 +16,7 @@ type CommentWithReplies = {
 	updated_at: string;
 	replies?: CommentWithReplies[];
 	username?: string | null;
+	avatar_url?: string | null;
 };
 
 type CommentsPayload = { 
@@ -124,11 +125,11 @@ export default function CommentSection ({reviewId, userId, commentData, activeUs
 		const newReply = await postComment(reviewId, userId, replyText, parentCommentId);
 
 		if (newReply) {
-			// Fetch username for the new reply
+			// Fetch username and avatar_url for the new reply
 			const supabase = await createClient();
 			const { data: usernameData } = await supabase
 				.from("users")
-				.select("username")
+				.select("username, avatar_url")
 				.eq("id", userId)
 				.single();
 
@@ -137,6 +138,7 @@ export default function CommentSection ({reviewId, userId, commentData, activeUs
 					...newReply,
 					user_id: newReply.user_id || userId, // Ensure user_id is set
 					username: usernameData.username,
+					avatar_url: usernameData.avatar_url || null,
 					replies: []
 				};
 				
@@ -224,16 +226,29 @@ export default function CommentSection ({reviewId, userId, commentData, activeUs
 							className={`
 								icon-container
 								w-fit h-fit
+								flex-shrink-0
 							`}
 						>
-							<UserCircleIcon 
-								className={`
-									w-8 h-8
-									rounded-full
-									text-accentText
-									bg-white
-								`}
-							/>
+							{comment.avatar_url ? (
+								<img 
+									src={comment.avatar_url} 
+									alt={comment.username || 'User'}
+									className={`
+										w-8 h-8
+										rounded-full
+										object-cover
+									`}
+								/>
+							) : (
+								<UserCircleIcon 
+									className={`
+										w-8 h-8
+										rounded-full
+										text-accentText
+										bg-white
+									`}
+								/>
+							)}
 						</div>
 						<div
 							className={`
@@ -448,20 +463,21 @@ export default function CommentSection ({reviewId, userId, commentData, activeUs
 						const newComment = await postComment(reviewId, userId, commentText);
 
 						if (newComment) {
-							// Fetch username for the new comment
-							const supabase = await createClient();
-							const { data: usernameData } = await supabase
-								.from("users")
-								.select("username")
-								.eq("id", userId)
-								.single();
+						// Fetch username and avatar_url for the new comment
+						const supabase = await createClient();
+						const { data: usernameData } = await supabase
+							.from("users")
+							.select("username, avatar_url")
+							.eq("id", userId)
+							.single();
 
-							if (usernameData) {
-								const commentWithUsername: CommentWithReplies = {
-									...newComment,
-									username: usernameData.username,
-									replies: []
-								};
+						if (usernameData) {
+							const commentWithUsername: CommentWithReplies = {
+								...newComment,
+								username: usernameData.username,
+								avatar_url: usernameData.avatar_url || null,
+								replies: []
+							};
 
 								setComments(prev => ({
 									...prev,
