@@ -40,13 +40,13 @@ export default async function getFriendsActivity(albumId: string, userId: string
         const followingIds = followingData.map(f => f.following_id);
 
         // Get user_albums entries for this album from users being followed
-        // Include albums that have been reviewed, rated, liked, favorited, or queued
+        // Include albums that have been reviewed, rated, liked, or queued (favorites don't log albums)
         const { data: userAlbumsData, error: userAlbumsError } = await supabase
             .from('user_albums')
             .select('id, user_id, rating, review_text, is_favorite, liked, queue, created_at')
             .eq('album_id', albumId)
             .in('user_id', followingIds)
-            .or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null, queue.eq.true')
+            .or('rating.not.is.null, review_text.not.is.null, liked.not.is.null, queue.eq.true')
             .order('created_at', { ascending: false })
             .limit(10);
 
@@ -78,14 +78,13 @@ export default async function getFriendsActivity(albumId: string, userId: string
         const activities: FriendActivity[] = userAlbumsData.map(ua => {
             const user = usersMap.get(ua.user_id);
             
-            // Determine activity type (prioritize: review > rating > favorite > like > queue)
+            // Determine activity type (prioritize: review > rating > like > queue)
+            // Note: favorites don't log albums, so they won't appear in activity feeds
             let activityType: 'reviewed' | 'rated' | 'liked' | 'favorited' | 'queued' = 'queued';
             if (ua.review_text) {
                 activityType = 'reviewed';
             } else if (ua.rating !== null) {
                 activityType = 'rated';
-            } else if (ua.is_favorite) {
-                activityType = 'favorited';
             } else if (ua.liked) {
                 activityType = 'liked';
             } else if (ua.queue) {

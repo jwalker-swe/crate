@@ -65,10 +65,18 @@ export default async function ProfileEdit({ params }: ProfileEditProps) {
                 const albumMap = new Map(albumsData.map((album: any) => [album.id, album]));
                 
                 // Map to the format expected by FavoriteAlbumsSelector, preserving the order from userAlbumsData
+                // Also remove duplicates by spotify_id (keep first occurrence)
+                const seenSpotifyIds = new Set<string>();
                 initialFavorites = userAlbumsData
                     .map(ua => {
                         const album = albumMap.get(ua.album_id);
                         if (!album) return null;
+                        
+                        // Skip if we've already seen this spotify_id (duplicate)
+                        if (seenSpotifyIds.has(album.spotify_id)) {
+                            return null;
+                        }
+                        seenSpotifyIds.add(album.spotify_id);
                         
                         // Handle artists field - could be array, string, or object
                         let artistName = 'Unknown Artist';

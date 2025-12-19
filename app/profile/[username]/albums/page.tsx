@@ -28,11 +28,12 @@ export default async function Home({ params }: ProfileProps ) {
 
 
 	// Fetch albums logged by user of profile being viewed
+	// Albums are only logged if they have a rating, review, or like (favorites don't log albums)
 	const { data: loggedAlbums } = await supabase
 		.from('user_albums')
 		.select('*, albums(id, spotify_id, title, cover_image_url)')
 		.eq('user_id', userData?.id)
-		.or('rating.not.is.null, review_text.not.is.null, is_favorite.not.is.null, liked.not.is.null')
+		.or('rating.not.is.null, review_text.not.is.null, liked.not.is.null')
 		.order('created_at', { ascending: false })
 
 	console.log('logged album data: ', loggedAlbums)

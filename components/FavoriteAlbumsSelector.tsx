@@ -24,11 +24,22 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
     const [showResults, setShowResults] = useState(false);
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Update favorites when initialFavorites changes (e.g., when component remounts with new data)
+    // Also remove duplicates when loading
     useEffect(() => {
         if (initialFavorites && initialFavorites.length > 0) {
-            setFavorites(initialFavorites);
+            // Remove duplicates by spotify_id, keeping the first occurrence
+            const uniqueFavorites = initialFavorites.filter((album, index, self) => 
+                index === self.findIndex(a => a.spotify_id === album.spotify_id)
+            );
+            
+            if (uniqueFavorites.length !== initialFavorites.length) {
+                console.log('Removed duplicates from initial favorites');
+            }
+            
+            setFavorites(uniqueFavorites);
         }
     }, [initialFavorites]);
 
@@ -85,13 +96,15 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
 
     const addFavorite = (album: { spotify_id: string; name: string; artist: string; imageUrl: string }) => {
         if (favorites.length >= 5) {
-            alert('You can only select up to 5 favorite albums');
+            setErrorMessage('You can only select up to 5 favorite albums');
+            setTimeout(() => setErrorMessage(null), 3000);
             return;
         }
 
         // Check if album is already in favorites
         if (favorites.some(fav => fav.spotify_id === album.spotify_id)) {
-            alert('This album is already in your favorites');
+            setErrorMessage('This album is already in your favorites');
+            setTimeout(() => setErrorMessage(null), 3000);
             return;
         }
 
@@ -107,6 +120,7 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
         setSearchQuery('');
         setSearchResults([]);
         setShowResults(false);
+        setErrorMessage(null); // Clear any previous error
     };
 
     const removeFavorite = (spotifyId: string) => {
@@ -168,6 +182,18 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
                 `}>
                     Favorite Albums ({favorites.length}/5)
                 </label>
+                {errorMessage && (
+                    <div className={`
+                        px-4 py-2
+                        rounded-lg
+                        bg-red-500/10
+                        border border-red-500/20
+                        text-red-500
+                        text-sm
+                    `}>
+                        {errorMessage}
+                    </div>
+                )}
                 <div className={`
                     relative
                 `}>
@@ -179,6 +205,7 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
                         className={`
                             w-full
                             px-4 py-2
+                            ${searchQuery ? 'pr-10' : ''}
                             rounded-lg
                             bg-secondaryBackground
                             text-primaryText
@@ -187,6 +214,29 @@ export default function FavoriteAlbumsSelector({ initialFavorites = [], onFavori
                             focus:ring-2 focus:ring-accentText
                         `}
                     />
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearchQuery('');
+                                setSearchResults([]);
+                                setShowResults(false);
+                            }}
+                            className={`
+                                absolute right-2 top-1/2 -translate-y-1/2
+                                w-6 h-6
+                                flex items-center justify-center
+                                rounded
+                                text-secondaryText
+                                hover:text-primaryText
+                                hover:bg-primaryBackground
+                                transition-colors
+                            `}
+                            aria-label="Clear search"
+                        >
+                            <XMarkIcon className="w-4 h-4" />
+                        </button>
+                    )}
                     {showResults && searchResults.length > 0 && (
                         <div className={`
                             absolute z-10
