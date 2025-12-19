@@ -97,7 +97,14 @@ export default function Auth() {
 
                 // Only navigate if there's no error and we have data
                 if (data && !error) {
-                    router.push(`/auth/sign-in`)
+                    setMessage({ 
+                        type: 'success', 
+                        text: 'Account created successfully! Please check your email to verify your account before signing in.' 
+                    });
+                    // Wait 5 seconds to show the message, then redirect
+                    setTimeout(() => {
+                        router.push(`/auth/sign-in`)
+                    }, 5000);
                 }
             } catch (error: any) {
                 setMessage({ type: 'error', text: error.message || 'An unexpected error occurred while trying to sign up.' })

@@ -229,16 +229,12 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                 Albums
                             </li>
                         </Link>
-                        <Link href='#'>
-                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
-                                Lists
-                            </li>
-                        </Link>
-                        <Link href='#'>
-                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
-                                News
-                            </li>
-                        </Link>
+                        <li className={`text-secondaryText text-xs whitespace-nowrap md:text-sm opacity-50 cursor-not-allowed`}>
+                            Lists
+                        </li>
+                        <li className={`text-secondaryText text-xs whitespace-nowrap md:text-sm opacity-50 cursor-not-allowed`}>
+                            News
+                        </li>
                     </ul>
                 </div>
                 <div className={`
@@ -406,34 +402,17 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                         `}>
                                             Reviews
                                         </Link>
-                                        <Link 
-                                            href='#' 
-                                            onClick={() => setIsProfileMenuOpen(false)}
+                                        <div 
                                             className={`
                                         w-full
                                         px-4 py-2
                                         flex items-center
                                             text-secondaryText
-                                            hover:text-accentText
-                                        hover:bg-primaryBackground
-                                        transition-colors
+                                            opacity-50
+                                            cursor-not-allowed
                                         `}>
                                             Lists
-                                        </Link>
-                                        <Link 
-                                            href='#' 
-                                            onClick={() => setIsProfileMenuOpen(false)}
-                                            className={`
-                                        w-full
-                                        px-4 py-2
-                                        flex items-center
-                                            text-secondaryText
-                                            hover:text-accentText
-                                        hover:bg-primaryBackground
-                                        transition-colors
-                                        `}>
-                                            Likes
-                                        </Link>
+                                        </div>
                                         <button 
                                             onClick={async () => {
                                                 setIsProfileMenuOpen(false);
