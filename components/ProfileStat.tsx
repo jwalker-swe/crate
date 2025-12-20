@@ -103,14 +103,18 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
                 <div className={`
                     flex flex-col justify-center items-center gap-1
                 `}>
-                    <h3 className={`
-                        text-xl
-                    `}>
-                        {following ?? 0}
-                    </h3>
-                    <p>
-                        {statName}
-                    </p>
+					<button
+						onClick={() => {}}
+					>
+						<h3 className={`
+							text-xl
+						`}>
+							{following ?? 0}
+						</h3>
+						<p>
+							{statName}
+						</p>
+					</button>
                 </div>
             )
 
