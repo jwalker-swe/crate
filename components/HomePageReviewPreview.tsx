@@ -112,7 +112,7 @@ export default function HomePageReviewPreview({ recentReviewData }: { recentRevi
                                 `}>
                                     <UserCircleIcon width={24} height={24}
                                         className={`
-                                            text-accentText
+                                            text-secondaryText
                                         `}
                                     />
                                     

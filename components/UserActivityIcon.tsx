@@ -106,7 +106,7 @@ export default function UserActivityIcon({ username, avatarUrl, activityType, ra
                             </div>
                         )}
                     </div>
-                    {rating !== null && (
+                    {rating ? (
                         <div className={`
                             user-rating-container
                             //General Styling
@@ -141,7 +141,15 @@ export default function UserActivityIcon({ username, avatarUrl, activityType, ra
                                 );
                             })}
                         </div>
-                    )}
+                    ) : (
+		                <div className={`
+                            user-rating-container
+							h-2
+                            flex justify-center items-center gap-0.5
+                            mt-1
+                        `}>
+						</div>
+					)}
                 </div>
             </Link>
         </div>

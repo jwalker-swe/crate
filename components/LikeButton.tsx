@@ -9,7 +9,6 @@ import { handleLike } from "@/lib/supabase/handleLike";
 export default function LikeButton({ size, likeData, reviewId, likeTotal, user }: { size: number, likeData: any, reviewId: string, likeTotal: number, user: boolean }) {
 
     const iconSize = size * 4;
-    console.log('like data: ', likeData);
 
     const [like, setLike] = useState<boolean>(likeData);
     const [loading, setLoading] = useState<boolean>(false);

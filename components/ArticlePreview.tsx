@@ -89,6 +89,7 @@ export default function ArticlePreview({ bannerURL, articleTitle, articleURL }:A
                     <UserCircleIcon className={`
                         //General Styling
                         w-8 h-8
+                        text-secondaryText
                         //Mobile Styling
                         //Desktop Styling
                     `}/>

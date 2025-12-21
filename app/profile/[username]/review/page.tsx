@@ -141,7 +141,7 @@ export default async function UserReviewsPage({ params, searchParams }: UserRevi
                                 className="w-full h-full object-cover"
                             />
                         ) : (
-                            <UserCircleIcon className="w-full h-full text-accentText" />
+                            <UserCircleIcon className="w-full h-full text-secondaryText" />
                         )}
                     </div>
                     

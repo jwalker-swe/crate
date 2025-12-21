@@ -3,6 +3,8 @@ import AlbumPreview from "@/components/AlbumPreview";
 import FollowButton from "@/components/FollowButton";
 import NavBar from "@/components/NavBar";
 import ProfileStat from "@/components/ProfileStat";
+import FollowerModal from "@/components/FollowerModal";
+import FollowingModal from "@/components/FollowingModal";
 import SectionTitle from "@/components/SectionTitle";
 import ViewAll from "@/components/ViewAll";
 import Footer from "@/components/Footer";
@@ -19,6 +21,29 @@ type ProfileProps = {
     }>
 }
 
+interface FollowingUser {
+	following_id: string;
+	users: {
+		id: string;
+		username: string;
+		display_name: string | null;
+		avatar_url: string | null;
+	}
+}
+
+interface FollowerUser {
+	following_id: string;
+	users: {
+		id: string;
+		username: string;
+		display_name: string | null;
+		avatar_url: string | null;
+	}
+}
+
+let followingUsers: FollowingUser[] = [];
+let followerUsers: FollowerUser[] = [];
+
 export default async function Profile({ params }: ProfileProps) {
 
 	const supabase = await createClient();
@@ -26,12 +51,81 @@ export default async function Profile({ params }: ProfileProps) {
     const { username } =  await params
     const { data: { user }, error } = await supabase.auth.getUser()
 
-    // Get profile user's data
+	// Get profile user's data
     const { data: profileUserData, error: profileUserError } = await supabase
-			.from('users')
+		.from('users')
         .select('id, username, display_name, bio, avatar_url, created_at, is_vip')
-			.eq('username', username)
+		.eq('username', username)
         .single();
+
+
+
+
+
+	// Get user following
+	try {
+		const { data: followingData, error: followingError } = await supabase
+			.from('follows')
+			.select(`
+				following_id,
+				users!follows_following_id_fkey (
+					id,
+					username,
+					display_name,
+					avatar_url
+				)
+			`)
+			.eq('follower_id', profileUserData.id)
+
+		if ( followingError ) {
+			console.error('Error fetching following: ', followingError)
+			followingUsers = [];
+		}
+
+		if ( !followingData || followingData.length === 0 ) {
+			followingUsers = [];
+		}
+
+		followingUsers = followingData;
+	} catch ( error ) {
+		console.error('Unexpected error fetching following: ', error)
+	}
+
+
+
+
+
+	// Get user followers
+	try {
+		const { data: followerData, error: followerError } = await supabase
+			.from('follows')
+			.select(`
+				follower_id,
+				users!follows_follower_id_fkey (
+					id,
+					username,
+					display_name,
+					avatar_url
+				)
+			`)
+			.eq('following_id', profileUserData.id)
+
+		if ( followerError ) {
+			console.error('Error fetching followers: ', followerError)
+		}
+
+		if ( !followerData || followerData.length === 0 ) {
+			followerUsers = [];
+		}
+
+		followerUsers = followerData;
+	} catch ( error ) {
+		console.error('Unexpected error fetching followers: ', error)
+	}
+
+
+
+
 
     // If user doesn't exist, return 404
     if (profileUserError || !profileUserData) {
@@ -70,8 +164,13 @@ export default async function Profile({ params }: ProfileProps) {
         )
     }
 
+
+
+
+
     // Get favorite albums for the profile user
     let favoriteAlbumsData: any[] = [];
+
     if (profileUserData?.id) {
         try {
             // Get favorites from the favorites table
@@ -129,6 +228,10 @@ export default async function Profile({ params }: ProfileProps) {
         }
     }
     
+
+
+
+
     // Get current user's username to check if viewing own profile
     let currentUserUsername: string | null = null;
     let isFollowing: boolean = false;
@@ -155,6 +258,10 @@ export default async function Profile({ params }: ProfileProps) {
         }
     }
     
+
+
+
+
     // Check if viewing own profile
     const isOwnProfile = currentUserUsername === username;
     
@@ -168,6 +275,10 @@ export default async function Profile({ params }: ProfileProps) {
             .single();
         currentUserData = data;
     }
+
+
+
+
 
     // Fetch user's recent reviews for the JustReviewed component
     const userRecentReviewsData = await getUserRecentReviews(username, 6);
@@ -220,7 +331,7 @@ export default async function Profile({ params }: ProfileProps) {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                            <UserCircleIcon width={96} height={96} className={`text-accentText w-full h-full`} />
+                            <UserCircleIcon width={96} height={96} className={`text-secondaryText w-full h-full`} />
                             )}
                         </div>
                         <div className={`
@@ -335,8 +446,18 @@ export default async function Profile({ params }: ProfileProps) {
                         flex justify-center items-center gap-8
                     `}>
                         <ProfileStat statName={'albums'} username={username} />
-                        <ProfileStat statName={'followers'} username={username} />
-                        <ProfileStat statName={'following'} username={username} />
+						<FollowerModal 
+							followerData={followerUsers} 
+							userId={profileUserData?.id}
+							currentUserId={user?.id || null}
+							isOwnProfile={isOwnProfile}
+						/>
+						<FollowingModal 
+							followingData={followingUsers} 
+							userId={profileUserData?.id}
+							currentUserId={user?.id || null}
+							isOwnProfile={isOwnProfile}
+						/>	
                     </div>
                 </div>
                 <div className={`

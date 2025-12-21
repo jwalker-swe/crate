@@ -102,7 +102,7 @@ export default async function Home({ params }: ProfileProps ) {
 								className="w-full h-full object-cover"
 							/>
 						) : (
-							<UserCircleIcon className="w-full h-full text-accentText" />
+							<UserCircleIcon className="w-full h-full text-secondaryText" />
 						)}
 					</div>
 					
