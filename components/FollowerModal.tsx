@@ -179,7 +179,9 @@ export default function FollowerModal({ followerData, userId, currentUserId, isO
 				<div
 					className={`
 						flex flex-col justify-center items-center gap-1
-						hover:cursor-pointer
+						cursor-pointer
+						hover:opacity-80
+						transition-opacity
 					`}
 					onClick={() => setIsOpen(true) }
 				>
@@ -201,27 +203,32 @@ export default function FollowerModal({ followerData, userId, currentUserId, isO
 						backdrop-blur-lg
 						z-50
 						flex items-center justify-center
-						p-4
+						p-2
+						sm:p-4
 					`}
 					onClick={() => onClose()}
 				>
 					<div
 						className={`
 							modal-container
-							min-w-140 h-fit
-							flex flex-col justify-center items-center
+							w-full max-w-md
+							h-fit
+							flex flex-col
 							bg-secondaryBackground
 							rounded-2xl
 							z-10
 							overflow-hidden
+							sm:max-w-lg
+							md:max-w-xl
 						`}
 						onClick={(e) => e.stopPropagation()}
 					>
 						<div
 							className={`
 								w-full h-full p-4
-								flex justify-between items-center gap-32
+								flex justify-between items-center gap-4
 								border-b-1 border-primaryBorder
+								sm:gap-8
 							`}
 						>
 							<h2
@@ -241,9 +248,12 @@ export default function FollowerModal({ followerData, userId, currentUserId, isO
 						</div>
 						<ul
 							className={`
-								following-list-container p-4
-								w-full max-h-78
+								following-list-container 
+								w-full 
+								max-h-78
 								overflow-y-auto
+								p-4
+								sm:p-6
 							`}
 						>
 							<div
@@ -259,15 +269,17 @@ export default function FollowerModal({ followerData, userId, currentUserId, isO
 											<div
 												className={`
 													w-full h-fit
-													flex justify-between items-center
+													flex justify-between items-center gap-2
+													sm:gap-4
 												`}
 											>
 												<Link
 													href={`/profile/${item.users.username}`}
 													onClick={() => onClose()}
 													className={`
-														w-full h-fit
-														flex justify-start items-center gap-3
+														flex-1 min-w-0 h-fit
+														flex justify-start items-center gap-2
+														sm:gap-3
 														hover:cursor-pointer
 														hover:opacity-80
 														transition-opacity
