@@ -32,7 +32,7 @@ interface FollowingUser {
 }
 
 interface FollowerUser {
-	following_id: string;
+	follower_id: string;
 	users: {
 		id: string;
 		username: string;
@@ -63,32 +63,35 @@ export default async function Profile({ params }: ProfileProps) {
 
 
 	// Get user following
-	try {
-		const { data: followingData, error: followingError } = await supabase
-			.from('follows')
-			.select(`
-				following_id,
-				users!follows_following_id_fkey (
-					id,
-					username,
-					display_name,
-					avatar_url
-				)
-			`)
-			.eq('follower_id', profileUserData.id)
+	if (profileUserData) {
+		try {
+			const { data: followingData, error: followingError } = await supabase
+				.from('follows')
+				.select(`
+					following_id,
+					users!follows_following_id_fkey (
+						id,
+						username,
+						display_name,
+						avatar_url
+					)
+				`)
+				.eq('follower_id', profileUserData.id)
 
-		if ( followingError ) {
-			console.error('Error fetching following: ', followingError)
-			followingUsers = [];
+			if ( followingError ) {
+				console.error('Error fetching following: ', followingError)
+				followingUsers = [];
+			} else if ( !followingData || followingData.length === 0 ) {
+				followingUsers = [];
+			} else {
+				followingUsers = followingData.map(item => ({
+					following_id: item.following_id,
+					users: Array.isArray(item.users) ? item.users[0] : item.users
+				})) as FollowingUser[];
+			}
+		} catch ( error ) {
+			console.error('Unexpected error fetching following: ', error)
 		}
-
-		if ( !followingData || followingData.length === 0 ) {
-			followingUsers = [];
-		}
-
-		followingUsers = followingData;
-	} catch ( error ) {
-		console.error('Unexpected error fetching following: ', error)
 	}
 
 
@@ -96,31 +99,35 @@ export default async function Profile({ params }: ProfileProps) {
 
 
 	// Get user followers
-	try {
-		const { data: followerData, error: followerError } = await supabase
-			.from('follows')
-			.select(`
-				follower_id,
-				users!follows_follower_id_fkey (
-					id,
-					username,
-					display_name,
-					avatar_url
-				)
-			`)
-			.eq('following_id', profileUserData.id)
+	if (profileUserData) {
+		try {
+			const { data: followerData, error: followerError } = await supabase
+				.from('follows')
+				.select(`
+					follower_id,
+					users!follows_follower_id_fkey (
+						id,
+						username,
+						display_name,
+						avatar_url
+					)
+				`)
+				.eq('following_id', profileUserData.id)
 
-		if ( followerError ) {
-			console.error('Error fetching followers: ', followerError)
+			if ( followerError ) {
+				console.error('Error fetching followers: ', followerError)
+				followerUsers = [];
+			} else if ( !followerData || followerData.length === 0 ) {
+				followerUsers = [];
+			} else {
+				followerUsers = followerData.map(item => ({
+					follower_id: item.follower_id,
+					users: Array.isArray(item.users) ? item.users[0] : item.users
+				})) as FollowerUser[];
+			}
+		} catch ( error ) {
+			console.error('Unexpected error fetching followers: ', error)
 		}
-
-		if ( !followerData || followerData.length === 0 ) {
-			followerUsers = [];
-		}
-
-		followerUsers = followerData;
-	} catch ( error ) {
-		console.error('Unexpected error fetching followers: ', error)
 	}
 
 

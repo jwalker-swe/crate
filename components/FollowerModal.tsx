@@ -19,7 +19,7 @@ interface FollowerUser {
 
 type FollowerModalProps = {
 	followerData: FollowerUser[]
-	userId: string  // Profile user's ID (whose followers we're viewing)
+	userId: string | undefined  // Profile user's ID (whose followers we're viewing)
 	currentUserId?: string | null  // Logged-in user's ID
 	isOwnProfile: boolean  // Whether viewing own profile
 }

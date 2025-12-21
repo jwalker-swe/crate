@@ -19,7 +19,7 @@ interface FollowingUser {
 
 type FollowingModalProps = {
 	followingData: FollowingUser[]
-	userId: string  // Profile user's ID (whose following list we're viewing)
+	userId: string | undefined  // Profile user's ID (whose following list we're viewing)
 	currentUserId?: string | null  // Logged-in user's ID
 	isOwnProfile: boolean  // Whether viewing own profile
 }
