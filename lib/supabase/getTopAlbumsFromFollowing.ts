@@ -28,7 +28,7 @@ export default async function getTopAlbumsFromFollowing(userId: string | null, l
         // Get all albums that people you follow have recently interacted with
         // Get interactions from the last 30 days
         const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 60);
         const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
 
         // Get user_albums interactions (ratings, reviews, likes) with timestamps
