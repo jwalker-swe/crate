@@ -334,9 +334,9 @@ export default async function Profile({ params }: ProfileProps) {
                         user-stats-container
                         flex justify-center items-center gap-8
                     `}>
-                        <ProfileStat statName={'albums'} username={username} />
-                        <ProfileStat statName={'followers'} username={username} />
-                        <ProfileStat statName={'following'} username={username} />
+                        <ProfileStat statName={'albums'} username={username} currentUserId={user?.id || null} />
+                        <ProfileStat statName={'followers'} username={username} currentUserId={user?.id || null} />
+                        <ProfileStat statName={'following'} username={username} currentUserId={user?.id || null} />
                     </div>
                 </div>
                 <div className={`

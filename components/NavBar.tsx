@@ -229,9 +229,11 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                 Albums
                             </li>
                         </Link>
-                        <li className={`text-secondaryText text-xs whitespace-nowrap md:text-sm opacity-50 cursor-not-allowed`}>
-                            Lists
-                        </li>
+                        <Link href="/lists">
+                            <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
+                                Lists
+                            </li>
+                        </Link>
                         <li className={`text-secondaryText text-xs whitespace-nowrap md:text-sm opacity-50 cursor-not-allowed`}>
                             News
                         </li>
@@ -402,17 +404,19 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                         `}>
                                             Reviews
                                         </Link>
-                                        <div 
+                                        <Link 
+                                            href={username ? `/profile/${username}/lists` : '#'}
+                                            onClick={() => setIsProfileMenuOpen(false)}
                                             className={`
-                                        w-full
-                                        px-4 py-2
-                                        flex items-center
-                                            text-secondaryText
-                                            opacity-50
-                                            cursor-not-allowed
+                                                w-full
+                                                px-4 py-2
+                                                flex items-center
+                                                text-secondaryText
+                                                hover:bg-primaryBackground
+                                                transition-colors
                                         `}>
                                             Lists
-                                        </div>
+                                        </Link>
                                         <button 
                                             onClick={async () => {
                                                 setIsProfileMenuOpen(false);

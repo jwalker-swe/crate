@@ -34,7 +34,7 @@ export default async function Home() {
     }
     
 	const justReviewedData = await getPopularRecentReviews(10);
-	const popularAlbumsThisWeek = await getPopularAlbumsThisWeek(4);
+	const popularAlbumsThisWeek = await getPopularAlbumsThisWeek(12);
 
     return (
         <div className={`
