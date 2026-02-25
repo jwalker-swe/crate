@@ -62,4 +62,38 @@ body {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    /* Modern horizontal scrollbar */
+    .modern-scrollbar {
+        /* Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(39, 135, 247, 0.4) rgba(26, 26, 40, 0.2);
+    }
+
+    .modern-scrollbar::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .modern-scrollbar::-webkit-scrollbar-track {
+        background: rgba(26, 26, 40, 0.2);
+        border-radius: 10px;
+        margin: 0 4px;
+    }
+
+    .modern-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, rgba(39, 135, 247, 0.6), rgba(39, 135, 247, 0.4));
+        border-radius: 10px;
+        border: 1px solid rgba(39, 135, 247, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .modern-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(90deg, rgba(39, 135, 247, 0.8), rgba(39, 135, 247, 0.6));
+        border-color: rgba(39, 135, 247, 0.4);
+        box-shadow: 0 0 8px rgba(39, 135, 247, 0.3);
+    }
+
+    .modern-scrollbar::-webkit-scrollbar-thumb:active {
+        background: linear-gradient(90deg, rgba(39, 135, 247, 1), rgba(39, 135, 247, 0.8));
+    }
 }

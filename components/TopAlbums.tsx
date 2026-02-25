@@ -30,7 +30,7 @@ export default function TopAlbums({albums, columns, gap}: {albums: any[], column
                     flex gap-4
                     overflow-x-auto
                     pb-4
-                    scrollbar-thin scrollbar-thumb-secondaryBackground scrollbar-track-transparent
+                    modern-scrollbar
                     snap-x snap-mandatory
                 `}
                 style={{
