@@ -3,10 +3,11 @@ import Link from "next/link"
 
 type ProfileStatProps = {
     statName: string,
-    username: string
+    username: string,
+    currentUserId?: string | null
 }
 
-export default async function ProfileStat({ statName, username }: ProfileStatProps) {
+export default async function ProfileStat({ statName, username, currentUserId }: ProfileStatProps) {
 
     const supabase = await createClient()
 
@@ -99,22 +100,18 @@ export default async function ProfileStat({ statName, username }: ProfileStatPro
             )
         
         case 'following':
-            return(
+            return (
                 <div className={`
                     flex flex-col justify-center items-center gap-1
                 `}>
-					<button
-						onClick={() => {}}
-					>
-						<h3 className={`
-							text-xl
-						`}>
-							{following ?? 0}
-						</h3>
-						<p>
-							{statName}
-						</p>
-					</button>
+                    <h3 className={`
+                        text-xl
+                    `}>
+                        {following ?? 0}
+                    </h3>
+                    <p>
+                        {statName}
+                    </p>
                 </div>
             )
 
