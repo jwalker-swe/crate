@@ -1,25 +1,61 @@
 import { HeartIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 
-export default function AlbumPageList() {
+type Album = {
+    id: string;
+    cover_image_url: string;
+}
+
+type ListProps = {
+    id: string;
+    name: string;
+    description: string | null;
+    username: string;
+    avatarUrl: string | null;
+    albumCount: number;
+    likeCount: number;
+    coverAlbums: Album[];
+}
+
+export default function AlbumPageList({ list }: { list: ListProps }) {
     return (
-        <div className={`
-            //General Styling
-            flex justify-start items-center gap-3
-            p-3
-            bg-secondaryBackground
-            rounded-xl
-            w-full
-            sm:gap-4 sm:p-4
-        `}>
+        <Link 
+            href={`/profile/${list.username}/lists/${list.id}`}
+            className={`
+                //General Styling
+                flex justify-start items-center gap-3
+                p-3
+                bg-secondaryBackground
+                rounded-xl
+                w-full
+                sm:gap-4 sm:p-4
+                hover:bg-secondaryBackground/80 transition-colors
+            `}
+        >
             <div className={`
                 list-thumbnail-container
                 //General Styling
-                w-36 h-full
-                bg-white
+                w-20 h-20 flex-shrink-0
                 rounded-lg
-                //Mobile Styling
-                //Desktop Styling
+                overflow-hidden
+                grid grid-cols-2 grid-rows-2 gap-[1px]
+                bg-tertiaryBackground
+                sm:w-24 sm:h-24
             `}>
+                {list.coverAlbums.slice(0, 4).map((album, index) => (
+                    <div key={album.id} className="w-full h-full">
+                        <img 
+                            src={album.cover_image_url} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                ))}
+                {list.coverAlbums.length < 4 && 
+                    Array.from({ length: 4 - list.coverAlbums.length }).map((_, i) => (
+                        <div key={`empty-${i}`} className="w-full h-full bg-tertiaryBackground" />
+                    ))
+                }
             </div>
             <div className={`
                 list-info-container
@@ -34,18 +70,20 @@ export default function AlbumPageList() {
                 <h3 className={`
                     list-title
                     //General Styling
-                    text-lg text-primaryText font-sans font-bold
+                    text-base text-primaryText font-sans font-bold
+                    line-clamp-1
+                    sm:text-lg
                     //Mobile Styling
                     //Desktop Styling
                 `}>
-                    Favorite Albums 2025
+                    {list.name}
                 </h3>
                 <div className={`
                     post-info-container
                     //General Styling
                     w-full
-                    flex flex-col gap-2
-                    mb-4
+                    flex flex-col gap-1
+                    mb-2
                     text-xs text-secondaryText font-sans 
                     sm:flex-row sm:items-center sm:gap-2
                 `}>
@@ -56,16 +94,15 @@ export default function AlbumPageList() {
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <div className={`
-                            user-profile-image
-                            w-4 h-4
-                            rounded-full
-                            bg-white
-                        `}>
-                            <UserCircleIcon width={16} height={16} className={`
-                                text-secondaryText
-                            `}/>
-                        </div>
+                        {list.avatarUrl ? (
+                            <img 
+                                src={list.avatarUrl} 
+                                alt={list.username}
+                                className="w-4 h-4 rounded-full object-cover"
+                            />
+                        ) : (
+                            <UserCircleIcon width={16} height={16} className="text-secondaryText" />
+                        )}
                         <span className={`
                             user-name
                             //General Styling
@@ -73,7 +110,7 @@ export default function AlbumPageList() {
                             //Mobile Styling
                             //Desktop Styling
                         `}>
-                            @john_doe
+                            @{list.username}
                         </span>
                     </div>
                     <div className={`
@@ -83,42 +120,34 @@ export default function AlbumPageList() {
                         //Mobile Styling
                         //Desktop Styling
                     `}>
-                        <span className={`
-                            list-album-count
-                        `}>
-                            15 Albums
+                        <span className="list-album-count">
+                            {list.albumCount} {list.albumCount === 1 ? 'Album' : 'Albums'}
                         </span>
-                        <div className={`
-                            list-total-likes
-                            flex justify-center items-center gap-[2px]
-                        `}>
-                            <HeartIcon width={16} height={16} className={`
-                                text-secondaryText
-                            `} />
+                        <div className="list-total-likes flex justify-center items-center gap-[2px]">
+                            <HeartIcon width={16} height={16} className="text-secondaryText" />
                             <span>
-                                34k
+                                {list.likeCount >= 1000 
+                                    ? `${(list.likeCount / 1000).toFixed(1)}k` 
+                                    : list.likeCount}
                             </span>
                         </div>
                     </div>
                 </div>
-                <p className={`
-                    list-description
-                    //General Styling
-                    w-full
-                    line-clamp-2
-                    text-xs text-secondaryText
-                    overflow-hidden
-                    //Mobile Styling
-                    //Desktop Styling
-                `}>
-                    I asked reddit whats one movie everyone should watch at least once in their lifetime to create a list of movies that everyone should watch. 
-
-                    Link to thread:
-                    www.reddit.com/r/movies/comments/178uqki/whats_a_movie_you_think_everyone_has_to_watch_at/
-
-                    Feel free to comment your progress on the list or any movies you think should be added or maybe even removed. Thanks.
-                </p>
+                {list.description && (
+                    <p className={`
+                        list-description
+                        //General Styling
+                        w-full
+                        line-clamp-2
+                        text-xs text-secondaryText
+                        overflow-hidden
+                        //Mobile Styling
+                        //Desktop Styling
+                    `}>
+                        {list.description}
+                    </p>
+                )}
             </div>
-        </div>
+        </Link>
     )
 }

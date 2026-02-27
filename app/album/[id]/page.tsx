@@ -279,6 +279,69 @@ export default async function Home({ params }: AlbumPageParams) {
         }
     }
 
+    // Fetch popular lists containing this album
+    let popularLists: any[] = [];
+    if (albumId) {
+        // Step 1: Get list IDs that contain this album
+        const { data: listAlbumEntries, error: listAlbumError } = await supabase
+            .from('list_albums')
+            .select('list_id')
+            .eq('album_id', albumId);
+
+        if (listAlbumEntries && listAlbumEntries.length > 0) {
+            const listIds = [...new Set(listAlbumEntries.map(entry => entry.list_id))];
+            
+            // Step 2: Fetch full list data for those list IDs
+            const { data: lists, error: listsError } = await supabase
+                .from('lists')
+                .select(`
+                    id,
+                    name,
+                    description,
+                    user_id,
+                    users (
+                        username,
+                        avatar_url
+                    ),
+                    list_albums (
+                        position,
+                        albums (
+                            id,
+                            cover_image_url
+                        )
+                    ),
+                    list_likes (
+                        id
+                    )
+                `)
+                .in('id', listIds);
+
+            if (lists) {
+                popularLists = lists.map(list => {
+                    const userInfo = Array.isArray(list.users) ? list.users[0] : list.users;
+                    const coverAlbums = list.list_albums
+                        ?.sort((a: any, b: any) => a.position - b.position)
+                        .slice(0, 4)
+                        .map((la: any) => Array.isArray(la.albums) ? la.albums[0] : la.albums)
+                        .filter(Boolean) || [];
+                    
+                    return {
+                        id: list.id,
+                        name: list.name,
+                        description: list.description,
+                        username: userInfo?.username || 'unknown',
+                        avatarUrl: userInfo?.avatar_url || null,
+                        albumCount: list.list_albums?.length || 0,
+                        likeCount: list.list_likes?.length || 0,
+                        coverAlbums
+                    };
+                })
+                .sort((a, b) => b.likeCount - a.likeCount)
+                .slice(0, 4);
+            }
+        }
+    }
+
     return (
         <div className={`
             //General Styling
@@ -527,10 +590,15 @@ export default async function Home({ params }: AlbumPageParams) {
                         grid grid-cols-1 gap-4
                         md:grid-cols-2
                     `}>
-                        <AlbumPageList />
-                        <AlbumPageList />
-                        <AlbumPageList />
-                        <AlbumPageList />
+                        {popularLists.length > 0 ? (
+                            popularLists.map(list => (
+                                <AlbumPageList key={list.id} list={list} />
+                            ))
+                        ) : (
+                            <p className="text-secondaryText text-sm col-span-2">
+                                No lists containing this album yet
+                            </p>
+                        )}
                     </div>
                 </section>
             </div>

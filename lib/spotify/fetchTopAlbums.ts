@@ -39,63 +39,83 @@ async function removeUnpopular(albums: any[], minPopularity: number, token: any)
     return filtered;
 }
 
-export async function fetchTopAlbums() {
+const MIN_RECENT_ALBUMS = 14; // Minimum albums to fill the section (2 rows of 7)
+
+async function fetchAlbumsFromSpotify(token: string, searchQuery: string): Promise<any[]> {
+    const encodedQuery = encodeURIComponent(searchQuery);
+    const searchURL = `https://api.spotify.com/v1/search?q=${encodedQuery}&type=album&limit=50&market=US`;
     
-    const token = await getAccessToken()
+    const res = await fetch(searchURL, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error('Error fetching albums from Spotify');
+    }
+
+    const data = await res.json();
+    return data.albums.items || [];
+}
+
+export async function fetchTopAlbums() {
+    const token = await getAccessToken();
+    if (!token) {
+        throw new Error('Failed to get Spotify access token');
+    }
+    
     const currentYear = new Date().getFullYear();
     const previousYear = currentYear - 1;
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setDate(oneMonthAgo.getDate() - 60);
     
-    // If we're in the first 2 months of the year, also search previous year
-    // to catch albums from the last 60 days that might be from previous year
-    const currentMonth = new Date().getMonth(); // 0-11
-    const shouldIncludePreviousYear = currentMonth < 2; // January (0) or February (1)
-
-    let albums: any = [];
-    let nonDuplicateAlbums: any = [];
     let recentAlbums: any = [];
     let topAlbums: any = [];
-
-    // Search for albums from current year (and previous year if early in year)
-    const searchQueries = shouldIncludePreviousYear 
-        ? [`year:${currentYear}`, `year:${previousYear}`]
-        : [`year:${currentYear}`];
     
-    // Fetch albums from all relevant years
-    const searchPromises = searchQueries.map(async (searchQuery) => {
-        const encodedQuery = encodeURIComponent(searchQuery);
-        const searchURL = `https://api.spotify.com/v1/search?q=${encodedQuery}&type=album&limit=50&market=US`;
+    // Start with 60 days lookback, expand if needed
+    const lookbackDays = [60, 90, 120, 180];
+    
+    for (const days of lookbackDays) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
         
-        const res = await fetch(`${searchURL}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        if (!res.ok) {
-            throw new Error ('Error fetching top albums');
+        // Determine which years to search based on cutoff date
+        const cutoffYear = cutoffDate.getFullYear();
+        const searchYears = new Set([currentYear]);
+        if (cutoffYear < currentYear) {
+            searchYears.add(previousYear);
         }
-
-        const data = await res.json()
-        return data.albums.items;
-    });
+        
+        // Fetch albums from relevant years
+        const searchPromises = Array.from(searchYears).map(year => 
+            fetchAlbumsFromSpotify(token, `year:${year}`)
+        );
+        
+        const searchResults = await Promise.all(searchPromises);
+        const albums = searchResults.flat();
+        
+        // Filter to albums released within the lookback period
+        const filteredAlbums = albums.filter((item: any) => {
+            const isAlbum = item.album_type === 'album';
+            const releaseDate = new Date(item.release_date);
+            const isRecent = releaseDate > cutoffDate;
+            return isAlbum && isRecent;
+        });
+        
+        const nonDuplicateAlbums = removeDupes(filteredAlbums);
+        recentAlbums = await removeUnpopular(nonDuplicateAlbums, 30, token);
+        
+        // If we have enough albums, stop expanding the lookback
+        if (recentAlbums.length >= MIN_RECENT_ALBUMS) {
+            break;
+        }
+    }
     
-    const searchResults = await Promise.all(searchPromises);
-    albums = searchResults.flat(); // Combine results from all searches
+    // Sort by release date (newest first)
+    recentAlbums.sort((a: any, b: any) => 
+        new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
+    );
     
-    recentAlbums = albums.filter((item: any) => {
-        const isAlbum = item.album_type === 'album';
-        const releaseDate = new Date(item.release_date);
-        const isRecent = releaseDate > oneMonthAgo;
+    topAlbums = await removeUnpopular(recentAlbums, 50, token);
 
-        return isAlbum && isRecent;
-    })
-
-    nonDuplicateAlbums = await removeDupes(recentAlbums); 
-    
-    recentAlbums = await removeUnpopular(nonDuplicateAlbums, 30, token);
-    topAlbums = await removeUnpopular(recentAlbums, 50, token)
-
-    return {recentAlbums, topAlbums};
+    return { recentAlbums, topAlbums };
 }
