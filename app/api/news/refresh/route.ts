@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 
+/** Node runtime: Buffer for ids; cron can need > default function duration */
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
 type NewsAPIArticle = {
     source: { id: string | null; name: string };
     author: string | null;
@@ -15,9 +19,23 @@ type NewsAPIArticle = {
 
 type NewsAPIResponse = {
     status: string;
-    totalResults: number;
-    articles: NewsAPIArticle[];
+    totalResults?: number;
+    articles?: NewsAPIArticle[];
+    code?: string;
+    message?: string;
 };
+
+function safeSourceName(article: NewsAPIArticle): string {
+    return article.source?.name?.trim() || 'Unknown';
+}
+
+function externalIdFromUrl(prefix: string, url: string): string {
+    try {
+        return `${prefix}-${Buffer.from(url).toString('base64').slice(0, 48)}`;
+    } catch {
+        return `${prefix}-${url.slice(0, 80)}`;
+    }
+}
 
 // Music-related keywords to check for
 const MUSIC_KEYWORDS = [
@@ -238,12 +256,17 @@ async function fetchFromNewsAPI(
     });
 
     if (!response.ok) {
-        console.error(`NewsAPI error for query "${query}":`, response.status);
+        const errText = await response.text().catch(() => '');
+        console.error(`NewsAPI HTTP ${response.status} for "${query}":`, errText.slice(0, 500));
         return [];
     }
 
     const data: NewsAPIResponse = await response.json();
-    return data.articles || [];
+    if (data.status === 'error') {
+        console.error(`NewsAPI error for "${query}":`, data.code, data.message);
+        return [];
+    }
+    return data.articles ?? [];
 }
 
 function isAuthorizedCronOrManual(request: Request): boolean {
@@ -288,34 +311,25 @@ export async function GET(request: Request) {
             'music streaming'
         ];
         
-        const allArticles: NewsAPIArticle[] = [];
-        // First, try to get articles from major music publications
-        for (const query of mainQueries) {
-            const articles = await fetchFromNewsAPI(query, apiKey, { useMusicDomains: true });
-            allArticles.push(...articles);
-        }
-        // If we don't have enough, get more from general sources (will be filtered)
+        const domainMain = await Promise.all(
+            mainQueries.map((q) => fetchFromNewsAPI(q, apiKey, { useMusicDomains: true }))
+        );
+        const allArticles: NewsAPIArticle[] = domainMain.flat();
+
         if (allArticles.length < 20) {
-            for (const query of mainQueries) {
-                const articles = await fetchFromNewsAPI(query, apiKey);
-                allArticles.push(...articles);
-            }
+            const broadMain = await Promise.all(
+                mainQueries.map((q) => fetchFromNewsAPI(q, apiKey))
+            );
+            allArticles.push(...broadMain.flat());
         }
 
-        // Fetch headlines for quick bites - ONLY from major music publications
-        const headlineQueries = [
-            'album',
-            'single release',
-            'tour',
-            'concert'
-        ];
-        
-        let headlineArticles: NewsAPIArticle[] = [];
-        for (const query of headlineQueries) {
-            // Always use music domains for quick bites
-            const articles = await fetchFromNewsAPI(query, apiKey, { useMusicDomains: true, pageSize: 15 });
-            headlineArticles.push(...articles);
-        }
+        const headlineQueries = ['album', 'single release', 'tour', 'concert'];
+        const headlineBatches = await Promise.all(
+            headlineQueries.map((q) =>
+                fetchFromNewsAPI(q, apiKey, { useMusicDomains: true, pageSize: 15 })
+            )
+        );
+        const headlineArticles: NewsAPIArticle[] = headlineBatches.flat();
 
         // Deduplicate by URL and filter for music-related content
         const seenUrls = new Set<string>();
@@ -339,9 +353,8 @@ export async function GET(request: Request) {
 
         console.log(`Filtered to ${uniqueMainArticles.length} music articles and ${uniqueHeadlines.length} music headlines`);
         
-        // Log sources for debugging
-        const mainSources = [...new Set(uniqueMainArticles.map(a => a.source.name))];
-        const headlineSources = [...new Set(uniqueHeadlines.map(a => a.source.name))];
+        const mainSources = [...new Set(uniqueMainArticles.map((a) => safeSourceName(a)))];
+        const headlineSources = [...new Set(uniqueHeadlines.map((a) => safeSourceName(a)))];
         console.log('Main article sources:', mainSources.join(', '));
         console.log('Headline sources:', headlineSources.join(', '));
 
@@ -356,8 +369,8 @@ export async function GET(request: Request) {
         });
 
         // Prepare articles for database
-        const mainArticlesToInsert = uniqueMainArticles.slice(0, 20).map(article => ({
-            external_id: `article-${Buffer.from(article.url).toString('base64').slice(0, 20)}`,
+        const mainArticlesToInsert = uniqueMainArticles.slice(0, 20).map((article) => ({
+            external_id: externalIdFromUrl('article', article.url),
             title: article.title,
             excerpt: article.description,
             category: categorizeArticle(article.title, article.description),
@@ -365,12 +378,12 @@ export async function GET(request: Request) {
             author: article.author,
             published_at: article.publishedAt,
             url: article.url,
-            source: article.source.name,
-            article_type: 'article'
+            source: safeSourceName(article),
+            article_type: 'article' as const,
         }));
 
-        const headlinesToInsert = uniqueHeadlines.slice(0, 10).map(article => ({
-            external_id: `headline-${Buffer.from(article.url).toString('base64').slice(0, 20)}`,
+        const headlinesToInsert = uniqueHeadlines.slice(0, 10).map((article) => ({
+            external_id: externalIdFromUrl('headline', article.url),
             title: article.title,
             excerpt: article.description,
             category: categorizeArticle(article.title, article.description),
@@ -378,42 +391,67 @@ export async function GET(request: Request) {
             author: article.author,
             published_at: article.publishedAt,
             url: article.url,
-            source: article.source.name,
-            article_type: 'headline'
+            source: safeSourceName(article),
+            article_type: 'headline' as const,
         }));
 
-        // Clear ALL existing headlines (quick bites) to ensure fresh music-only content
-        await supabase
+        const { error: deleteHeadlinesError } = await supabase
             .from('news_articles')
             .delete()
             .eq('article_type', 'headline');
+        if (deleteHeadlinesError) {
+            console.error('Error deleting headlines:', deleteHeadlinesError);
+        }
 
-        // Clear old main articles (older than 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
-        await supabase
+
+        const { error: deleteOldError } = await supabase
             .from('news_articles')
             .delete()
             .eq('article_type', 'article')
             .lt('created_at', sevenDaysAgo.toISOString());
+        if (deleteOldError) {
+            console.error('Error deleting old articles:', deleteOldError);
+        }
 
-        // Insert new articles (upsert to handle duplicates)
         const allToInsert = [...mainArticlesToInsert, ...headlinesToInsert];
-        
+
+        if (allToInsert.length === 0) {
+            console.warn('News refresh: no articles passed filters; DB unchanged');
+            try {
+                revalidatePath('/news');
+                revalidatePath('/');
+            } catch (e) {
+                console.error('Error revalidating after empty refresh:', e);
+            }
+            return NextResponse.json({
+                success: true,
+                articlesCount: 0,
+                headlinesCount: 0,
+                message: 'No articles matched filters (NewsAPI may be empty or blocked)',
+                warning: 'empty_result',
+            });
+        }
+
         const { error: insertError } = await supabase
             .from('news_articles')
-            .upsert(allToInsert, { 
+            .upsert(allToInsert, {
                 onConflict: 'url',
-                ignoreDuplicates: true 
+                ignoreDuplicates: true,
             });
 
         if (insertError) {
             console.error('Error inserting articles:', insertError);
-            return NextResponse.json({ 
-                error: 'Failed to save articles', 
-                details: insertError.message 
-            }, { status: 500 });
+            return NextResponse.json(
+                {
+                    error: 'Failed to save articles',
+                    details: insertError.message,
+                    hint: insertError.hint,
+                    code: insertError.code,
+                },
+                { status: 500 }
+            );
         }
 
         try {
