@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 
 type NewsAPIArticle = {
@@ -405,6 +406,14 @@ export async function GET(request: Request) {
                 error: 'Failed to save articles', 
                 details: insertError.message 
             }, { status: 500 });
+        }
+
+        // Revalidate the news page to ensure fresh content is served
+        try {
+            revalidatePath('/news');
+        } catch (revalidateError) {
+            console.error('Error revalidating news page:', revalidateError);
+            // Don't fail the request if revalidation fails
         }
 
         return NextResponse.json({ 

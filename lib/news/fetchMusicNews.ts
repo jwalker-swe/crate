@@ -31,6 +31,54 @@ function formatTimeAgo(dateString: string): string {
     }
 }
 
+// Check if news data is stale (older than 6 hours)
+async function isNewsStale(supabase: Awaited<ReturnType<typeof createClient>>): Promise<boolean> {
+    try {
+        const { data } = await supabase
+            .from('news_articles')
+            .select('created_at')
+            .eq('article_type', 'article')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (!data || !data.created_at) {
+            return true; // No data means stale
+        }
+
+        const lastUpdate = new Date(data.created_at);
+        const sixHoursAgo = new Date();
+        sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
+
+        return lastUpdate < sixHoursAgo;
+    } catch (error) {
+        console.error('Error checking news staleness:', error);
+        return false; // Don't trigger refresh on error
+    }
+}
+
+// Trigger background refresh (non-blocking)
+async function triggerBackgroundRefresh() {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL 
+            ? `https://${process.env.VERCEL_URL}` 
+            : 'http://localhost:3000';
+        
+        // Fire and forget - don't wait for response
+        fetch(`${baseUrl}/api/news/refresh`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${process.env.CRON_SECRET || ''}`
+            }
+        }).catch(err => {
+            // Silently fail - this is a background refresh
+            console.log('Background refresh triggered (may fail in dev)');
+        });
+    } catch (error) {
+        // Silently fail
+    }
+}
+
 // Fetch main news articles from database
 export async function fetchMusicNews(): Promise<NewsArticle[]> {
     try {
@@ -48,9 +96,18 @@ export async function fetchMusicNews(): Promise<NewsArticle[]> {
             return [];
         }
 
+        // If no data, trigger background refresh (non-blocking)
         if (!data || data.length === 0) {
-            console.log('No news articles in database');
+            console.log('No news articles in database, triggering background refresh');
+            triggerBackgroundRefresh();
             return [];
+        }
+        
+        // Check if data is stale (older than 6 hours) and trigger background refresh
+        const stale = await isNewsStale(supabase);
+        if (stale) {
+            // Trigger refresh in background (non-blocking) - ISR will pick up new data on next request
+            triggerBackgroundRefresh();
         }
 
         return data.map(article => ({

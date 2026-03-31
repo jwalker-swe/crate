@@ -52,8 +52,10 @@ export default async function getAccessToken() {
 
         } catch(err) {
             console.error(`Error fetching access token: ${err}`);
+            return null;
         }
 
     }
 
+    return null;
 }

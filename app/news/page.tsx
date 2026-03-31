@@ -132,6 +132,9 @@ function estimateReadTime(text: string): number {
     return Math.max(1, Math.ceil(words / wordsPerMinute) + 2);
 }
 
+// Revalidate the page every 4 hours to ensure news updates regularly
+export const revalidate = 14400; // 4 hours in seconds
+
 export default async function NewsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

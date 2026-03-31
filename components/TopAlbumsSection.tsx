@@ -4,8 +4,7 @@ import AlbumPreview from './AlbumPreview';
 export default async function TopAlbumsSection() {
   const recentTopAlbums: any = await getTopAlbums();
 
-  // Handle case where getTopAlbums returns null or undefined
-  if (!recentTopAlbums || !Array.isArray(recentTopAlbums)) {
+  if (!recentTopAlbums || !Array.isArray(recentTopAlbums) || recentTopAlbums.length === 0) {
     return (
       <div className={`
         //General Styling
@@ -20,12 +19,28 @@ export default async function TopAlbumsSection() {
     );
   }
 
-  let albums = recentTopAlbums.map((item: any) => ({
-    title: item.album.name,
-    artist: item.album.artists[0].name,
-    id: item.album.id,
-    images: item.album.images[0].url
-  }));
+  let albums = recentTopAlbums
+    .map((item: any) => ({
+      title: item.album?.name ?? "",
+      artist: item.album?.artists?.[0]?.name ?? "",
+      id: item.album?.id ?? "",
+      images: item.album?.images?.[0]?.url ?? "",
+    }))
+    .filter((a: { id: string; images: string }) => a.id && a.images);
+
+  if (albums.length === 0) {
+    return (
+      <div className={`
+        w-full max-w-[1200px]
+        flex justify-center items-center
+        text-secondaryText
+        py-8 px-4
+        lg:w-[1200px] lg:px-0
+      `}>
+        No albums available at the moment.
+      </div>
+    );
+  }
 
   return (
     <ul className={`
