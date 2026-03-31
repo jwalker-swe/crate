@@ -132,8 +132,8 @@ function estimateReadTime(text: string): number {
     return Math.max(1, Math.ceil(words / wordsPerMinute) + 2);
 }
 
-// Revalidate the page every 4 hours to ensure news updates regularly
-export const revalidate = 14400; // 4 hours in seconds
+// ISR: cron refreshes DB daily; on-demand revalidatePath runs after /api/news/refresh
+export const revalidate = 86400;
 
 export default async function NewsPage() {
     const supabase = await createClient();

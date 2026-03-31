@@ -57,24 +57,30 @@ async function isNewsStale(supabase: Awaited<ReturnType<typeof createClient>>): 
     }
 }
 
+function getSiteBaseUrl(): string {
+    const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
+    if (site) return site;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+    return 'http://localhost:3000';
+}
+
 // Trigger background refresh (non-blocking)
 async function triggerBackgroundRefresh() {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL 
-            ? `https://${process.env.VERCEL_URL}` 
-            : 'http://localhost:3000';
-        
-        // Fire and forget - don't wait for response
+        const baseUrl = getSiteBaseUrl();
+        const secret = process.env.CRON_SECRET;
+        const headers: HeadersInit = {};
+        if (secret) {
+            headers['Authorization'] = `Bearer ${secret}`;
+        }
+
         fetch(`${baseUrl}/api/news/refresh`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${process.env.CRON_SECRET || ''}`
-            }
-        }).catch(err => {
-            // Silently fail - this is a background refresh
-            console.log('Background refresh triggered (may fail in dev)');
+            headers,
+        }).catch(() => {
+            console.log('Background news refresh request failed (non-fatal)');
         });
-    } catch (error) {
+    } catch {
         // Silently fail
     }
 }

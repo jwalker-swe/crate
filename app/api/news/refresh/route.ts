@@ -246,14 +246,22 @@ async function fetchFromNewsAPI(
     return data.articles || [];
 }
 
-export async function GET(request: Request) {
-    // Verify the request is authorized (using a secret key)
-    // Skip auth check in development for easier testing
+function isAuthorizedCronOrManual(request: Request): boolean {
     const isDev = process.env.NODE_ENV === 'development';
-    const authHeader = request.headers.get('authorization');
+    if (isDev) return true;
+
     const cronSecret = process.env.CRON_SECRET;
-    
-    if (!isDev && cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    const authHeader = request.headers.get('authorization');
+    // Vercel Cron injects Authorization: Bearer <CRON_SECRET> when CRON_SECRET is set in the project
+    if (cronSecret) {
+        return authHeader === `Bearer ${cronSecret}`;
+    }
+    // No secret: allow (e.g. local prod testing); prefer setting CRON_SECRET on Vercel
+    return true;
+}
+
+export async function GET(request: Request) {
+    if (!isAuthorizedCronOrManual(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -408,12 +416,11 @@ export async function GET(request: Request) {
             }, { status: 500 });
         }
 
-        // Revalidate the news page to ensure fresh content is served
         try {
             revalidatePath('/news');
+            revalidatePath('/');
         } catch (revalidateError) {
-            console.error('Error revalidating news page:', revalidateError);
-            // Don't fail the request if revalidation fails
+            console.error('Error revalidating after news refresh:', revalidateError);
         }
 
         return NextResponse.json({ 
