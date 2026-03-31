@@ -234,9 +234,6 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                 Lists
                             </li>
                         </Link>
-                        <Link href="/news" className={`text-secondaryText text-xs whitespace-nowrap md:text-sm hover:text-primaryText transition-colors`}>
-                            News
-                        </Link>
                     </ul>
                 </div>
                 <div className={`
