@@ -422,6 +422,7 @@ export default async function Home() {
         <HomePageReviewPreview recentReviewData={recentReviews} />
       </section>
       {/* Tag Line */}
+	  {/*
       <div className={`
         //General Styling
         w-full
@@ -448,7 +449,7 @@ export default async function Home() {
           Catch the latest drops, headlines, and stories shaping the world of music.
         </p>
       </div>
-      {/* News Section */}
+      {/* News Section 
       <section className={`
         //General Styling
         flex flex-col items-center justify-center
@@ -479,6 +480,7 @@ export default async function Home() {
           <ArticlePreview />
         </div>
       </section>
+	  */}
       {/* Call to Action Section */}
       <section className={`
         //General Styling

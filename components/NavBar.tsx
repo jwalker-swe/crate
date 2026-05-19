@@ -229,11 +229,13 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                 Albums
                             </li>
                         </Link>
+						{/*
                         <Link href="/lists">
                             <li className={`text-secondaryText text-xs whitespace-nowrap hover:text-primaryText md:text-sm`}>
                                 Lists
                             </li>
                         </Link>
+						*/}
                     </ul>
                 </div>
                 <div className={`
@@ -401,6 +403,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                         `}>
                                             Reviews
                                         </Link>
+										{/*
                                         <Link 
                                             href={username ? `/profile/${username}/lists` : '#'}
                                             onClick={() => setIsProfileMenuOpen(false)}
@@ -414,6 +417,7 @@ export default function NavBar({ session, initialUsername, initialAvatarUrl, ini
                                         `}>
                                             Lists
                                         </Link>
+										*/}
                                         <button 
                                             onClick={async () => {
                                                 setIsProfileMenuOpen(false);
